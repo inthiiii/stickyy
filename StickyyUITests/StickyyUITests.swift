@@ -32,6 +32,25 @@ final class StickyyUITests: XCTestCase {
     }
 
     @MainActor
+    func testCloseControlDismissesScratchpad() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-reset-persistence",
+            "--ui-testing-open-scratchpad",
+        ]
+        app.launch()
+
+        let editor = app.textViews["scratchpadEditor"]
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+
+        let closeButton = app.buttons["Close scratchpad"]
+        XCTAssertTrue(closeButton.exists)
+        closeButton.click()
+
+        XCTAssertTrue(editor.waitForNonExistence(timeout: 2))
+    }
+
+    @MainActor
     func testScratchpadRestoresTextAfterRelaunch() {
         let firstLaunch = XCUIApplication()
         firstLaunch.launchArguments = [

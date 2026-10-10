@@ -4,6 +4,9 @@
     "Catch a thought before it fades." : {
       "extractionState" : "manual"
     },
+    "Close scratchpad" : {
+      "extractionState" : "manual"
+    },
     "Quit Stickyy" : {
       "extractionState" : "manual"
     },
@@ -22,7 +25,7 @@
     "Stickyy" : {
       "extractionState" : "manual"
     },
-    "Stickyy — Phase 3" : {
+    "Stickyy — Phase 4" : {
       "extractionState" : "manual"
     },
     "Stickyy couldn’t restore the saved scratchpad. New text will remain available until the app quits." : {

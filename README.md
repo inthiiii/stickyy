@@ -6,7 +6,7 @@ Stickyy is a fast, local-first macOS menu-bar scratchpad built with SwiftUI, App
 
 ## Current status
 
-Phase 3 provides a persistent interactive scratchpad:
+Phase 4 provides a polished, persistent Liquid Glass scratchpad:
 
 - Xcode 27 project
 - Swift 6 language mode and complete concurrency checking
@@ -18,6 +18,11 @@ Phase 3 provides a persistent interactive scratchpad:
 - Text restoration after quitting, relaunching, or restarting macOS
 - Immediate save flushing when the popover closes or the app quits
 - Visible storage-failure handling without discarding current text
+- Native Liquid Glass surface and interactive close control
+- Adaptive semantic styling for Light Mode and Dark Mode
+- Solid, high-contrast fallback for Reduce Transparency
+- Motion that automatically respects Reduce Motion
+- Refined typography, spacing, editor framing, and overlay scrolling
 - Escape and outside-click dismissal
 - Swift Testing and UI-test targets
 

@@ -1,6 +1,6 @@
 import Foundation
 
 enum AppEnvironment {
-    static let productName = "Stickyy"
-    static let tagline = "Catch a thought before it fades."
+    static let productName = String(localized: "Stickyy")
+    static let tagline = String(localized: "Catch a thought before it fades.")
 }
