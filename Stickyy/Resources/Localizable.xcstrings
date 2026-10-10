@@ -1,0 +1,21 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Catch a thought before it fades." : {
+      "extractionState" : "manual"
+    },
+    "Quit Stickyy" : {
+      "extractionState" : "manual"
+    },
+    "Settings arrive in a later phase." : {
+      "extractionState" : "manual"
+    },
+    "Stickyy" : {
+      "extractionState" : "manual"
+    },
+    "Stickyy — Phase 1" : {
+      "extractionState" : "manual"
+    }
+  },
+  "version" : "1.0"
+}
