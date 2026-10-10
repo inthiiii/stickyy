@@ -54,12 +54,21 @@ final class StatusItemController: NSObject {
     private func makeContextMenu() -> NSMenu {
         let menu = NSMenu()
         let phaseLabel = NSMenuItem(
-            title: String(localized: "Stickyy — Phase 4"),
+            title: String(localized: "Stickyy — Phase 5"),
             action: nil,
             keyEquivalent: ""
         )
         phaseLabel.isEnabled = false
         menu.addItem(phaseLabel)
+        menu.addItem(.separator())
+
+        let settingsItem = NSMenuItem(
+            title: String(localized: "Settings…"),
+            action: #selector(showSettings),
+            keyEquivalent: ","
+        )
+        settingsItem.target = self
+        menu.addItem(settingsItem)
         menu.addItem(.separator())
 
         let quitItem = NSMenuItem(
@@ -70,5 +79,12 @@ final class StatusItemController: NSObject {
         quitItem.target = NSApp
         menu.addItem(quitItem)
         return menu
+    }
+
+    @objc
+    private func showSettings() {
+        popoverController.close()
+        NSApp.activate()
+        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
     }
 }

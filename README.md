@@ -6,7 +6,7 @@ Stickyy is a fast, local-first macOS menu-bar scratchpad built with SwiftUI, App
 
 ## Current status
 
-Phase 4 provides a polished, persistent Liquid Glass scratchpad:
+Phase 5 provides a complete, local-first scratchpad library while preserving Stickyy's original minimal design:
 
 - Xcode 27 project
 - Swift 6 language mode and complete concurrency checking
@@ -18,15 +18,18 @@ Phase 4 provides a polished, persistent Liquid Glass scratchpad:
 - Text restoration after quitting, relaunching, or restarting macOS
 - Immediate save flushing when the popover closes or the app quits
 - Visible storage-failure handling without discarding current text
-- Native Liquid Glass surface and interactive close control
+- Multiple independent scratchpads with remembered selection
+- Create, rename, pin, search, and delete workflows
+- Destructive delete confirmation and automatic blank-note replacement
+- Configurable global keyboard shortcut (Control–Option–Space by default)
+- Optional launch at login
+- A real Settings window available from the menu-bar context menu
+- Original minimal material appearance by default
+- Optional Liquid Glass that changes only the surface—not the layout
 - Adaptive semantic styling for Light Mode and Dark Mode
 - Solid, high-contrast fallback for Reduce Transparency
-- Motion that automatically respects Reduce Motion
-- Refined typography, spacing, editor framing, and overlay scrolling
 - Escape and outside-click dismissal
 - Swift Testing and UI-test targets
-
-Multiple scratchpads, search, pinning, and configurable shortcuts remain assigned to Phase 5.
 
 ## Requirements
 
@@ -39,7 +42,11 @@ Multiple scratchpads, search, pinning, and configurable shortcuts remain assigne
 2. Select the **Stickyy** scheme and **My Mac**.
 3. Press Command-R.
 4. Find the note icon in the macOS menu bar.
-5. Left-click the icon to toggle the scratchpad; right-click it to quit.
+5. Left-click the icon to toggle the scratchpad.
+6. Click the note icon inside the scratchpad to open the scratchpad library.
+7. Right-click the menu-bar icon to open Settings or quit.
+
+The default global shortcut is **Control–Option–Space**. It can be changed or disabled in Settings.
 
 ## Testing
 

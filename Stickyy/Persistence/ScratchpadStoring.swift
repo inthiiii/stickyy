@@ -2,8 +2,10 @@ import Foundation
 
 @MainActor
 protocol ScratchpadStoring: AnyObject {
-    func loadText() throws -> String
-    func saveText(_ text: String) throws
+    func loadScratchpads() throws -> [Scratchpad]
+    func save(_ scratchpad: Scratchpad) throws
+    func deleteScratchpad(id: String) throws
+    func deleteAllScratchpads() throws
 }
 
 enum ScratchpadStoreError: LocalizedError {
@@ -16,11 +18,19 @@ enum ScratchpadStoreError: LocalizedError {
 
 @MainActor
 final class UnavailableScratchpadStore: ScratchpadStoring {
-    func loadText() throws -> String {
+    func loadScratchpads() throws -> [Scratchpad] {
         throw ScratchpadStoreError.unavailable
     }
 
-    func saveText(_ text: String) throws {
+    func save(_ scratchpad: Scratchpad) throws {
+        throw ScratchpadStoreError.unavailable
+    }
+
+    func deleteScratchpad(id: String) throws {
+        throw ScratchpadStoreError.unavailable
+    }
+
+    func deleteAllScratchpads() throws {
         throw ScratchpadStoreError.unavailable
     }
 }

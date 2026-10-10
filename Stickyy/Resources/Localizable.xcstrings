@@ -1,39 +1,43 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "Catch a thought before it fades." : {
-      "extractionState" : "manual"
-    },
-    "Close scratchpad" : {
-      "extractionState" : "manual"
-    },
-    "Quit Stickyy" : {
-      "extractionState" : "manual"
-    },
-    "Right-click the menu-bar icon to quit Stickyy." : {
-      "extractionState" : "manual"
-    },
-    "Scratchpad" : {
-      "extractionState" : "manual"
-    },
-    "Scratchpad storage is unavailable." : {
-      "extractionState" : "manual"
-    },
-    "Start typing…" : {
-      "extractionState" : "manual"
-    },
-    "Stickyy" : {
-      "extractionState" : "manual"
-    },
-    "Stickyy — Phase 4" : {
-      "extractionState" : "manual"
-    },
-    "Stickyy couldn’t restore the saved scratchpad. New text will remain available until the app quits." : {
-      "extractionState" : "manual"
-    },
-    "Stickyy couldn’t save this scratchpad. Your current text will remain available until the app quits." : {
-      "extractionState" : "manual"
-    }
+    "Allow Stickyy in System Settings → General → Login Items." : { "extractionState" : "manual" },
+    "Appearance" : { "extractionState" : "manual" },
+    "Cancel" : { "extractionState" : "manual" },
+    "Catch a thought before it fades." : { "extractionState" : "manual" },
+    "Delete Scratchpad" : { "extractionState" : "manual" },
+    "Delete this scratchpad?" : { "extractionState" : "manual" },
+    "Delete…" : { "extractionState" : "manual" },
+    "General" : { "extractionState" : "manual" },
+    "Keyboard Shortcut" : { "extractionState" : "manual" },
+    "Launch Stickyy at login" : { "extractionState" : "manual" },
+    "Liquid Glass changes only the window surface. The minimal layout stays the same." : { "extractionState" : "manual" },
+    "Name" : { "extractionState" : "manual" },
+    "New scratchpad" : { "extractionState" : "manual" },
+    "No text" : { "extractionState" : "manual" },
+    "Off" : { "extractionState" : "manual" },
+    "Pin" : { "extractionState" : "manual" },
+    "Quit Stickyy" : { "extractionState" : "manual" },
+    "Rename" : { "extractionState" : "manual" },
+    "Rename Scratchpad" : { "extractionState" : "manual" },
+    "Scratchpad" : { "extractionState" : "manual" },
+    "Scratchpad storage is unavailable." : { "extractionState" : "manual" },
+    "Scratchpads" : { "extractionState" : "manual" },
+    "Search scratchpads" : { "extractionState" : "manual" },
+    "Settings…" : { "extractionState" : "manual" },
+    "Show Stickyy" : { "extractionState" : "manual" },
+    "Start typing…" : { "extractionState" : "manual" },
+    "Stickyy" : { "extractionState" : "manual" },
+    "Stickyy Settings" : { "extractionState" : "manual" },
+    "Stickyy — Phase 5" : { "extractionState" : "manual" },
+    "Stickyy couldn’t delete this scratchpad." : { "extractionState" : "manual" },
+    "Stickyy couldn’t restore the saved scratchpads. New text will remain available until the app quits." : { "extractionState" : "manual" },
+    "Stickyy couldn’t save this scratchpad. Your current text will remain available until the app quits." : { "extractionState" : "manual" },
+    "The original minimal material is the default." : { "extractionState" : "manual" },
+    "This action cannot be undone." : { "extractionState" : "manual" },
+    "Unpin" : { "extractionState" : "manual" },
+    "Untitled" : { "extractionState" : "manual" },
+    "Use Liquid Glass" : { "extractionState" : "manual" }
   },
   "version" : "1.0"
 }

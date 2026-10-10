@@ -6,6 +6,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var scratchpadSession: ScratchpadSession?
     private var popoverController: PopoverController?
     private var statusItemController: StatusItemController?
+    private var globalShortcutController: GlobalShortcutController?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -27,7 +28,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         #if DEBUG
         if CommandLine.arguments.contains("--ui-testing-reset-persistence") {
             do {
-                try store.saveText("")
+                try store.deleteAllScratchpads()
+                UserDefaults.standard.removeObject(
+                    forKey: StickyyPreferences.selectedScratchpadID
+                )
             } catch {
                 NSLog(
                     "Stickyy UI-test persistence reset failed: %@",
@@ -46,6 +50,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         scratchpadSession = session
         self.popoverController = popoverController
         self.statusItemController = statusItemController
+        globalShortcutController = GlobalShortcutController {
+            statusItemController.showScratchpad()
+        }
 
         #if DEBUG
         if CommandLine.arguments.contains("--ui-testing-open-scratchpad") {

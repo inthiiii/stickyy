@@ -17,8 +17,6 @@ struct ScratchpadEditor: NSViewRepresentable {
         scrollView.hasVerticalScroller = true
         scrollView.hasHorizontalScroller = false
         scrollView.autohidesScrollers = true
-        scrollView.scrollerStyle = .overlay
-        scrollView.verticalScrollElasticity = .automatic
 
         let textView = EscapeHandlingTextView()
         textView.delegate = context.coordinator
@@ -46,15 +44,10 @@ struct ScratchpadEditor: NSViewRepresentable {
         )
         textView.textContainer?.widthTracksTextView = true
         textView.textContainer?.heightTracksTextView = false
-        textView.textContainer?.lineFragmentPadding = 0
         textView.textContainer?.containerSize = NSSize(
             width: 0,
             height: CGFloat.greatestFiniteMagnitude
         )
-        let paragraphStyle = NSMutableParagraphStyle()
-        paragraphStyle.lineSpacing = 3
-        textView.defaultParagraphStyle = paragraphStyle
-        textView.typingAttributes[.paragraphStyle] = paragraphStyle
         textView.isContinuousSpellCheckingEnabled = true
         textView.isGrammarCheckingEnabled = false
         textView.isAutomaticQuoteSubstitutionEnabled = true
