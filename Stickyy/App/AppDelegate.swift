@@ -2,45 +2,30 @@ import AppKit
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
-    private var statusItem: NSStatusItem?
+    private var scratchpadSession: ScratchpadSession?
+    private var popoverController: PopoverController?
+    private var statusItemController: StatusItemController?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
-        installStatusItem()
-    }
 
-    private func installStatusItem() {
-        let item = NSStatusBar.system.statusItem(
-            withLength: NSStatusItem.squareLength
+        let session = ScratchpadSession()
+        let popoverController = PopoverController(session: session)
+        let statusItemController = StatusItemController(
+            popoverController: popoverController
         )
 
-        if let button = item.button {
-            button.image = NSImage(
-                systemSymbolName: "note.text",
-                accessibilityDescription: AppEnvironment.productName
-            )
-            button.toolTip = AppEnvironment.productName
+        scratchpadSession = session
+        self.popoverController = popoverController
+        self.statusItemController = statusItemController
+
+        #if DEBUG
+        if CommandLine.arguments.contains("--ui-testing-open-scratchpad") {
+            Task { @MainActor [weak statusItemController] in
+                try? await Task.sleep(for: .milliseconds(150))
+                statusItemController?.showScratchpad()
+            }
         }
-
-        let menu = NSMenu()
-        let phaseLabel = NSMenuItem(
-            title: "Stickyy — Phase 1",
-            action: nil,
-            keyEquivalent: ""
-        )
-        phaseLabel.isEnabled = false
-        menu.addItem(phaseLabel)
-        menu.addItem(.separator())
-
-        let quitItem = NSMenuItem(
-            title: "Quit Stickyy",
-            action: #selector(NSApplication.terminate(_:)),
-            keyEquivalent: "q"
-        )
-        quitItem.target = NSApp
-        menu.addItem(quitItem)
-
-        item.menu = menu
-        statusItem = item
+        #endif
     }
 }

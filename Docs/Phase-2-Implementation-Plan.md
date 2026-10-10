@@ -1,5 +1,7 @@
 # Phase 2 — Menu Bar Scratchpad
 
+> Status: Implemented and verified.
+
 Phase 2 turns the verified project shell into a usable, single-session scratchpad. It deliberately does not write note text to disk; persistence belongs to Phase 3.
 
 ## Outcome

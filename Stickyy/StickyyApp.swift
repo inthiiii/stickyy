@@ -7,12 +7,12 @@ struct StickyyApp: App {
 
     var body: some Scene {
         Settings {
-            PhaseOneSettingsView()
+            PhaseTwoSettingsView()
         }
     }
 }
 
-private struct PhaseOneSettingsView: View {
+private struct PhaseTwoSettingsView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(AppEnvironment.productName)
@@ -21,7 +21,7 @@ private struct PhaseOneSettingsView: View {
             Text(AppEnvironment.tagline)
                 .foregroundStyle(.secondary)
 
-            Text("Settings arrive in a later phase.")
+            Text("Right-click the menu-bar icon to quit Stickyy.")
                 .font(.callout)
                 .foregroundStyle(.tertiary)
         }

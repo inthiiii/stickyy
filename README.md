@@ -6,16 +6,19 @@ Stickyy is a fast, local-first macOS menu-bar scratchpad built with SwiftUI, App
 
 ## Current status
 
-Phase 1 establishes the project foundation:
+Phase 2 provides the first interactive scratchpad:
 
 - Xcode 27 project
 - Swift 6 language mode and complete concurrency checking
 - macOS 26 deployment target
 - App Sandbox and Hardened Runtime
-- Menu-bar-only smoke build
+- Menu-bar-only application with a reusable popover
+- Native AppKit text editor with focus, selection, undo/redo, and scrolling
+- In-memory text retention while the app is running
+- Escape and outside-click dismissal
 - Swift Testing and UI-test targets
 
-The interactive scratchpad begins in Phase 2. Persistence begins in Phase 3.
+Persistence begins in Phase 3.
 
 ## Requirements
 
@@ -28,6 +31,7 @@ The interactive scratchpad begins in Phase 2. Persistence begins in Phase 3.
 2. Select the **Stickyy** scheme and **My Mac**.
 3. Press Command-R.
 4. Find the note icon in the macOS menu bar.
+5. Left-click the icon to toggle the scratchpad; right-click it to quit.
 
 ## Testing
 

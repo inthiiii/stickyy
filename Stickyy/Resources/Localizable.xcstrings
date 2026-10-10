@@ -7,13 +7,19 @@
     "Quit Stickyy" : {
       "extractionState" : "manual"
     },
-    "Settings arrive in a later phase." : {
+    "Right-click the menu-bar icon to quit Stickyy." : {
+      "extractionState" : "manual"
+    },
+    "Scratchpad" : {
+      "extractionState" : "manual"
+    },
+    "Start typing…" : {
       "extractionState" : "manual"
     },
     "Stickyy" : {
       "extractionState" : "manual"
     },
-    "Stickyy — Phase 1" : {
+    "Stickyy — Phase 2" : {
       "extractionState" : "manual"
     }
   },
