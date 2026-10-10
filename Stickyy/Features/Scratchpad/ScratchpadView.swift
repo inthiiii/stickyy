@@ -26,6 +26,26 @@ struct ScratchpadView: View {
 
             Divider()
 
+            if let persistenceError = session.persistenceError {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.orange)
+
+                    Text(persistenceError)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    Spacer(minLength: 0)
+                }
+                .padding(.horizontal, StickyyMetrics.headerPadding)
+                .padding(.vertical, 10)
+                .background(Color.orange.opacity(0.08))
+                .accessibilityElement(children: .combine)
+                .accessibilityIdentifier("persistenceError")
+
+                Divider()
+            }
+
             ZStack(alignment: .topLeading) {
                 ScratchpadEditor(
                     text: $session.text,

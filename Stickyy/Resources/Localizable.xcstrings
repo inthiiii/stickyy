@@ -13,13 +13,22 @@
     "Scratchpad" : {
       "extractionState" : "manual"
     },
+    "Scratchpad storage is unavailable." : {
+      "extractionState" : "manual"
+    },
     "Start typing…" : {
       "extractionState" : "manual"
     },
     "Stickyy" : {
       "extractionState" : "manual"
     },
-    "Stickyy — Phase 2" : {
+    "Stickyy — Phase 3" : {
+      "extractionState" : "manual"
+    },
+    "Stickyy couldn’t restore the saved scratchpad. New text will remain available until the app quits." : {
+      "extractionState" : "manual"
+    },
+    "Stickyy couldn’t save this scratchpad. Your current text will remain available until the app quits." : {
       "extractionState" : "manual"
     }
   },

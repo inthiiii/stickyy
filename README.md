@@ -6,7 +6,7 @@ Stickyy is a fast, local-first macOS menu-bar scratchpad built with SwiftUI, App
 
 ## Current status
 
-Phase 2 provides the first interactive scratchpad:
+Phase 3 provides a persistent interactive scratchpad:
 
 - Xcode 27 project
 - Swift 6 language mode and complete concurrency checking
@@ -14,11 +14,14 @@ Phase 2 provides the first interactive scratchpad:
 - App Sandbox and Hardened Runtime
 - Menu-bar-only application with a reusable popover
 - Native AppKit text editor with focus, selection, undo/redo, and scrolling
-- In-memory text retention while the app is running
+- Debounced automatic saving with local SwiftData storage
+- Text restoration after quitting, relaunching, or restarting macOS
+- Immediate save flushing when the popover closes or the app quits
+- Visible storage-failure handling without discarding current text
 - Escape and outside-click dismissal
 - Swift Testing and UI-test targets
 
-Persistence begins in Phase 3.
+Multiple scratchpads, search, pinning, and configurable shortcuts remain assigned to Phase 5.
 
 ## Requirements
 
@@ -49,4 +52,4 @@ xcodebuild \
 
 ## Privacy
 
-Stickyy is local-first and requires no network connection for its core functionality. The Phase 1 app requests no network, broad file-access, automation, accessibility, microphone, camera, contacts, calendar, or location entitlement.
+Stickyy is local-first and requires no network connection for its core functionality. Scratchpad text is stored in the app's sandbox using SwiftData. The app requests no network, broad file-access, automation, accessibility, microphone, camera, contacts, calendar, or location entitlement.

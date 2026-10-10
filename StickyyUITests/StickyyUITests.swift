@@ -15,7 +15,10 @@ final class StickyyUITests: XCTestCase {
     @MainActor
     func testScratchpadAcceptsTextAndClosesWithEscape() {
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-testing-open-scratchpad"]
+        app.launchArguments = [
+            "--ui-testing-reset-persistence",
+            "--ui-testing-open-scratchpad",
+        ]
         app.launch()
 
         let editor = app.textViews["scratchpadEditor"]
@@ -26,5 +29,30 @@ final class StickyyUITests: XCTestCase {
 
         editor.typeKey(.escape, modifierFlags: [])
         XCTAssertTrue(editor.waitForNonExistence(timeout: 2))
+    }
+
+    @MainActor
+    func testScratchpadRestoresTextAfterRelaunch() {
+        let firstLaunch = XCUIApplication()
+        firstLaunch.launchArguments = [
+            "--ui-testing-reset-persistence",
+            "--ui-testing-open-scratchpad",
+        ]
+        firstLaunch.launch()
+
+        let firstEditor = firstLaunch.textViews["scratchpadEditor"]
+        XCTAssertTrue(firstEditor.waitForExistence(timeout: 5))
+        firstEditor.typeText("Survives relaunch")
+        firstEditor.typeKey(.escape, modifierFlags: [])
+        XCTAssertTrue(firstEditor.waitForNonExistence(timeout: 2))
+        firstLaunch.terminate()
+
+        let secondLaunch = XCUIApplication()
+        secondLaunch.launchArguments = ["--ui-testing-open-scratchpad"]
+        secondLaunch.launch()
+
+        let restoredEditor = secondLaunch.textViews["scratchpadEditor"]
+        XCTAssertTrue(restoredEditor.waitForExistence(timeout: 5))
+        XCTAssertEqual(restoredEditor.value as? String, "Survives relaunch")
     }
 }
