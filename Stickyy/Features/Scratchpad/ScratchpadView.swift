@@ -90,7 +90,7 @@ struct ScratchpadView: View {
     }
 
     private var editor: some View {
-        ZStack(alignment: .topLeading) {
+        ZStack(alignment: .bottomTrailing) {
             ScratchpadEditor(
                 text: $session.text,
                 focusRequest: session.editorFocusRequest,
@@ -106,11 +106,44 @@ struct ScratchpadView: View {
                     .foregroundStyle(.tertiary)
                     .padding(.horizontal, StickyyMetrics.editorInset + 4)
                     .padding(.vertical, StickyyMetrics.editorInset + 2)
+                    .frame(
+                        maxWidth: .infinity,
+                        maxHeight: .infinity,
+                        alignment: .topLeading
+                    )
                     .allowsHitTesting(false)
                     .accessibilityHidden(true)
             }
+
+            if !clipboardHistory.isEnabled {
+                Button {
+                    pasteCurrentClipboardText()
+                } label: {
+                    Image(systemName: "clipboard")
+                        .font(.system(size: 12, weight: .semibold))
+                        .frame(width: 26, height: 26)
+                }
+                .buttonStyle(.plain)
+                .background(.regularMaterial, in: .circle)
+                .overlay {
+                    Circle().strokeBorder(Color.primary.opacity(0.1))
+                }
+                .shadow(color: .black.opacity(0.12), radius: 4, y: 2)
+                .padding(10)
+                .help("Paste into Stickyy")
+                .accessibilityLabel("Paste into Stickyy")
+                .accessibilityIdentifier("pasteCurrentClipboardText")
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private func pasteCurrentClipboardText() {
+        guard let text = clipboardHistory.currentTextForPasting() else {
+            NSSound.beep()
+            return
+        }
+        session.insertIntoEditor(text)
     }
 
     private func quickPaste(_ index: Int) {

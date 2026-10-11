@@ -62,8 +62,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         } else {
             nil
         }
+        let clipboardHistoryDisabledForTesting = CommandLine.arguments.contains(
+            "--ui-testing-disable-clipboard-history"
+        )
         let clipboardHistoryController = ClipboardHistoryController(
-            monitoringEnabled: clipboardTestText == nil
+            monitoringEnabled: clipboardTestText == nil,
+            initiallyEnabled: clipboardHistoryDisabledForTesting ? false : nil
         )
         if let clipboardTestText {
             clipboardHistoryController.seedForUITesting(text: clipboardTestText)

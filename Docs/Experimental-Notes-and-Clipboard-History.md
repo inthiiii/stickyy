@@ -36,8 +36,11 @@ simple contextual icons for links, email addresses, and phone numbers.
 Use the trash button at the end of the shelf to clear all five entries without
 changing the current system clipboard. Clipboard History can be turned off in
 Stickyy Settings whenever a distraction-free scratchpad is preferred. Turning
-it off immediately clears the temporary history and hides the shelf; turning it
-back on resumes monitoring new clipboard changes.
+it off immediately clears the temporary history and hides the entire shelf;
+turning it back on resumes monitoring new clipboard changes. While history is
+off, a small clipboard button remains in the editor's bottom-right corner for
+directly pasting plain text without storing any clipboard history. Images and
+files are deliberately ignored by that direct-paste button.
 
 Clipboard history is intentionally temporary in this experiment. It is not
 written to Stickyy's scratchpad store, synced, or restored after the app quits.

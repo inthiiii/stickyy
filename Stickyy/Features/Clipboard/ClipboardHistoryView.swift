@@ -6,9 +6,9 @@ struct ClipboardHistoryView: View {
     let onPasteText: (String) -> Void
 
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 5) {
             ScrollView(.horizontal) {
-                LazyHStack(spacing: 8) {
+                LazyHStack(spacing: 5) {
                     if history.items.isEmpty {
                         emptyPill
                     } else {
@@ -20,8 +20,8 @@ struct ClipboardHistoryView: View {
                         }
                     }
                 }
-                .padding(.horizontal, 4)
-                .padding(.vertical, 4)
+                .padding(.horizontal, 3)
+                .padding(.vertical, 3)
                 .accessibilityElement(children: .contain)
                 .accessibilityLabel("Clipboard History")
             }
@@ -33,7 +33,8 @@ struct ClipboardHistoryView: View {
                     history.clearHistory()
                 } label: {
                     Image(systemName: "trash")
-                        .frame(width: 30, height: 30)
+                        .font(.caption)
+                        .frame(width: 26, height: 26)
                 }
                 .buttonStyle(.plain)
                 .background(.regularMaterial, in: .circle)
@@ -57,10 +58,10 @@ struct ClipboardHistoryView: View {
 
     private var emptyPill: some View {
         Label("Clipboard is ready", systemImage: "clipboard")
-            .font(.caption)
+            .font(.caption2)
             .foregroundStyle(.secondary)
-            .padding(.horizontal, 12)
-            .frame(height: 36)
+            .padding(.horizontal, 10)
+            .frame(height: 30)
             .background(.regularMaterial, in: .capsule)
             .overlay {
                 Capsule().strokeBorder(Color.primary.opacity(0.1))
@@ -73,18 +74,18 @@ struct ClipboardHistoryView: View {
         for item: ClipboardHistoryItem,
         position: Int
     ) -> some View {
-        HStack(spacing: 6) {
+        HStack(spacing: 5) {
             Button {
                 history.restore(item)
             } label: {
-                HStack(spacing: 7) {
+                HStack(spacing: 5) {
                     preview(for: item)
-                        .frame(width: 24, height: 24)
+                        .frame(width: 18, height: 18)
 
                     Text(title(for: item))
-                        .font(.caption)
+                        .font(.caption2)
                         .lineLimit(1)
-                        .frame(maxWidth: 150, alignment: .leading)
+                        .frame(maxWidth: 125, alignment: .leading)
 
                     Text("⌘\(position)")
                         .font(.caption2.monospacedDigit())
@@ -103,14 +104,14 @@ struct ClipboardHistoryView: View {
                     onPasteText(text)
                 }
                 .buttonStyle(.borderless)
-                .font(.caption.weight(.semibold))
+                .font(.caption2.weight(.semibold))
                 .help("Paste into Stickyy")
                 .accessibilityIdentifier("pasteClipboardText_\(position)")
             }
         }
-        .padding(.leading, 8)
-        .padding(.trailing, 10)
-        .frame(height: 38)
+        .padding(.leading, 7)
+        .padding(.trailing, 8)
+        .frame(height: 32)
         .background(.regularMaterial, in: .capsule)
         .overlay {
             Capsule().strokeBorder(Color.primary.opacity(0.1))

@@ -82,6 +82,53 @@ final class StickyyUITests: XCTestCase {
     }
 
     @MainActor
+    func testDisabledClipboardHistoryShowsOnlyDirectTextPaste() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-reset-persistence",
+            "--ui-testing-disable-clipboard-history",
+            "--ui-testing-clipboard-text",
+            "Paste without history",
+            "--ui-testing-open-scratchpad",
+        ]
+        app.launch()
+
+        let editor = app.textViews["scratchpadEditor"]
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+        XCTAssertFalse(
+            app.descendants(matching: .any)["clipboardShelf"].exists
+        )
+        XCTAssertFalse(
+            app.descendants(matching: .any)["emptyClipboardHistory"].exists
+        )
+
+        let directPaste = app.buttons["pasteCurrentClipboardText"]
+        XCTAssertTrue(directPaste.waitForExistence(timeout: 2))
+        directPaste.click()
+        XCTAssertEqual(editor.value as? String, "Paste without history")
+    }
+
+    @MainActor
+    func testScratchpadClosesWhenAppDeactivates() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-reset-persistence",
+            "--ui-testing-open-scratchpad",
+        ]
+        app.launch()
+
+        let editor = app.textViews["scratchpadEditor"]
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+
+        let finder = XCUIApplication(bundleIdentifier: "com.apple.finder")
+        finder.activate()
+        finder.coordinate(
+            withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)
+        ).click()
+        XCTAssertTrue(editor.waitForNonExistence(timeout: 2))
+    }
+
+    @MainActor
     func testScratchpadLibraryCreatesANewScratchpad() {
         let app = XCUIApplication()
         app.launchArguments = [

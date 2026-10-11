@@ -6,6 +6,7 @@ final class ClipboardShelfController {
     private let panel: NSPanel
     private let history: ClipboardHistoryController
     private weak var parentWindow: NSWindow?
+    private var historyStateObserver: NSObjectProtocol?
 
     init(
         history: ClipboardHistoryController,
@@ -43,6 +44,16 @@ final class ClipboardShelfController {
             String(localized: "Clipboard History")
         )
         panel.contentViewController = hostingController
+
+        historyStateObserver = NotificationCenter.default.addObserver(
+            forName: .clipboardHistoryStateDidChange,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                self?.updateVisibility()
+            }
+        }
     }
 
     func show(relativeTo parentWindow: NSWindow) {
@@ -51,8 +62,13 @@ final class ClipboardShelfController {
     }
 
     func updateVisibility() {
-        guard history.isEnabled,
-              let parentWindow,
+        guard history.isEnabled else {
+            panel.parent?.removeChildWindow(panel)
+            panel.orderOut(nil)
+            return
+        }
+
+        guard let parentWindow,
               parentWindow.isVisible else {
             hide()
             return
@@ -79,5 +95,9 @@ final class ClipboardShelfController {
         panel.parent?.removeChildWindow(panel)
         panel.orderOut(nil)
         parentWindow = nil
+    }
+
+    func owns(_ window: NSWindow?) -> Bool {
+        panel === window
     }
 }

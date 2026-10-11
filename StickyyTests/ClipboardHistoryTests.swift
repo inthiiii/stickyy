@@ -171,6 +171,32 @@ struct ClipboardHistoryTests {
         #expect(ClipboardTextKind.detect(in: "A normal thought") == .text)
     }
 
+    @Test("Direct paste accepts text but rejects images and files")
+    func directPasteIsTextOnly() {
+        let pasteboard = makePasteboard()
+        let history = ClipboardHistoryController(
+            pasteboard: pasteboard,
+            monitoringEnabled: false
+        )
+
+        pasteboard.clearContents()
+        #expect(pasteboard.setString("Paste this", forType: .string))
+        #expect(history.currentTextForPasting() == "Paste this")
+
+        let image = NSImage(size: NSSize(width: 2, height: 2))
+        pasteboard.clearContents()
+        #expect(pasteboard.writeObjects([image]))
+        #expect(history.currentTextForPasting() == nil)
+
+        pasteboard.clearContents()
+        #expect(
+            pasteboard.writeObjects([
+                URL(fileURLWithPath: "/tmp/not-text.png") as NSURL,
+            ])
+        )
+        #expect(history.currentTextForPasting() == nil)
+    }
+
     private func makePasteboard() -> NSPasteboard {
         NSPasteboard(name: .init("StickyyTests.\(UUID().uuidString)"))
     }

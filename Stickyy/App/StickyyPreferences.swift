@@ -19,6 +19,9 @@ extension Notification.Name {
     static let clipboardHistoryPreferenceDidChange = Notification.Name(
         "Stickyy.clipboardHistoryPreferenceDidChange"
     )
+    static let clipboardHistoryStateDidChange = Notification.Name(
+        "Stickyy.clipboardHistoryStateDidChange"
+    )
 }
 
 @MainActor

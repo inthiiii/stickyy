@@ -178,6 +178,11 @@ final class ClipboardHistoryController {
             lastChangeCount = pasteboard.changeCount
             clearHistory()
         }
+
+        NotificationCenter.default.post(
+            name: .clipboardHistoryStateDidChange,
+            object: enabled
+        )
     }
 
     func item(at index: Int) -> ClipboardHistoryItem? {
@@ -185,9 +190,31 @@ final class ClipboardHistoryController {
         return items[index]
     }
 
+    func currentTextForPasting() -> String? {
+        let containsFiles = !(pasteboard.readObjects(
+            forClasses: [NSURL.self],
+            options: [.urlReadingFileURLsOnly: true]
+        ) ?? []).isEmpty
+        let containsImage = pasteboard.data(forType: .png) != nil
+            || pasteboard.data(forType: .tiff) != nil
+
+        guard !containsFiles,
+              !containsImage,
+              let text = pasteboard.string(forType: .string),
+              !text.isEmpty else {
+            return nil
+        }
+        return text
+    }
+
     #if DEBUG
     func seedForUITesting(text: String) {
-        record(.text(text))
+        pasteboard.clearContents()
+        _ = pasteboard.setString(text, forType: .string)
+        lastChangeCount = pasteboard.changeCount
+        if isEnabled {
+            record(.text(text))
+        }
     }
     #endif
 
