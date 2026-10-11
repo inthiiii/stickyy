@@ -16,6 +16,27 @@
     "Catch a thought before it fades." : {
       "extractionState" : "manual"
     },
+    "Clipboard" : {
+      "extractionState" : "manual"
+    },
+    "Clipboard files: %@" : {
+      "extractionState" : "manual"
+    },
+    "Clipboard image" : {
+      "extractionState" : "manual"
+    },
+    "Clipboard text: %@" : {
+      "extractionState" : "manual"
+    },
+    "Copy text, an image, or a file to begin." : {
+      "extractionState" : "manual"
+    },
+    "Copy this item again" : {
+      "extractionState" : "manual"
+    },
+    "Copies this item back to the clipboard" : {
+      "extractionState" : "manual"
+    },
     "Delete Scratchpad" : {
       "extractionState" : "manual"
     },
@@ -28,10 +49,16 @@
     "General" : {
       "extractionState" : "manual"
     },
+    "Image" : {
+      "extractionState" : "manual"
+    },
     "Keyboard Shortcut" : {
       "extractionState" : "manual"
     },
     "Launch Stickyy at login" : {
+      "extractionState" : "manual"
+    },
+    "Last 5" : {
       "extractionState" : "manual"
     },
     "Liquid Glass changes only the window surface. The minimal layout stays the same." : {
@@ -50,6 +77,9 @@
       "extractionState" : "manual"
     },
     "Open this scratchpad" : {
+      "extractionState" : "manual"
+    },
+    "Opens the macOS share sheet; choose Notes" : {
       "extractionState" : "manual"
     },
     "Pin" : {
@@ -133,7 +163,13 @@
     "Untitled" : {
       "extractionState" : "manual"
     },
+    "Export to Apple Notes" : {
+      "extractionState" : "manual"
+    },
     "Use Liquid Glass" : {
+      "extractionState" : "manual"
+    },
+    "%lld files" : {
       "extractionState" : "manual"
     }
   },

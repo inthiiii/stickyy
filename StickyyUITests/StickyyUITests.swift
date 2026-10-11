@@ -32,6 +32,27 @@ final class StickyyUITests: XCTestCase {
     }
 
     @MainActor
+    func testNotesExportAndClipboardHistoryAreAvailable() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-reset-persistence",
+            "--ui-testing-open-scratchpad",
+        ]
+        app.launch()
+
+        let editor = app.textViews["scratchpadEditor"]
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+
+        let notesExport = app.buttons["exportToAppleNotes"]
+        XCTAssertTrue(notesExport.exists)
+        XCTAssertFalse(notesExport.isEnabled)
+        XCTAssertTrue(app.staticTexts["Clipboard"].exists)
+
+        editor.typeText("Send this thought to Notes")
+        XCTAssertTrue(notesExport.isEnabled)
+    }
+
+    @MainActor
     func testScratchpadLibraryCreatesANewScratchpad() {
         let app = XCUIApplication()
         app.launchArguments = [

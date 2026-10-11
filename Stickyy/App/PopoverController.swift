@@ -6,7 +6,10 @@ final class PopoverController: NSObject, NSPopoverDelegate {
     private let popover: NSPopover
     private let session: ScratchpadSession
 
-    init(session: ScratchpadSession) {
+    init(
+        session: ScratchpadSession,
+        clipboardHistory: ClipboardHistoryController
+    ) {
         self.session = session
         popover = NSPopover()
         super.init()
@@ -21,6 +24,7 @@ final class PopoverController: NSObject, NSPopoverDelegate {
         popover.contentViewController = NSHostingController(
             rootView: ScratchpadView(
                 session: session,
+                clipboardHistory: clipboardHistory,
                 onDismiss: { [weak self] in
                     self?.close()
                 }

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ScratchpadView: View {
     @Bindable var session: ScratchpadSession
+    @Bindable var clipboardHistory: ClipboardHistoryController
     let onDismiss: () -> Void
 
     @State private var showsLibrary = false
@@ -30,6 +31,8 @@ struct ScratchpadView: View {
             }
 
             editor
+            Divider()
+            ClipboardHistoryView(history: clipboardHistory)
         }
         .frame(
             width: StickyyMetrics.popoverWidth,
@@ -66,8 +69,25 @@ struct ScratchpadView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
+
+            ShareLink(
+                item: notesExportText,
+                subject: Text(verbatim: session.activeTitle)
+            ) {
+                Image(systemName: "square.and.arrow.up")
+            }
+            .buttonStyle(.plain)
+            .disabled(session.text.isEmpty)
+            .help("Export to Apple Notes")
+            .accessibilityLabel("Export to Apple Notes")
+            .accessibilityHint("Opens the macOS share sheet; choose Notes")
+            .accessibilityIdentifier("exportToAppleNotes")
         }
         .padding(StickyyMetrics.headerPadding)
+    }
+
+    private var notesExportText: String {
+        "\(session.activeTitle)\n\n\(session.text)"
     }
 
     private var editor: some View {

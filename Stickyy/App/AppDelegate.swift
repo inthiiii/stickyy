@@ -8,6 +8,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var popoverController: PopoverController?
     private var statusItemController: StatusItemController?
     private var globalShortcutController: GlobalShortcutController?
+    private var clipboardHistoryController: ClipboardHistoryController?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -49,7 +50,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         #endif
 
         let session = ScratchpadSession(store: store)
-        let popoverController = PopoverController(session: session)
+        let clipboardHistoryController = ClipboardHistoryController()
+        let popoverController = PopoverController(
+            session: session,
+            clipboardHistory: clipboardHistoryController
+        )
         let statusItemController = StatusItemController(
             popoverController: popoverController
         )
@@ -57,6 +62,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         scratchpadSession = session
         self.popoverController = popoverController
         self.statusItemController = statusItemController
+        self.clipboardHistoryController = clipboardHistoryController
         globalShortcutController = GlobalShortcutController {
             statusItemController.showScratchpad()
         }
