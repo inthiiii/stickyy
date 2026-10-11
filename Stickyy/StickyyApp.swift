@@ -27,6 +27,7 @@ private struct StickyySettingsView: View {
         Form {
             Section("General") {
                 Toggle("Launch Stickyy at login", isOn: launchAtLoginBinding)
+                    .accessibilityIdentifier("launchAtLoginToggle")
                 if let loginItemMessage {
                     Text(loginItemMessage)
                         .font(.caption)
@@ -41,10 +42,12 @@ private struct StickyySettingsView: View {
                     }
                 }
                 .pickerStyle(.menu)
+                .accessibilityIdentifier("globalShortcutPicker")
             }
 
             Section("Appearance") {
                 Toggle("Use Liquid Glass", isOn: $usesLiquidGlass)
+                    .accessibilityIdentifier("liquidGlassToggle")
                 Text(
                     usesLiquidGlass
                         ? String(

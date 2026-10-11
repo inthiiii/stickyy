@@ -54,7 +54,7 @@ final class StatusItemController: NSObject {
     private func makeContextMenu() -> NSMenu {
         let menu = NSMenu()
         let phaseLabel = NSMenuItem(
-            title: String(localized: "Stickyy — Phase 5"),
+            title: String(localized: "Stickyy — Phase 6"),
             action: nil,
             keyEquivalent: ""
         )

@@ -15,7 +15,7 @@ final class ScratchpadSession {
                   scratchpads[index].text != newValue else { return }
             scratchpads[index].text = newValue
             scratchpads[index].updatedAt = .now
-            scheduleAutosave(for: scratchpads[index])
+            scheduleAutosave(for: scratchpads[index].id)
         }
     }
 
@@ -170,8 +170,8 @@ final class ScratchpadSession {
         return scratchpads[activeIndex]
     }
 
-    private func scheduleAutosave(for scratchpad: Scratchpad) {
-        autosaveTask?.cancel()
+    private func scheduleAutosave(for scratchpadID: String) {
+        guard autosaveTask == nil else { return }
         autosaveTask = Task { [weak self] in
             guard let self else { return }
 
@@ -182,7 +182,8 @@ final class ScratchpadSession {
             }
 
             guard !Task.isCancelled else { return }
-            guard activeScratchpadID == scratchpad.id,
+            autosaveTask = nil
+            guard activeScratchpadID == scratchpadID,
                   let current = activeScratchpad else { return }
             persist(current)
         }

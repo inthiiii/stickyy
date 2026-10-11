@@ -17,6 +17,10 @@ struct ScratchpadEditor: NSViewRepresentable {
         scrollView.hasVerticalScroller = true
         scrollView.hasHorizontalScroller = false
         scrollView.autohidesScrollers = true
+        scrollView.setAccessibilityLabel(
+            String(localized: "Scratchpad editor")
+        )
+        scrollView.setAccessibilityIdentifier("scratchpadScrollView")
 
         let textView = EscapeHandlingTextView()
         textView.delegate = context.coordinator

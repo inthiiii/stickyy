@@ -61,57 +61,93 @@ struct ScratchpadLibraryView: View {
     }
 
     private func row(for scratchpad: Scratchpad) -> some View {
-        Button {
-            session.selectScratchpad(id: scratchpad.id)
-            onSelect()
-        } label: {
-            HStack(spacing: 9) {
-                Image(systemName: scratchpad.isPinned ? "pin.fill" : "note.text")
-                    .foregroundStyle(scratchpad.isPinned ? Color.accentColor : .secondary)
-                    .frame(width: 16)
+        HStack(spacing: 4) {
+            Button {
+                session.selectScratchpad(id: scratchpad.id)
+                onSelect()
+            } label: {
+                HStack(spacing: 9) {
+                    Image(systemName: scratchpad.isPinned ? "pin.fill" : "note.text")
+                        .foregroundStyle(scratchpad.isPinned ? Color.accentColor : .secondary)
+                        .frame(width: 16)
+                        .accessibilityHidden(true)
 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(scratchpad.title)
-                        .font(.callout.weight(.medium))
-                        .lineLimit(1)
-                    Text(preview(for: scratchpad))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(scratchpad.title)
+                            .font(.callout.weight(.medium))
+                            .lineLimit(1)
+                        Text(preview(for: scratchpad))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
+
+                    Spacer(minLength: 6)
+
+                    if scratchpad.id == session.activeScratchpadID {
+                        Image(systemName: "checkmark")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.tint)
+                            .accessibilityHidden(true)
+                    }
                 }
-
-                Spacer(minLength: 6)
-
-                if scratchpad.id == session.activeScratchpadID {
-                    Image(systemName: "checkmark")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.tint)
-                }
+                .contentShape(.rect)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 7)
             }
-            .contentShape(.rect)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 7)
+            .buttonStyle(.plain)
+            .accessibilityLabel(scratchpad.title)
+            .accessibilityValue(accessibilityValue(for: scratchpad))
+            .accessibilityHint("Open this scratchpad")
+            .accessibilityIdentifier("scratchpadRow_\(scratchpad.id)")
+
+            Menu {
+                actions(for: scratchpad)
+            } label: {
+                Image(systemName: "ellipsis")
+                    .frame(width: 22, height: 22)
+                    .contentShape(.rect)
+            }
+            .menuStyle(.borderlessButton)
+            .fixedSize()
+            .help("Scratchpad actions")
+            .accessibilityLabel("Actions for \(scratchpad.title)")
+            .accessibilityIdentifier("scratchpadActions_\(scratchpad.id)")
         }
-        .buttonStyle(.plain)
         .background(
             scratchpad.id == session.activeScratchpadID
                 ? Color.accentColor.opacity(0.10)
                 : .clear,
             in: .rect(cornerRadius: 7)
         )
-        .accessibilityIdentifier("scratchpadRow_\(scratchpad.id)")
         .contextMenu {
-            Button(
-                scratchpad.isPinned
-                    ? String(localized: "Unpin")
-                    : String(localized: "Pin")
-            ) {
-                session.togglePin(id: scratchpad.id)
-            }
-            Button("Rename…") { beginRename(scratchpad) }
-            Divider()
-            Button("Delete…", role: .destructive) { deleteTarget = scratchpad }
+            actions(for: scratchpad)
         }
+    }
+
+    @ViewBuilder
+    private func actions(for scratchpad: Scratchpad) -> some View {
+        Button(
+            scratchpad.isPinned
+                ? String(localized: "Unpin")
+                : String(localized: "Pin")
+        ) {
+            session.togglePin(id: scratchpad.id)
+        }
+        Button("Edit Scratchpad Name…") { beginRename(scratchpad) }
+        Divider()
+        Button("Delete…", role: .destructive) { deleteTarget = scratchpad }
+    }
+
+    private func accessibilityValue(for scratchpad: Scratchpad) -> String {
+        var values = [preview(for: scratchpad)]
+        if scratchpad.isPinned {
+            values.append(String(localized: "Pinned"))
+        }
+        if scratchpad.id == session.activeScratchpadID {
+            values.append(String(localized: "Selected"))
+        }
+        return values.joined(separator: ", ")
     }
 
     private var renamePresented: Binding<Bool> {

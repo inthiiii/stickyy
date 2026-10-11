@@ -22,7 +22,7 @@ enum GlobalShortcutChoice: String, CaseIterable, Identifiable {
         }
     }
 
-    fileprivate var keyCode: UInt32? {
+    var keyCode: UInt32? {
         switch self {
         case .controlOptionSpace, .controlShiftSpace, .commandShiftSpace:
             UInt32(kVK_Space)
@@ -33,7 +33,7 @@ enum GlobalShortcutChoice: String, CaseIterable, Identifiable {
         }
     }
 
-    fileprivate var modifiers: UInt32 {
+    var modifiers: UInt32 {
         switch self {
         case .controlOptionSpace, .controlOptionS:
             UInt32(controlKey | optionKey)

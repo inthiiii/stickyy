@@ -6,7 +6,7 @@ Stickyy is a fast, local-first macOS menu-bar scratchpad built with SwiftUI, App
 
 ## Current status
 
-Phase 5 provides a complete, local-first scratchpad library while preserving Stickyy's original minimal design:
+Phase 6 hardens the complete local-first scratchpad with automated quality, recovery, accessibility, and performance coverage while preserving Stickyy's original minimal design:
 
 - Xcode 27 project
 - Swift 6 language mode and complete concurrency checking
@@ -14,7 +14,8 @@ Phase 5 provides a complete, local-first scratchpad library while preserving Sti
 - App Sandbox and Hardened Runtime
 - Menu-bar-only application with a reusable popover
 - Native AppKit text editor with focus, selection, undo/redo, and scrolling
-- Debounced automatic saving with local SwiftData storage
+- Coalesced automatic saving with local SwiftData storage
+- Periodic durable saves during continuous typing to bound crash-loss risk
 - Text restoration after quitting, relaunching, or restarting macOS
 - Immediate save flushing when the popover closes or the app quits
 - Visible storage-failure handling without discarding current text
@@ -29,7 +30,10 @@ Phase 5 provides a complete, local-first scratchpad library while preserving Sti
 - Adaptive semantic styling for Light Mode and Dark Mode
 - Solid, high-contrast fallback for Reduce Transparency
 - Escape and outside-click dismissal
-- Swift Testing and UI-test targets
+- 43 automated unit, storage, preference, performance, accessibility, and UI tests
+- Forced-termination recovery coverage
+- Xcode static analysis plus Address Sanitizer and Thread Sanitizer validation
+- Release-build CPU, memory, and leak baselines
 
 ## Requirements
 
@@ -61,6 +65,8 @@ xcodebuild \
   -derivedDataPath .build/DerivedData \
   clean test
 ```
+
+The full Phase 6 validation record, measured baselines, and regression targets are in [Docs/Phase-6-Testing-and-Optimization.md](Docs/Phase-6-Testing-and-Optimization.md).
 
 ## Privacy
 

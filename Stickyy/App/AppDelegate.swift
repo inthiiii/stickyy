@@ -1,4 +1,5 @@
 import AppKit
+import Darwin
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
@@ -32,6 +33,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 UserDefaults.standard.removeObject(
                     forKey: StickyyPreferences.selectedScratchpadID
                 )
+                UserDefaults.standard.removeObject(
+                    forKey: StickyyPreferences.usesLiquidGlass
+                )
+                UserDefaults.standard.removeObject(
+                    forKey: StickyyPreferences.globalShortcut
+                )
             } catch {
                 NSLog(
                     "Stickyy UI-test persistence reset failed: %@",
@@ -59,6 +66,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             Task { @MainActor [weak statusItemController] in
                 try? await Task.sleep(for: .milliseconds(150))
                 statusItemController?.showScratchpad()
+            }
+        }
+
+        if CommandLine.arguments.contains("--ui-testing-crash-after-edit") {
+            Task { @MainActor [weak session] in
+                while session?.text.isEmpty == true {
+                    try? await Task.sleep(for: .milliseconds(50))
+                }
+                var previousText = session?.text
+                var stableChecks = 0
+                while stableChecks < 10 {
+                    try? await Task.sleep(for: .milliseconds(50))
+                    if session?.text == previousText {
+                        stableChecks += 1
+                    } else {
+                        previousText = session?.text
+                        stableChecks = 0
+                    }
+                }
+                Darwin._exit(99)
             }
         }
         #endif

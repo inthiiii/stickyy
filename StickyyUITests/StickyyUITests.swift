@@ -81,4 +81,181 @@ final class StickyyUITests: XCTestCase {
         XCTAssertTrue(restoredEditor.waitForExistence(timeout: 5))
         XCTAssertEqual(restoredEditor.value as? String, "Survives relaunch")
     }
+
+    @MainActor
+    func testAutosavedTextSurvivesForcedTermination() {
+        let crashedApp = XCUIApplication()
+        crashedApp.launchArguments = [
+            "--ui-testing-reset-persistence",
+            "--ui-testing-open-scratchpad",
+            "--ui-testing-crash-after-edit",
+        ]
+        crashedApp.launch()
+
+        let editor = crashedApp.textViews["scratchpadEditor"]
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+        editor.typeText("Recovered after a crash")
+        XCTAssertTrue(
+            crashedApp.wait(for: .notRunning, timeout: 5)
+        )
+
+        let relaunchedApp = XCUIApplication()
+        relaunchedApp.launchArguments = ["--ui-testing-open-scratchpad"]
+        relaunchedApp.launch()
+
+        let restoredEditor = relaunchedApp.textViews["scratchpadEditor"]
+        XCTAssertTrue(restoredEditor.waitForExistence(timeout: 5))
+        XCTAssertEqual(
+            restoredEditor.value as? String,
+            "Recovered after a crash"
+        )
+    }
+
+    @MainActor
+    func testSearchRenamePinAndDeleteWorkflow() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-reset-persistence",
+            "--ui-testing-open-scratchpad",
+        ]
+        app.launch()
+
+        let editor = app.textViews["scratchpadEditor"]
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+        app.buttons["scratchpadLibrary"].click()
+        app.buttons["newScratchpad"].click()
+        editor.typeText("Unique searchable phrase")
+
+        app.buttons["scratchpadLibrary"].click()
+        let search = app.textFields["scratchpadSearch"]
+        XCTAssertTrue(search.waitForExistence(timeout: 2))
+        search.typeText("Unique searchable")
+
+        let actions = app.descendants(matching: .any)["Actions for Untitled"]
+        XCTAssertTrue(actions.waitForExistence(timeout: 2))
+        actions.click()
+        app.menuItems["Edit Scratchpad Name…"].click()
+
+        let nameField = app.textFields["Name"]
+        XCTAssertTrue(nameField.waitForExistence(timeout: 2))
+        nameField.click()
+        nameField.typeKey("a", modifierFlags: .command)
+        nameField.typeText("Recovered Ideas")
+        app.sheets.buttons["Rename"].click()
+
+        let renamedActions = app.descendants(matching: .any)[
+            "Actions for Recovered Ideas"
+        ]
+        XCTAssertTrue(renamedActions.waitForExistence(timeout: 2))
+        renamedActions.click()
+        app.menuItems["Pin"].click()
+
+        let renamedRow = app.buttons["Recovered Ideas"]
+        XCTAssertTrue(renamedRow.waitForExistence(timeout: 2))
+        XCTAssertTrue((renamedRow.value as? String)?.contains("Pinned") == true)
+
+        renamedActions.click()
+        app.menuItems["Delete…"].click()
+        let deleteButton = app.sheets.buttons["Delete Scratchpad"]
+        XCTAssertTrue(deleteButton.waitForExistence(timeout: 2))
+        deleteButton.click()
+
+        XCTAssertTrue(renamedRow.waitForNonExistence(timeout: 2))
+    }
+
+    @MainActor
+    func testSettingsExposePhaseSixControls() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-testing-reset-persistence"]
+        app.launch()
+        app.typeKey(",", modifierFlags: .command)
+
+        XCTAssertTrue(
+            app.descendants(matching: .any)["launchAtLoginToggle"]
+                .waitForExistence(timeout: 5)
+        )
+        XCTAssertTrue(
+            app.descendants(matching: .any)["globalShortcutPicker"].exists
+        )
+        XCTAssertTrue(
+            app.descendants(matching: .any)["liquidGlassToggle"].exists
+        )
+    }
+
+    @MainActor
+    func testDefaultGlobalShortcutOpensScratchpad() async {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-testing-reset-persistence"]
+        app.launch()
+
+        // Carbon can briefly retain the previous UI-test process's hot-key
+        // registration while repeated app launches are settling.
+        try? await Task.sleep(for: .milliseconds(500))
+        app.typeKey(.space, modifierFlags: [.control, .option])
+
+        let editor = app.textViews["scratchpadEditor"]
+        if !editor.waitForExistence(timeout: 2) {
+            app.typeKey(.space, modifierFlags: [.control, .option])
+        }
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+    }
+
+    @MainActor
+    func testScratchpadPassesAccessibilityAudit() throws {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-reset-persistence",
+            "--ui-testing-open-scratchpad",
+        ]
+        app.launch()
+
+        XCTAssertTrue(
+            app.textViews["scratchpadEditor"].waitForExistence(timeout: 5)
+        )
+        let handleSystemOwnedIssue = { (issue: XCUIAccessibilityAuditIssue) in
+            // macOS exposes the system Touch Bar/candidate strip through the
+            // app hierarchy. Stickyy does not create or control that element.
+            if issue.element?.elementType == .touchBar {
+                return true
+            }
+            if issue.element?.label == "emoji & symbols" {
+                return true
+            }
+            if let element = issue.element,
+               element.descendants(matching: .button)["siri"].exists
+            {
+                // The system Siri/Touch Bar candidate dialog is also exposed
+                // as part of the app hierarchy on macOS 27.
+                return true
+            }
+            print(
+                "Accessibility audit: \(issue.compactDescription); "
+                    + "\(issue.detailedDescription); "
+                    + "element=\(String(describing: issue.element))"
+            )
+            return false
+        }
+        try app.performAccessibilityAudit(
+            for: .all,
+            handleSystemOwnedIssue
+        )
+
+        app.buttons["scratchpadLibrary"].click()
+        XCTAssertTrue(
+            app.textFields["scratchpadSearch"].waitForExistence(timeout: 2)
+        )
+        try app.performAccessibilityAudit(
+            for: .all,
+            handleSystemOwnedIssue
+        )
+    }
+
+    @MainActor
+    func testLaunchPerformance() {
+        let app = XCUIApplication()
+        measure(metrics: [XCTApplicationLaunchMetric(waitUntilResponsive: true)]) {
+            app.launch()
+            app.terminate()
+        }
+    }
 }

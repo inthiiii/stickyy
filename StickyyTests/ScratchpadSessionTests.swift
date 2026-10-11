@@ -28,6 +28,19 @@ struct ScratchpadSessionTests {
         #expect(session.text == "Two")
     }
 
+    @Test("An invalid remembered selection falls back safely")
+    func invalidSelectionFallsBack() {
+        let scratchpad = Scratchpad(title: "Available")
+        let selection = MemorySelectionStore(selectedScratchpadID: "missing")
+        let session = ScratchpadSession(
+            store: RecordingScratchpadStore([scratchpad]),
+            selectionStore: selection
+        )
+
+        #expect(session.activeScratchpadID == scratchpad.id)
+        #expect(selection.selectedScratchpadID == scratchpad.id)
+    }
+
     @Test("Creating a scratchpad selects and remembers it")
     func createsAndSelectsScratchpad() {
         let store = RecordingScratchpadStore([Scratchpad(title: "First")])
@@ -53,6 +66,23 @@ struct ScratchpadSessionTests {
         #expect(store.scratchpads.first?.text == "Latest text")
     }
 
+    @Test("Switching scratchpads flushes the outgoing edit")
+    func selectionFlushesOutgoingScratchpad() {
+        let first = Scratchpad(title: "First")
+        let second = Scratchpad(title: "Second")
+        let store = RecordingScratchpadStore([first, second])
+        let session = makeSession(store: store)
+
+        session.text = "Saved before switching"
+        session.selectScratchpad(id: second.id)
+
+        #expect(
+            store.scratchpads.first(where: { $0.id == first.id })?.text
+                == "Saved before switching"
+        )
+        #expect(session.activeScratchpadID == second.id)
+    }
+
     @Test("Rapid edits are coalesced into one autosave")
     func coalescesRapidEdits() async throws {
         let scratchpad = Scratchpad()
@@ -67,6 +97,26 @@ struct ScratchpadSessionTests {
 
         #expect(store.scratchpads.first?.text == "Three")
         #expect(store.saveCount == 1)
+    }
+
+    @Test("Continuous typing receives periodic durable saves")
+    func continuouslyTypingStillSaves() async throws {
+        let scratchpad = Scratchpad()
+        let store = RecordingScratchpadStore([scratchpad])
+        let session = makeSession(
+            store: store,
+            autosaveDelay: .milliseconds(20)
+        )
+        store.saveCount = 0
+
+        for index in 1...8 {
+            session.text = "Edit \(index)"
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        try await Task.sleep(for: .milliseconds(30))
+
+        #expect(store.scratchpads.first?.text == "Edit 8")
+        #expect(store.saveCount >= 2)
     }
 
     @Test("Search matches titles and note text")
@@ -120,6 +170,18 @@ struct ScratchpadSessionTests {
         #expect(store.scratchpads.first?.title == "New name")
     }
 
+    @Test("An empty rename uses the Untitled fallback")
+    func emptyRenameUsesFallback() {
+        let scratchpad = Scratchpad(title: "Old")
+        let session = makeSession(
+            store: RecordingScratchpadStore([scratchpad])
+        )
+
+        session.renameScratchpad(id: scratchpad.id, to: "   \n")
+
+        #expect(session.activeTitle == "Untitled")
+    }
+
     @Test("Deleting the final scratchpad creates a blank replacement")
     func deletingLastCreatesReplacement() {
         let scratchpad = Scratchpad(title: "Only")
@@ -134,6 +196,32 @@ struct ScratchpadSessionTests {
         #expect(store.scratchpads.count == 1)
     }
 
+    @Test("Deleting a background scratchpad preserves the active selection")
+    func deletingBackgroundScratchpadPreservesSelection() {
+        let active = Scratchpad(title: "Active")
+        let background = Scratchpad(title: "Background")
+        let store = RecordingScratchpadStore([active, background])
+        let session = makeSession(store: store)
+
+        session.deleteScratchpad(id: background.id)
+
+        #expect(session.activeScratchpadID == active.id)
+        #expect(session.scratchpads.map(\.id) == [active.id])
+    }
+
+    @Test("A failed deletion leaves the scratchpad available")
+    func deleteFailurePreservesScratchpad() {
+        let scratchpad = Scratchpad(title: "Keep")
+        let store = RecordingScratchpadStore([scratchpad])
+        let session = makeSession(store: store)
+        store.failsOnDelete = true
+
+        session.deleteScratchpad(id: scratchpad.id)
+
+        #expect(session.scratchpads.map(\.id) == [scratchpad.id])
+        #expect(session.persistenceError != nil)
+    }
+
     @Test("Persistence failures keep the current text visible")
     func saveFailurePreservesText() {
         let scratchpad = Scratchpad()
@@ -146,6 +234,32 @@ struct ScratchpadSessionTests {
 
         #expect(session.text == "Keep this in memory")
         #expect(session.persistenceError != nil)
+    }
+
+    @Test("A restore failure creates a usable in-memory scratchpad")
+    func restoreFailureCreatesFallback() {
+        let store = RecordingScratchpadStore()
+        store.failsOnLoad = true
+
+        let session = makeSession(store: store)
+
+        #expect(session.scratchpads.count == 1)
+        #expect(session.text.isEmpty)
+        #expect(session.persistenceError != nil)
+    }
+
+    @Test("A one-megabyte scratchpad remains intact")
+    func largeScratchpadRemainsIntact() {
+        let scratchpad = Scratchpad()
+        let store = RecordingScratchpadStore([scratchpad])
+        let session = makeSession(store: store)
+        let largeText = String(repeating: "A thought worth keeping. ", count: 45_000)
+
+        session.text = largeText
+        session.flush()
+
+        #expect(session.text == largeText)
+        #expect(store.scratchpads.first?.text == largeText)
     }
 
     private func makeSession(
@@ -173,14 +287,17 @@ private final class MemorySelectionStore: ScratchpadSelectionStoring {
 private final class RecordingScratchpadStore: ScratchpadStoring {
     var scratchpads: [Scratchpad]
     var saveCount = 0
+    var failsOnLoad = false
     var failsOnSave = false
+    var failsOnDelete = false
 
     init(_ scratchpads: [Scratchpad] = []) {
         self.scratchpads = scratchpads
     }
 
     func loadScratchpads() throws -> [Scratchpad] {
-        scratchpads
+        if failsOnLoad { throw ScratchpadStoreError.unavailable }
+        return scratchpads
     }
 
     func save(_ scratchpad: Scratchpad) throws {
@@ -194,7 +311,7 @@ private final class RecordingScratchpadStore: ScratchpadStoring {
     }
 
     func deleteScratchpad(id: String) throws {
-        if failsOnSave { throw ScratchpadStoreError.unavailable }
+        if failsOnDelete { throw ScratchpadStoreError.unavailable }
         scratchpads.removeAll { $0.id == id }
     }
 

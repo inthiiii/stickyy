@@ -49,6 +49,7 @@ struct ScratchpadView: View {
             .buttonStyle(.plain)
             .help("Scratchpads")
             .accessibilityLabel("Scratchpads")
+            .accessibilityHint("Show all scratchpads")
             .accessibilityIdentifier("scratchpadLibrary")
             .popover(isPresented: $showsLibrary, arrowEdge: .bottom) {
                 ScratchpadLibraryView(session: session) {
