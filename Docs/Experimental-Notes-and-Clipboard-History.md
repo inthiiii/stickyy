@@ -22,9 +22,22 @@ most recent distinct entries in memory. It supports:
 - PNG and TIFF images
 - One or more file URLs copied together
 
-Each entry appears as a compact pill below the editor in a vertically scrollable
-list. Selecting a pill places that entry back on the clipboard and moves it to
-the front of the history.
+Each entry appears as a compact, floating pill in a horizontally scrollable
+shelf below the scratchpad. The shelf is visually separate from the note so the
+main editor keeps its original minimal size and layout. Image entries include a
+small circular preview and their file name when one is available.
+
+Text entries have a Paste button that inserts their contents at the current
+editor selection. The five newest entries can also be pasted with Command-1
+through Command-5. Selecting the main part of any pill restores that entry to
+the system clipboard and moves it to the front of the history. Text pills use
+simple contextual icons for links, email addresses, and phone numbers.
+
+Use the trash button at the end of the shelf to clear all five entries without
+changing the current system clipboard. Clipboard History can be turned off in
+Stickyy Settings whenever a distraction-free scratchpad is preferred. Turning
+it off immediately clears the temporary history and hides the shelf; turning it
+back on resumes monitoring new clipboard changes.
 
 Clipboard history is intentionally temporary in this experiment. It is not
 written to Stickyy's scratchpad store, synced, or restored after the app quits.

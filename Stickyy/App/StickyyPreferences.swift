@@ -2,8 +2,23 @@ import Foundation
 
 enum StickyyPreferences {
     static let usesLiquidGlass = "usesLiquidGlass"
+    static let usesClipboardHistory = "usesClipboardHistory"
     static let globalShortcut = "globalShortcut"
     static let selectedScratchpadID = "selectedScratchpadID"
+
+    static func clipboardHistoryEnabled(
+        in defaults: UserDefaults = .standard
+    ) -> Bool {
+        defaults.object(forKey: usesClipboardHistory) == nil
+            ? true
+            : defaults.bool(forKey: usesClipboardHistory)
+    }
+}
+
+extension Notification.Name {
+    static let clipboardHistoryPreferenceDidChange = Notification.Name(
+        "Stickyy.clipboardHistoryPreferenceDidChange"
+    )
 }
 
 @MainActor

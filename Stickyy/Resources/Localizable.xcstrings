@@ -19,10 +19,22 @@
     "Clipboard" : {
       "extractionState" : "manual"
     },
+    "Clipboard History" : {
+      "extractionState" : "manual"
+    },
     "Clipboard files: %@" : {
       "extractionState" : "manual"
     },
+    "Clipboard image: %@" : {
+      "extractionState" : "manual"
+    },
     "Clipboard image" : {
+      "extractionState" : "manual"
+    },
+    "Clipboard is ready" : {
+      "extractionState" : "manual"
+    },
+    "Clipboard monitoring is off and the scratchpad stays completely minimal." : {
       "extractionState" : "manual"
     },
     "Clipboard text: %@" : {
@@ -34,7 +46,13 @@
     "Copy this item again" : {
       "extractionState" : "manual"
     },
+    "Copied Image" : {
+      "extractionState" : "manual"
+    },
     "Copies this item back to the clipboard" : {
+      "extractionState" : "manual"
+    },
+    "Clear Clipboard History" : {
       "extractionState" : "manual"
     },
     "Delete Scratchpad" : {
@@ -88,6 +106,12 @@
     "Pinned" : {
       "extractionState" : "manual"
     },
+    "Paste" : {
+      "extractionState" : "manual"
+    },
+    "Paste into Stickyy" : {
+      "extractionState" : "manual"
+    },
     "Quit Stickyy" : {
       "extractionState" : "manual"
     },
@@ -128,6 +152,9 @@
       "extractionState" : "manual"
     },
     "Show all scratchpads" : {
+      "extractionState" : "manual"
+    },
+    "Shows the five latest clipboard items in a floating shelf below Stickyy." : {
       "extractionState" : "manual"
     },
     "Start typing…" : {

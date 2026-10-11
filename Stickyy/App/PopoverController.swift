@@ -5,12 +5,17 @@ import SwiftUI
 final class PopoverController: NSObject, NSPopoverDelegate {
     private let popover: NSPopover
     private let session: ScratchpadSession
+    private let clipboardShelfController: ClipboardShelfController
 
     init(
         session: ScratchpadSession,
         clipboardHistory: ClipboardHistoryController
     ) {
         self.session = session
+        clipboardShelfController = ClipboardShelfController(
+            history: clipboardHistory,
+            session: session
+        )
         popover = NSPopover()
         super.init()
 
@@ -55,15 +60,20 @@ final class PopoverController: NSObject, NSPopoverDelegate {
             of: button,
             preferredEdge: .minY
         )
+        if let popoverWindow = popover.contentViewController?.view.window {
+            clipboardShelfController.show(relativeTo: popoverWindow)
+        }
         NSApp.activate()
         session.requestEditorFocus()
     }
 
     func close() {
+        clipboardShelfController.hide()
         popover.performClose(nil)
     }
 
     func popoverDidClose(_ notification: Notification) {
+        clipboardShelfController.hide()
         session.flush()
     }
 }

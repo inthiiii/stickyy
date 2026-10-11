@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 struct ScratchpadView: View {
@@ -31,8 +32,6 @@ struct ScratchpadView: View {
             }
 
             editor
-            Divider()
-            ClipboardHistoryView(history: clipboardHistory)
         }
         .frame(
             width: StickyyMetrics.popoverWidth,
@@ -95,6 +94,8 @@ struct ScratchpadView: View {
             ScratchpadEditor(
                 text: $session.text,
                 focusRequest: session.editorFocusRequest,
+                insertionRequest: session.pendingTextInsertion,
+                onQuickPaste: quickPaste,
                 onEscape: onDismiss
             )
             .accessibilityLabel("Scratchpad")
@@ -110,5 +111,24 @@ struct ScratchpadView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private func quickPaste(_ index: Int) {
+        guard let item = clipboardHistory.item(at: index) else {
+            NSSound.beep()
+            return
+        }
+
+        switch item.content {
+        case .text(let text):
+            session.insertIntoEditor(text)
+        case .files(let urls):
+            session.insertIntoEditor(
+                urls.map(\.path).joined(separator: "\n")
+            )
+        case .image:
+            clipboardHistory.restore(item)
+            NSSound.beep()
+        }
     }
 }

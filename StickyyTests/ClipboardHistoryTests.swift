@@ -117,6 +117,60 @@ struct ClipboardHistoryTests {
         #expect(restored == urls)
     }
 
+    @Test("Clearing history removes every item without changing the clipboard")
+    func clearsHistory() {
+        let pasteboard = makePasteboard()
+        let history = ClipboardHistoryController(
+            pasteboard: pasteboard,
+            monitoringEnabled: false
+        )
+        pasteboard.clearContents()
+        #expect(pasteboard.setString("Keep on clipboard", forType: .string))
+        history.captureIfChanged()
+
+        history.clearHistory()
+
+        #expect(history.items.isEmpty)
+        #expect(pasteboard.string(forType: .string) == "Keep on clipboard")
+    }
+
+    @Test("Disabling clipboard history clears it and pauses capture")
+    func disablesAndReenablesHistory() {
+        let pasteboard = makePasteboard()
+        let history = ClipboardHistoryController(
+            pasteboard: pasteboard,
+            monitoringEnabled: false
+        )
+        pasteboard.clearContents()
+        #expect(pasteboard.setString("Before", forType: .string))
+        history.captureIfChanged()
+
+        history.setEnabled(false)
+        pasteboard.clearContents()
+        #expect(pasteboard.setString("While disabled", forType: .string))
+        history.captureIfChanged()
+
+        #expect(history.items.isEmpty)
+
+        history.setEnabled(true)
+        history.captureIfChanged()
+        #expect(text(from: history.items[0]) == "While disabled")
+    }
+
+    @Test("Smart clipboard labels recognize common text types")
+    func detectsTextKind() {
+        #expect(
+            ClipboardTextKind.detect(in: "https://example.com/path") == .link
+        )
+        #expect(
+            ClipboardTextKind.detect(in: "hello@example.com") == .email
+        )
+        #expect(
+            ClipboardTextKind.detect(in: "+1 (415) 555-0123") == .phone
+        )
+        #expect(ClipboardTextKind.detect(in: "A normal thought") == .text)
+    }
+
     private func makePasteboard() -> NSPasteboard {
         NSPasteboard(name: .init("StickyyTests.\(UUID().uuidString)"))
     }

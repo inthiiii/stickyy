@@ -46,10 +46,39 @@ final class StickyyUITests: XCTestCase {
         let notesExport = app.buttons["exportToAppleNotes"]
         XCTAssertTrue(notesExport.exists)
         XCTAssertFalse(notesExport.isEnabled)
-        XCTAssertTrue(app.staticTexts["Clipboard"].exists)
+        XCTAssertTrue(
+            app.descendants(matching: .any)["clipboardShelf"]
+                .waitForExistence(timeout: 2)
+        )
 
         editor.typeText("Send this thought to Notes")
         XCTAssertTrue(notesExport.isEnabled)
+    }
+
+    @MainActor
+    func testClipboardPasteButtonAndKeyboardShortcutInsertText() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-reset-persistence",
+            "--ui-testing-clipboard-text",
+            "A clipboard thought",
+            "--ui-testing-open-scratchpad",
+        ]
+        app.launch()
+
+        let editor = app.textViews["scratchpadEditor"]
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+
+        let pasteButton = app.buttons["pasteClipboardText_1"]
+        XCTAssertTrue(pasteButton.waitForExistence(timeout: 2))
+        pasteButton.click()
+        XCTAssertEqual(editor.value as? String, "A clipboard thought")
+
+        editor.click()
+        editor.typeKey("a", modifierFlags: .command)
+        editor.typeKey(.delete, modifierFlags: [])
+        editor.typeKey("1", modifierFlags: .command)
+        XCTAssertEqual(editor.value as? String, "A clipboard thought")
     }
 
     @MainActor
@@ -200,6 +229,9 @@ final class StickyyUITests: XCTestCase {
         )
         XCTAssertTrue(
             app.descendants(matching: .any)["liquidGlassToggle"].exists
+        )
+        XCTAssertTrue(
+            app.descendants(matching: .any)["clipboardHistoryToggle"].exists
         )
     }
 

@@ -1,6 +1,11 @@
 import Foundation
 import Observation
 
+struct ScratchpadTextInsertion: Equatable {
+    let id = UUID()
+    let text: String
+}
+
 @MainActor
 @Observable
 final class ScratchpadSession {
@@ -36,6 +41,7 @@ final class ScratchpadSession {
     }
 
     private(set) var editorFocusRequest = 0
+    private(set) var pendingTextInsertion: ScratchpadTextInsertion?
     private(set) var persistenceError: String?
 
     @ObservationIgnored
@@ -86,6 +92,12 @@ final class ScratchpadSession {
 
     func requestEditorFocus() {
         editorFocusRequest &+= 1
+    }
+
+    func insertIntoEditor(_ text: String) {
+        guard !text.isEmpty else { return }
+        pendingTextInsertion = ScratchpadTextInsertion(text: text)
+        requestEditorFocus()
     }
 
     @discardableResult

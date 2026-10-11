@@ -38,6 +38,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                     forKey: StickyyPreferences.usesLiquidGlass
                 )
                 UserDefaults.standard.removeObject(
+                    forKey: StickyyPreferences.usesClipboardHistory
+                )
+                UserDefaults.standard.removeObject(
                     forKey: StickyyPreferences.globalShortcut
                 )
             } catch {
@@ -50,7 +53,24 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         #endif
 
         let session = ScratchpadSession(store: store)
+        #if DEBUG
+        let clipboardTestText: String? = if let argumentIndex =
+            CommandLine.arguments.firstIndex(
+            of: "--ui-testing-clipboard-text"
+        ), CommandLine.arguments.indices.contains(argumentIndex + 1) {
+            CommandLine.arguments[argumentIndex + 1]
+        } else {
+            nil
+        }
+        let clipboardHistoryController = ClipboardHistoryController(
+            monitoringEnabled: clipboardTestText == nil
+        )
+        if let clipboardTestText {
+            clipboardHistoryController.seedForUITesting(text: clipboardTestText)
+        }
+        #else
         let clipboardHistoryController = ClipboardHistoryController()
+        #endif
         let popoverController = PopoverController(
             session: session,
             clipboardHistory: clipboardHistoryController

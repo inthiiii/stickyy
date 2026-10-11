@@ -20,6 +20,9 @@ private struct StickyySettingsView: View {
     @AppStorage(StickyyPreferences.globalShortcut)
     private var shortcut = GlobalShortcutChoice.defaultChoice.rawValue
 
+    @AppStorage(StickyyPreferences.usesClipboardHistory)
+    private var usesClipboardHistory = true
+
     @State private var launchesAtLogin = SMAppService.mainApp.status == .enabled
     @State private var loginItemMessage: String?
 
@@ -45,6 +48,22 @@ private struct StickyySettingsView: View {
                 .accessibilityIdentifier("globalShortcutPicker")
             }
 
+            Section("Clipboard") {
+                Toggle("Clipboard History", isOn: $usesClipboardHistory)
+                    .accessibilityIdentifier("clipboardHistoryToggle")
+                Text(
+                    usesClipboardHistory
+                        ? String(
+                            localized: "Shows the five latest clipboard items in a floating shelf below Stickyy."
+                        )
+                        : String(
+                            localized: "Clipboard monitoring is off and the scratchpad stays completely minimal."
+                        )
+                )
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
+
             Section("Appearance") {
                 Toggle("Use Liquid Glass", isOn: $usesLiquidGlass)
                     .accessibilityIdentifier("liquidGlassToggle")
@@ -63,9 +82,15 @@ private struct StickyySettingsView: View {
         }
         .formStyle(.grouped)
         .padding(6)
-        .frame(width: 430, height: 300)
+        .frame(width: 430, height: 390)
         .navigationTitle("Stickyy Settings")
         .onAppear { refreshLoginItemState() }
+        .onChange(of: usesClipboardHistory) {
+            NotificationCenter.default.post(
+                name: .clipboardHistoryPreferenceDidChange,
+                object: nil
+            )
+        }
     }
 
     private var launchAtLoginBinding: Binding<Bool> {

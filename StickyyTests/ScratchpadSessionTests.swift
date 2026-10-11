@@ -14,6 +14,17 @@ struct ScratchpadSessionTests {
         #expect(store.scratchpads.count == 1)
     }
 
+    @Test("Clipboard paste requests focus the editor with exact text")
+    func requestsClipboardInsertion() {
+        let session = makeSession(store: RecordingScratchpadStore())
+        let previousFocusRequest = session.editorFocusRequest
+
+        session.insertIntoEditor("Pasted thought")
+
+        #expect(session.pendingTextInsertion?.text == "Pasted thought")
+        #expect(session.editorFocusRequest == previousFocusRequest + 1)
+    }
+
     @Test("The remembered scratchpad becomes active")
     func restoresSelection() {
         let first = Scratchpad(title: "First", text: "One")
