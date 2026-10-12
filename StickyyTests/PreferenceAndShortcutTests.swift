@@ -19,10 +19,10 @@ struct PreferenceAndShortcutTests {
         #expect(store.selectedScratchpadID == nil)
     }
 
-    @Test("The default shortcut is Command-Option-Space")
+    @Test("The default shortcut is Control-Option-Space")
     func defaultShortcut() {
         #expect(GlobalShortcut.defaultShortcut.keyCode == UInt32(kVK_Space))
-        #expect(GlobalShortcut.defaultShortcut.modifiers == UInt32(cmdKey | optionKey))
+        #expect(GlobalShortcut.defaultShortcut.modifiers == UInt32(controlKey | optionKey))
     }
 
     @Test("Custom shortcuts round-trip through preference storage")

@@ -43,7 +43,7 @@ private struct StickyySettingsView: View {
                     ShortcutRecorderView(storageValue: $shortcut)
                         .frame(width: 150, height: 24)
                 }
-                Text("Click the shortcut, then press your preferred key combination. The default is ⌘⌥Space.")
+                Text("Click the shortcut, then press your preferred key combination. The default is ⌃⌥Space.")
                     .font(.caption).foregroundStyle(.secondary)
             }
 

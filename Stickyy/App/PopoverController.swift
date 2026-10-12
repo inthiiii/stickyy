@@ -9,6 +9,8 @@ final class PopoverController: NSObject, NSPopoverDelegate {
     private weak var anchorWindow: NSWindow?
     private var localMouseMonitor: Any?
     private var globalMouseMonitor: Any?
+    private var sharingStateObserver: NSObjectProtocol?
+    private var isSharing = false
 
     init(
         session: ScratchpadSession,
@@ -50,6 +52,20 @@ final class PopoverController: NSObject, NSPopoverDelegate {
             name: NSWorkspace.didActivateApplicationNotification,
             object: nil
         )
+        sharingStateObserver = NotificationCenter.default.addObserver(
+            forName: .sharingPickerStateDidChange,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            let isSharing = notification.object as? Bool ?? false
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                self.isSharing = isSharing
+                if !self.isSharing, !NSApp.isActive, self.popover.isShown {
+                    self.close()
+                }
+            }
+        }
     }
 
     var isShown: Bool {
@@ -113,7 +129,8 @@ final class PopoverController: NSObject, NSPopoverDelegate {
                 matching: [.leftMouseDown, .rightMouseDown]
             ) { [weak self] _ in
                 Task { @MainActor [weak self] in
-                    self?.close()
+                    guard let self, !self.isSharing else { return }
+                    self.close()
                 }
             }
         }
@@ -132,6 +149,7 @@ final class PopoverController: NSObject, NSPopoverDelegate {
     }
 
     private func dismissIfNeeded(for event: NSEvent) {
+        guard !isSharing else { return }
         guard let eventWindow = event.window else {
             close()
             return
@@ -150,7 +168,7 @@ final class PopoverController: NSObject, NSPopoverDelegate {
     }
 
     @objc private func applicationDidResignActive() {
-        guard popover.isShown else { return }
+        guard popover.isShown, !isSharing else { return }
         close()
     }
 
@@ -158,6 +176,7 @@ final class PopoverController: NSObject, NSPopoverDelegate {
         _ notification: Notification
     ) {
         guard popover.isShown,
+              !isSharing,
               let application = notification.userInfo?[
                   NSWorkspace.applicationUserInfoKey
               ] as? NSRunningApplication,

@@ -56,6 +56,27 @@ final class StickyyUITests: XCTestCase {
     }
 
     @MainActor
+    func testExportOpensNativeShareDestinations() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-reset-persistence",
+            "--ui-testing-open-scratchpad",
+        ]
+        app.launch()
+
+        let editor = app.textViews["scratchpadEditor"]
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+        editor.typeText("Share this thought")
+
+        app.buttons["exportToAppleNotes"].click()
+        let messages = app.menuItems["Messages"]
+        let notes = app.menuItems["Add to Notes"]
+        XCTAssertTrue(messages.waitForExistence(timeout: 2) || notes.exists)
+        app.typeKey(.escape, modifierFlags: [])
+        XCTAssertTrue(editor.exists)
+    }
+
+    @MainActor
     func testThreeHyphensCreateDivider() {
         let app = XCUIApplication()
         app.launchArguments = [
@@ -301,6 +322,21 @@ final class StickyyUITests: XCTestCase {
     }
 
     @MainActor
+    func testCustomShortcutRecorderCapturesKeys() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-testing-reset-persistence"]
+        app.launch()
+        app.typeKey(",", modifierFlags: .command)
+
+        let recorder = app.buttons["globalShortcutRecorder"]
+        XCTAssertTrue(recorder.waitForExistence(timeout: 5))
+        recorder.click()
+        app.typeKey("k", modifierFlags: [.control, .option])
+
+        XCTAssertEqual(recorder.value as? String, "⌃⌥K")
+    }
+
+    @MainActor
     func testDefaultGlobalShortcutOpensScratchpad() async {
         let app = XCUIApplication()
         app.launchArguments = ["--ui-testing-reset-persistence"]
@@ -309,11 +345,11 @@ final class StickyyUITests: XCTestCase {
         // Carbon can briefly retain the previous UI-test process's hot-key
         // registration while repeated app launches are settling.
         try? await Task.sleep(for: .milliseconds(500))
-        app.typeKey(.space, modifierFlags: [.command, .option])
+        app.typeKey(.space, modifierFlags: [.control, .option])
 
         let editor = app.textViews["scratchpadEditor"]
         if !editor.waitForExistence(timeout: 2) {
-            app.typeKey(.space, modifierFlags: [.command, .option])
+            app.typeKey(.space, modifierFlags: [.control, .option])
         }
         XCTAssertTrue(editor.waitForExistence(timeout: 5))
     }

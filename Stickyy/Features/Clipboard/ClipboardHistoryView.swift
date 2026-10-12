@@ -34,7 +34,7 @@ struct ClipboardHistoryView: View {
                 } label: {
                     Image(systemName: "trash")
                         .font(.caption)
-                        .frame(width: 26, height: 26)
+                        .frame(width: 28, height: 28)
                 }
                 .buttonStyle(.plain)
                 .stickyyPillSurface(Circle())
@@ -47,6 +47,7 @@ struct ClipboardHistoryView: View {
                 .accessibilityIdentifier("clearClipboardHistory")
             }
         }
+        .padding(.trailing, 7)
         .frame(
             width: StickyyMetrics.popoverWidth,
             height: StickyyMetrics.clipboardShelfHeight

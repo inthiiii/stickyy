@@ -53,7 +53,7 @@ private struct OnboardingView: View {
         OnboardingPage(
             icon: "sparkles", eyebrow: "WELCOME TO STICKYY",
             title: "Catch it before it fades.",
-            detail: "A calm scratchpad that lives in your menu bar. Open it from anywhere with ⌘⌥Space.",
+            detail: "A calm scratchpad that lives in your menu bar. Open it from anywhere with ⌃⌥Space.",
             accent: .orange
         ),
         OnboardingPage(

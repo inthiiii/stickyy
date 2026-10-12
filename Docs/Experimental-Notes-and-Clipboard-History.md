@@ -49,7 +49,7 @@ the scratchpad and uses the same opening animation.
 
 ## Additional experiment features
 
-- A recordable keyboard shortcut with Command–Option–Space as the default
+- A recordable keyboard shortcut with Control–Option–Space as the default
 - `---` expands into a visual divider in the editor
 - Pasted images and files appear as compact attachment previews with a Show in
   Finder action

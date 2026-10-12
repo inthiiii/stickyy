@@ -19,9 +19,11 @@ struct NativeShareButton: NSViewRepresentable {
 }
 
 @MainActor
-final class NativeShareControl: NSButton, NSSharingServicePickerDelegate {
+final class NativeShareControl: NSButton, NSSharingServiceDelegate {
     var shareText = ""
-    private var picker: NSSharingServicePicker?
+    private var services: [NSSharingService] = []
+    private var activeService: NSSharingService?
+    private var isPerformingShare = false
 
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
@@ -38,9 +40,74 @@ final class NativeShareControl: NSButton, NSSharingServicePickerDelegate {
 
     @objc private func showSharingPicker() {
         guard !shareText.isEmpty else { return }
-        let picker = NSSharingServicePicker(items: [shareText])
-        picker.delegate = self
-        self.picker = picker
-        picker.show(relativeTo: bounds, of: self, preferredEdge: .minY)
+        setSharingActive(true)
+        isPerformingShare = false
+        services = NSSharingService.sharingServices(forItems: [shareText])
+
+        let menu = NSMenu(title: String(localized: "Share"))
+        for (index, service) in services.enumerated() {
+            let item = NSMenuItem(
+                title: service.title,
+                action: #selector(performShare(_:)),
+                keyEquivalent: ""
+            )
+            item.target = self
+            item.tag = index
+            item.image = service.image
+            menu.addItem(item)
+        }
+
+        if menu.items.isEmpty {
+            let unavailable = NSMenuItem(title: String(localized: "No Sharing Services Available"), action: nil, keyEquivalent: "")
+            unavailable.isEnabled = false
+            menu.addItem(unavailable)
+        }
+
+        menu.popUp(
+            positioning: nil,
+            at: NSPoint(x: 0, y: bounds.height + 4),
+            in: self
+        )
+        if !isPerformingShare { setSharingActive(false) }
+    }
+
+    @objc private func performShare(_ sender: NSMenuItem) {
+        guard services.indices.contains(sender.tag) else { return }
+        let service = services[sender.tag]
+        guard service.canPerform(withItems: [shareText]) else { return }
+        isPerformingShare = true
+        activeService = service
+        service.delegate = self
+        service.perform(withItems: [shareText])
+    }
+
+    func sharingService(
+        _ sharingService: NSSharingService,
+        didShareItems items: [Any]
+    ) {
+        finishSharing()
+    }
+
+    func sharingService(
+        _ sharingService: NSSharingService,
+        didFailToShareItems items: [Any],
+        error: any Error
+    ) {
+        finishSharing()
+        NSAlert(error: error).runModal()
+    }
+
+    private func finishSharing() {
+        isPerformingShare = false
+        activeService = nil
+        services = []
+        setSharingActive(false)
+    }
+
+    private func setSharingActive(_ isActive: Bool) {
+        NotificationCenter.default.post(
+            name: .sharingPickerStateDidChange,
+            object: isActive
+        )
     }
 }

@@ -20,6 +20,9 @@ extension Notification.Name {
     static let globalShortcutPreferenceDidChange = Notification.Name(
         "Stickyy.globalShortcutPreferenceDidChange"
     )
+    static let globalShortcutRecordingDidBegin = Notification.Name("Stickyy.globalShortcutRecordingDidBegin")
+    static let globalShortcutRecordingDidEnd = Notification.Name("Stickyy.globalShortcutRecordingDidEnd")
+    static let sharingPickerStateDidChange = Notification.Name("Stickyy.sharingPickerStateDidChange")
     static let clipboardHistoryPreferenceDidChange = Notification.Name(
         "Stickyy.clipboardHistoryPreferenceDidChange"
     )

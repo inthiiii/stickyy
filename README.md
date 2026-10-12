@@ -22,7 +22,7 @@ Phase 6 hardens the complete local-first scratchpad with automated quality, reco
 - Multiple independent scratchpads with remembered selection
 - Create, rename, pin, search, and delete workflows
 - Destructive delete confirmation and automatic blank-note replacement
-- Recordable global keyboard shortcut (Command–Option–Space by default)
+- Recordable global keyboard shortcut (Control–Option–Space by default)
 - Optional launch at login
 - A real Settings window available from the menu-bar context menu
 - Original minimal material appearance by default
@@ -54,7 +54,7 @@ Phase 6 hardens the complete local-first scratchpad with automated quality, reco
 6. Click the note icon inside the scratchpad to open the scratchpad library.
 7. Right-click the menu-bar icon to open Settings or quit.
 
-The default global shortcut is **Command–Option–Space**. Click its recorder in Settings and press any preferred modified key combination to change it.
+The default global shortcut is **Control–Option–Space**. Click its recorder in Settings and press any preferred modified key combination to change it.
 
 ## Testing
 

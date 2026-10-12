@@ -26,6 +26,7 @@ final class ShortcutRecorderControl: NSButton {
     var shortcut = GlobalShortcut.defaultShortcut { didSet { refreshTitle() } }
     var onShortcut: (GlobalShortcut) -> Void = { _ in }
     private(set) var isRecording = false
+    private var keyMonitor: Any?
 
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
@@ -41,29 +42,57 @@ final class ShortcutRecorderControl: NSButton {
     override var acceptsFirstResponder: Bool { true }
 
     @objc private func beginRecording() {
+        if isRecording {
+            stopRecording()
+            return
+        }
         isRecording = true
         title = String(localized: "Press shortcut…")
         window?.makeFirstResponder(self)
+        NotificationCenter.default.post(name: .globalShortcutRecordingDidBegin, object: nil)
+        keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            let keyCode = UInt32(event.keyCode)
+            let modifiers = GlobalShortcut.carbonModifiers(from: event.modifierFlags)
+            let handled = MainActor.assumeIsolated {
+                self?.record(keyCode: keyCode, modifiers: modifiers) ?? false
+            }
+            return handled ? nil : event
+        }
     }
 
     override func keyDown(with event: NSEvent) {
         guard isRecording else { super.keyDown(with: event); return }
-        if event.keyCode == UInt16(kVK_Escape) { isRecording = false; refreshTitle(); return }
-        let modifiers = GlobalShortcut.carbonModifiers(from: event.modifierFlags)
-        guard modifiers != 0 else {
+        _ = record(keyCode: UInt32(event.keyCode), modifiers: GlobalShortcut.carbonModifiers(from: event.modifierFlags))
+    }
+
+    private func record(keyCode: UInt32, modifiers: UInt32) -> Bool {
+        guard isRecording else { return false }
+        if keyCode == UInt32(kVK_Escape) { stopRecording(); return true }
+        guard modifiers & ~UInt32(shiftKey) != 0 else {
             NSSound.beep()
-            title = String(localized: "Include ⌘, ⌥, ⌃, or ⇧")
-            return
+            title = String(localized: "Include ⌘, ⌥, or ⌃")
+            return true
         }
-        shortcut = GlobalShortcut(keyCode: UInt32(event.keyCode), modifiers: modifiers)
-        isRecording = false
+        shortcut = GlobalShortcut(keyCode: keyCode, modifiers: modifiers)
         onShortcut(shortcut)
+        stopRecording()
+        return true
     }
 
     override func resignFirstResponder() -> Bool {
-        isRecording = false
-        refreshTitle()
+        if isRecording { stopRecording() }
         return super.resignFirstResponder()
+    }
+
+    private func stopRecording() {
+        guard isRecording else { return }
+        isRecording = false
+        if let keyMonitor {
+            NSEvent.removeMonitor(keyMonitor)
+            self.keyMonitor = nil
+        }
+        refreshTitle()
+        NotificationCenter.default.post(name: .globalShortcutRecordingDidEnd, object: nil)
     }
 
     private func refreshTitle() {

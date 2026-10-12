@@ -96,28 +96,14 @@ final class ClipboardShelfController {
             panel.parent?.removeChildWindow(panel)
             parentWindow.addChildWindow(panel, ordered: .above)
         }
-        if isNewlyShown,
-           !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion {
-            panel.alphaValue = 0
-            panel.setFrame(
-                targetFrame.insetBy(dx: 10, dy: 0).offsetBy(dx: 0, dy: 8),
-                display: false
-            )
-            panel.orderFront(nil)
-            NSAnimationContext.runAnimationGroup { context in
-                context.duration = 0.28
-                context.timingFunction = CAMediaTimingFunction(controlPoints: 0.2, 0.9, 0.25, 1.15)
-                panel.animator().alphaValue = 1
-                panel.animator().setFrame(targetFrame, display: true)
-            }
-        } else {
-            panel.alphaValue = 1
-            panel.setFrame(targetFrame, display: true)
-            panel.orderFront(nil)
-        }
+        panel.setFrame(targetFrame, display: true)
+        panel.orderFront(nil)
+        if isNewlyShown { animateOpening() }
     }
 
     func hide() {
+        panel.contentView?.layer?.removeAllAnimations()
+        panel.alphaValue = 1
         panel.parent?.removeChildWindow(panel)
         panel.orderOut(nil)
         parentWindow = nil
@@ -125,5 +111,30 @@ final class ClipboardShelfController {
 
     func owns(_ window: NSWindow?) -> Bool {
         panel === window
+    }
+
+    private func animateOpening() {
+        guard !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion,
+              let view = panel.contentView else { return }
+        view.wantsLayer = true
+        guard let layer = view.layer else { return }
+        layer.removeAllAnimations()
+
+        let spring = CASpringAnimation(keyPath: "transform")
+        spring.fromValue = CATransform3DMakeScale(0.88, 0.88, 1)
+        spring.toValue = CATransform3DIdentity
+        spring.mass = 1
+        spring.stiffness = 250
+        spring.damping = 18
+        spring.initialVelocity = 0.5
+        spring.duration = min(spring.settlingDuration, 0.42)
+
+        let fade = CABasicAnimation(keyPath: "opacity")
+        fade.fromValue = 0
+        fade.toValue = 1
+        fade.duration = 0.16
+
+        layer.add(spring, forKey: "stickyy.open.spring")
+        layer.add(fade, forKey: "stickyy.open.fade")
     }
 }

@@ -1,4 +1,5 @@
 import AppKit
+import Carbon.HIToolbox
 import Darwin
 
 @MainActor
@@ -30,20 +31,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         #if DEBUG
         if CommandLine.arguments.contains("--ui-testing-reset-persistence") {
+            // Preferences are independent of the SwiftData store. Reset them
+            // first so a store cleanup failure cannot leak state between tests.
+            UserDefaults.standard.removeObject(
+                forKey: StickyyPreferences.selectedScratchpadID
+            )
+            UserDefaults.standard.removeObject(
+                forKey: StickyyPreferences.usesLiquidGlass
+            )
+            UserDefaults.standard.removeObject(
+                forKey: StickyyPreferences.usesClipboardHistory
+            )
+            UserDefaults.standard.removeObject(
+                forKey: StickyyPreferences.globalShortcut
+            )
             do {
                 try store.deleteAllScratchpads()
-                UserDefaults.standard.removeObject(
-                    forKey: StickyyPreferences.selectedScratchpadID
-                )
-                UserDefaults.standard.removeObject(
-                    forKey: StickyyPreferences.usesLiquidGlass
-                )
-                UserDefaults.standard.removeObject(
-                    forKey: StickyyPreferences.usesClipboardHistory
-                )
-                UserDefaults.standard.removeObject(
-                    forKey: StickyyPreferences.globalShortcut
-                )
             } catch {
                 NSLog(
                     "Stickyy UI-test persistence reset failed: %@",
@@ -88,6 +91,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         self.popoverController = popoverController
         self.statusItemController = statusItemController
         self.clipboardHistoryController = clipboardHistoryController
+
+        let previousDefault = GlobalShortcut(
+            keyCode: UInt32(kVK_Space),
+            modifiers: UInt32(cmdKey | optionKey)
+        ).storageValue
+        if UserDefaults.standard.string(forKey: StickyyPreferences.globalShortcut) == previousDefault {
+            UserDefaults.standard.set(
+                GlobalShortcut.defaultShortcut.storageValue,
+                forKey: StickyyPreferences.globalShortcut
+            )
+        }
         globalShortcutController = GlobalShortcutController {
             statusItemController.showScratchpad()
         }

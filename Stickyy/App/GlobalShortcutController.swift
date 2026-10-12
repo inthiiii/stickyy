@@ -6,7 +6,7 @@ struct GlobalShortcut: Equatable, Sendable {
     let modifiers: UInt32
 
     static let defaultShortcut = GlobalShortcut(
-        keyCode: UInt32(kVK_Space), modifiers: UInt32(cmdKey | optionKey)
+        keyCode: UInt32(kVK_Space), modifiers: UInt32(controlKey | optionKey)
     )
 
     var storageValue: String { "v1:\(keyCode):\(modifiers)" }
@@ -83,8 +83,8 @@ final class GlobalShortcutController: NSObject {
     private var hotKey: EventHotKeyRef?
     private var eventHandler: EventHandlerRef?
     private var localKeyMonitor: Any?
-    private var fallbackGlobalKeyMonitor: Any?
     private var currentShortcut = GlobalShortcut.defaultShortcut
+    private var isRecordingShortcut = false
     private let action: () -> Void
 
     init(action: @escaping () -> Void) {
@@ -95,11 +95,16 @@ final class GlobalShortcutController: NSObject {
             Unmanaged.passUnretained(self).toOpaque(), &eventHandler)
         NotificationCenter.default.addObserver(self, selector: #selector(preferencesDidChange),
             name: .globalShortcutPreferenceDidChange, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(shortcutRecordingDidBegin),
+            name: .globalShortcutRecordingDidBegin, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(shortcutRecordingDidEnd),
+            name: .globalShortcutRecordingDidEnd, object: nil)
         localKeyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
             let keyCode = UInt32(event.keyCode)
             let modifiers = GlobalShortcut.carbonModifiers(from: event.modifierFlags)
             let handled = MainActor.assumeIsolated {
-                guard let self, keyCode == self.currentShortcut.keyCode,
+                guard let self, !self.isRecordingShortcut,
+                      keyCode == self.currentShortcut.keyCode,
                       modifiers == self.currentShortcut.modifiers else { return false }
                 self.performAction()
                 return true
@@ -111,36 +116,31 @@ final class GlobalShortcutController: NSObject {
 
     func performAction() { action() }
     @objc private func preferencesDidChange() { registerCurrentShortcut() }
+    @objc private func shortcutRecordingDidBegin() {
+        isRecordingShortcut = true
+        unregisterShortcut()
+    }
+    @objc private func shortcutRecordingDidEnd() {
+        isRecordingShortcut = false
+        registerCurrentShortcut()
+    }
 
     private func registerCurrentShortcut() {
-        if let hotKey { UnregisterEventHotKey(hotKey); self.hotKey = nil }
+        unregisterShortcut()
+        guard !isRecordingShortcut else { return }
         let saved = UserDefaults.standard.string(forKey: StickyyPreferences.globalShortcut)
         let shortcut = saved.flatMap(GlobalShortcut.init(storageValue:)) ?? .defaultShortcut
         currentShortcut = shortcut
         let hotKeyID = EventHotKeyID(signature: 0x53544B59, id: 1)
         let status = RegisterEventHotKey(shortcut.keyCode, shortcut.modifiers, hotKeyID,
             GetApplicationEventTarget(), 0, &hotKey)
-        if status == noErr {
-            if let fallbackGlobalKeyMonitor {
-                NSEvent.removeMonitor(fallbackGlobalKeyMonitor)
-                self.fallbackGlobalKeyMonitor = nil
-            }
-        } else {
-            installFallbackMonitorIfNeeded()
-            NSLog("Stickyy is using its shortcut fallback because Carbon returned %d.", status)
-        }
+        if status != noErr { NSLog("Stickyy could not register its global shortcut (%d).", status) }
     }
 
-    private func installFallbackMonitorIfNeeded() {
-        guard fallbackGlobalKeyMonitor == nil else { return }
-        fallbackGlobalKeyMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
-            let keyCode = UInt32(event.keyCode)
-            let modifiers = GlobalShortcut.carbonModifiers(from: event.modifierFlags)
-            Task { @MainActor [weak self] in
-                guard let self, keyCode == self.currentShortcut.keyCode,
-                      modifiers == self.currentShortcut.modifiers else { return }
-                self.performAction()
-            }
+    private func unregisterShortcut() {
+        if let hotKey {
+            UnregisterEventHotKey(hotKey)
+            self.hotKey = nil
         }
     }
 }
