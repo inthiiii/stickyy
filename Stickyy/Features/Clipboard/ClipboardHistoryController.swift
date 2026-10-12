@@ -80,6 +80,7 @@ struct ClipboardHistoryItem: Identifiable, Equatable {
 final class ClipboardHistoryController {
     private(set) var items: [ClipboardHistoryItem] = []
     private(set) var isEnabled: Bool
+    private(set) var hasPasteableText = false
 
     @ObservationIgnored
     private let pasteboard: NSPasteboard
@@ -108,7 +109,7 @@ final class ClipboardHistoryController {
                 ? StickyyPreferences.clipboardHistoryEnabled()
                 : true)
         isEnabled = enabled
-        lastChangeCount = enabled ? -1 : pasteboard.changeCount
+        lastChangeCount = -1
 
         if monitoringEnabled {
             preferenceObserver = NotificationCenter.default.addObserver(
@@ -124,17 +125,21 @@ final class ClipboardHistoryController {
             }
         }
 
-        if enabled, monitoringEnabled {
+        if monitoringEnabled {
             startMonitoring()
         }
     }
 
     func captureIfChanged() {
-        guard isEnabled else { return }
         guard pasteboard.changeCount != lastChangeCount else { return }
         lastChangeCount = pasteboard.changeCount
-        guard let content = readCurrentContent() else { return }
-        record(content)
+        let content = readCurrentContent()
+        if case .text(let text) = content, !text.isEmpty {
+            hasPasteableText = true
+        } else {
+            hasPasteableText = false
+        }
+        if isEnabled, let content { record(content) }
     }
 
     @discardableResult
@@ -173,9 +178,6 @@ final class ClipboardHistoryController {
             lastChangeCount = -1
             startMonitoring()
         } else {
-            monitorTask?.cancel()
-            monitorTask = nil
-            lastChangeCount = pasteboard.changeCount
             clearHistory()
         }
 
@@ -212,6 +214,7 @@ final class ClipboardHistoryController {
         pasteboard.clearContents()
         _ = pasteboard.setString(text, forType: .string)
         lastChangeCount = pasteboard.changeCount
+        hasPasteableText = !text.isEmpty
         if isEnabled {
             record(.text(text))
         }

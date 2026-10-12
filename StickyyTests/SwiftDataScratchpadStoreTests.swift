@@ -87,6 +87,23 @@ struct SwiftDataScratchpadStoreTests {
         #expect(restored == scratchpad)
     }
 
+    @Test("SwiftData preserves scratchpad attachment metadata")
+    func preservesAttachments() throws {
+        let persistence = try PersistenceController(isStoredInMemoryOnly: true)
+        let attachment = ScratchpadAttachment(
+            id: UUID(),
+            kind: .image,
+            url: URL(fileURLWithPath: "/tmp/reference.png"),
+            displayName: "reference.png"
+        )
+        let scratchpad = Scratchpad(title: "With image", attachments: [attachment])
+
+        try persistence.scratchpadStore.save(scratchpad)
+        let restored = try #require(persistence.scratchpadStore.loadScratchpads().first)
+
+        #expect(restored.attachments == [attachment])
+    }
+
     @Test("SwiftData round-trips a one-megabyte note")
     func roundTripsLargeNote() throws {
         let persistence = try PersistenceController(isStoredInMemoryOnly: true)

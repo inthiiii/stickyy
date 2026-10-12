@@ -22,7 +22,7 @@ Phase 6 hardens the complete local-first scratchpad with automated quality, reco
 - Multiple independent scratchpads with remembered selection
 - Create, rename, pin, search, and delete workflows
 - Destructive delete confirmation and automatic blank-note replacement
-- Configurable global keyboard shortcut (Control–Option–Space by default)
+- Recordable global keyboard shortcut (Command–Option–Space by default)
 - Optional launch at login
 - A real Settings window available from the menu-bar context menu
 - Original minimal material appearance by default
@@ -30,7 +30,11 @@ Phase 6 hardens the complete local-first scratchpad with automated quality, reco
 - Adaptive semantic styling for Light Mode and Dark Mode
 - Solid, high-contrast fallback for Reduce Transparency
 - Escape and outside-click dismissal
-- 43 automated unit, storage, preference, performance, accessibility, and UI tests
+- Native Apple Notes sharing and optional five-item clipboard pills
+- Image/file attachment previews with Show in Finder links
+- Three-hyphen quick dividers
+- Interactive three-page welcome tour
+- 45+ automated unit, storage, preference, performance, accessibility, and UI tests
 - Forced-termination recovery coverage
 - Xcode static analysis plus Address Sanitizer and Thread Sanitizer validation
 - Release-build CPU, memory, and leak baselines
@@ -50,7 +54,7 @@ Phase 6 hardens the complete local-first scratchpad with automated quality, reco
 6. Click the note icon inside the scratchpad to open the scratchpad library.
 7. Right-click the menu-bar icon to open Settings or quit.
 
-The default global shortcut is **Control–Option–Space**. It can be changed or disabled in Settings.
+The default global shortcut is **Command–Option–Space**. Click its recorder in Settings and press any preferred modified key combination to change it.
 
 ## Testing
 

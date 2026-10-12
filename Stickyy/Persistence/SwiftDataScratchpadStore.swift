@@ -19,6 +19,7 @@ final class SwiftDataScratchpadStore: ScratchpadStoring {
                 title: record.title ?? legacyTitle(for: record),
                 text: record.text,
                 isPinned: record.isPinned ?? false,
+                attachments: decodeAttachments(record.attachmentsData),
                 createdAt: record.createdAt ?? record.updatedAt,
                 updatedAt: record.updatedAt
             )
@@ -30,6 +31,7 @@ final class SwiftDataScratchpadStore: ScratchpadStoring {
             record.title = scratchpad.title
             record.text = scratchpad.text
             record.isPinned = scratchpad.isPinned
+            record.attachmentsData = encodeAttachments(scratchpad.attachments)
             record.createdAt = scratchpad.createdAt
             record.updatedAt = scratchpad.updatedAt
         } else {
@@ -39,6 +41,7 @@ final class SwiftDataScratchpadStore: ScratchpadStoring {
                     title: scratchpad.title,
                     text: scratchpad.text,
                     isPinned: scratchpad.isPinned,
+                    attachmentsData: encodeAttachments(scratchpad.attachments),
                     createdAt: scratchpad.createdAt,
                     updatedAt: scratchpad.updatedAt
                 )
@@ -74,5 +77,14 @@ final class SwiftDataScratchpadStore: ScratchpadStoring {
         record.key == ScratchpadRecord.primaryKey
             ? String(localized: "Scratchpad")
             : String(localized: "Untitled")
+    }
+
+    private func encodeAttachments(_ attachments: [ScratchpadAttachment]) -> Data? {
+        try? JSONEncoder().encode(attachments)
+    }
+
+    private func decodeAttachments(_ data: Data?) -> [ScratchpadAttachment] {
+        guard let data else { return [] }
+        return (try? JSONDecoder().decode([ScratchpadAttachment].self, from: data)) ?? []
     }
 }

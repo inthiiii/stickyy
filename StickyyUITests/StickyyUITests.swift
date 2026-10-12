@@ -56,6 +56,24 @@ final class StickyyUITests: XCTestCase {
     }
 
     @MainActor
+    func testThreeHyphensCreateDivider() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-reset-persistence",
+            "--ui-testing-open-scratchpad",
+        ]
+        app.launch()
+
+        let editor = app.textViews["scratchpadEditor"]
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+        editor.typeText("---")
+
+        let value = editor.value as? String
+        XCTAssertTrue(value?.contains("────────────") == true)
+        XCTAssertFalse(value?.contains("---") == true)
+    }
+
+    @MainActor
     func testClipboardPasteButtonAndKeyboardShortcutInsertText() {
         let app = XCUIApplication()
         app.launchArguments = [
@@ -272,7 +290,7 @@ final class StickyyUITests: XCTestCase {
                 .waitForExistence(timeout: 5)
         )
         XCTAssertTrue(
-            app.descendants(matching: .any)["globalShortcutPicker"].exists
+            app.descendants(matching: .any)["globalShortcutRecorder"].exists
         )
         XCTAssertTrue(
             app.descendants(matching: .any)["liquidGlassToggle"].exists
@@ -291,11 +309,11 @@ final class StickyyUITests: XCTestCase {
         // Carbon can briefly retain the previous UI-test process's hot-key
         // registration while repeated app launches are settling.
         try? await Task.sleep(for: .milliseconds(500))
-        app.typeKey(.space, modifierFlags: [.control, .option])
+        app.typeKey(.space, modifierFlags: [.command, .option])
 
         let editor = app.textViews["scratchpadEditor"]
         if !editor.waitForExistence(timeout: 2) {
-            app.typeKey(.space, modifierFlags: [.control, .option])
+            app.typeKey(.space, modifierFlags: [.command, .option])
         }
         XCTAssertTrue(editor.waitForExistence(timeout: 5))
     }

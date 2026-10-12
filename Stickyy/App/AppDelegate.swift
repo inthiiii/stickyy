@@ -9,6 +9,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItemController: StatusItemController?
     private var globalShortcutController: GlobalShortcutController?
     private var clipboardHistoryController: ClipboardHistoryController?
+    private var onboardingController: OnboardingController?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -89,6 +90,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         self.clipboardHistoryController = clipboardHistoryController
         globalShortcutController = GlobalShortcutController {
             statusItemController.showScratchpad()
+        }
+
+        let onboardingController = OnboardingController()
+        self.onboardingController = onboardingController
+        if !CommandLine.arguments.contains(where: { $0.hasPrefix("--ui-testing") }),
+           !UserDefaults.standard.bool(forKey: StickyyPreferences.hasCompletedOnboarding) {
+            Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(350))
+                onboardingController.show()
+            }
         }
 
         #if DEBUG

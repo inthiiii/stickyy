@@ -6,6 +6,7 @@ struct ScratchpadEditor: NSViewRepresentable {
     let focusRequest: Int
     let insertionRequest: ScratchpadTextInsertion?
     let onQuickPaste: (Int) -> Void
+    let onPasteAttachment: (ClipboardHistoryContent) -> Void
     let onEscape: () -> Void
 
     func makeCoordinator() -> Coordinator {
@@ -57,9 +58,10 @@ struct ScratchpadEditor: NSViewRepresentable {
         textView.isContinuousSpellCheckingEnabled = true
         textView.isGrammarCheckingEnabled = false
         textView.isAutomaticQuoteSubstitutionEnabled = true
-        textView.isAutomaticDashSubstitutionEnabled = true
+        textView.isAutomaticDashSubstitutionEnabled = false
         textView.onEscape = onEscape
         textView.onQuickPaste = onQuickPaste
+        textView.onPasteAttachment = onPasteAttachment
         textView.setAccessibilityLabel(String(localized: "Scratchpad"))
         textView.setAccessibilityIdentifier("scratchpadEditor")
 
@@ -78,6 +80,7 @@ struct ScratchpadEditor: NSViewRepresentable {
         context.coordinator.parent = self
         textView.onEscape = onEscape
         textView.onQuickPaste = onQuickPaste
+        textView.onPasteAttachment = onPasteAttachment
 
         if textView.string != text {
             let selection = textView.selectedRange()
@@ -128,6 +131,7 @@ struct ScratchpadEditor: NSViewRepresentable {
 private final class EscapeHandlingTextView: NSTextView {
     var onEscape: () -> Void = {}
     var onQuickPaste: (Int) -> Void = { _ in }
+    var onPasteAttachment: (ClipboardHistoryContent) -> Void = { _ in }
 
     override func cancelOperation(_ sender: Any?) {
         onEscape()
@@ -145,5 +149,41 @@ private final class EscapeHandlingTextView: NSTextView {
             return true
         }
         return super.performKeyEquivalent(with: event)
+    }
+
+    override func insertText(_ insertString: Any, replacementRange: NSRange) {
+        if let string = insertString as? String,
+           string == "-",
+           selectedRange().length == 0,
+           selectedRange().location >= 2 {
+            let source = self.string as NSString
+            let previousRange = NSRange(location: selectedRange().location - 2, length: 2)
+            if source.substring(with: previousRange) == "--" {
+                super.insertText("\n────────────\n", replacementRange: previousRange)
+                return
+            }
+        }
+        super.insertText(insertString, replacementRange: replacementRange)
+    }
+
+    override func paste(_ sender: Any?) {
+        let pasteboard = NSPasteboard.general
+        let objects = pasteboard.readObjects(
+            forClasses: [NSURL.self], options: [.urlReadingFileURLsOnly: true]
+        ) ?? []
+        let urls = objects.compactMap { ($0 as? NSURL) as URL? }
+        if !urls.isEmpty {
+            onPasteAttachment(.files(urls))
+            return
+        }
+        if let data = pasteboard.data(forType: .png) {
+            onPasteAttachment(.image(data: data, pasteboardType: NSPasteboard.PasteboardType.png.rawValue, name: String(localized: "Pasted Image")))
+            return
+        }
+        if let data = pasteboard.data(forType: .tiff) {
+            onPasteAttachment(.image(data: data, pasteboardType: NSPasteboard.PasteboardType.tiff.rawValue, name: String(localized: "Pasted Image")))
+            return
+        }
+        super.paste(sender)
     }
 }

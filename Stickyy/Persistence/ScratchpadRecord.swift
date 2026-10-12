@@ -11,12 +11,14 @@ final class ScratchpadRecord {
     var title: String?
     var createdAt: Date?
     var isPinned: Bool?
+    var attachmentsData: Data?
 
     init(
         key: String = ScratchpadRecord.primaryKey,
         title: String? = nil,
         text: String = "",
         isPinned: Bool? = nil,
+        attachmentsData: Data? = nil,
         createdAt: Date? = nil,
         updatedAt: Date = .now
     ) {
@@ -24,6 +26,7 @@ final class ScratchpadRecord {
         self.title = title
         self.text = text
         self.isPinned = isPinned
+        self.attachmentsData = attachmentsData
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }

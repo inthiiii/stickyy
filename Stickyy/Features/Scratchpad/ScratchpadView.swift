@@ -64,23 +64,9 @@ struct ScratchpadView: View {
 
             Spacer()
 
-            Text(AppEnvironment.tagline)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-
-            ShareLink(
-                item: notesExportText,
-                subject: Text(verbatim: session.activeTitle)
-            ) {
-                Image(systemName: "square.and.arrow.up")
-            }
-            .buttonStyle(.plain)
-            .disabled(session.text.isEmpty)
-            .help("Export to Apple Notes")
-            .accessibilityLabel("Export to Apple Notes")
-            .accessibilityHint("Opens the macOS share sheet; choose Notes")
-            .accessibilityIdentifier("exportToAppleNotes")
+            NativeShareButton(text: notesExportText, isEnabled: !session.text.isEmpty)
+                .frame(width: 24, height: 24)
+                .disabled(session.text.isEmpty)
         }
         .padding(StickyyMetrics.headerPadding)
     }
@@ -90,12 +76,26 @@ struct ScratchpadView: View {
     }
 
     private var editor: some View {
+        VStack(spacing: 0) {
+            editorCanvas
+            if !session.activeAttachments.isEmpty {
+                Divider()
+                ScratchpadAttachmentsView(
+                    attachments: session.activeAttachments,
+                    onRemove: session.removeAttachment
+                )
+            }
+        }
+    }
+
+    private var editorCanvas: some View {
         ZStack(alignment: .bottomTrailing) {
             ScratchpadEditor(
                 text: $session.text,
                 focusRequest: session.editorFocusRequest,
                 insertionRequest: session.pendingTextInsertion,
                 onQuickPaste: quickPaste,
+                onPasteAttachment: session.addAttachments,
                 onEscape: onDismiss
             )
             .accessibilityLabel("Scratchpad")
@@ -115,7 +115,7 @@ struct ScratchpadView: View {
                     .accessibilityHidden(true)
             }
 
-            if !clipboardHistory.isEnabled {
+            if !clipboardHistory.isEnabled && clipboardHistory.hasPasteableText {
                 Button {
                     pasteCurrentClipboardText()
                 } label: {
@@ -124,7 +124,7 @@ struct ScratchpadView: View {
                         .frame(width: 26, height: 26)
                 }
                 .buttonStyle(.plain)
-                .background(.regularMaterial, in: .circle)
+                .stickyyPillSurface(Circle())
                 .overlay {
                     Circle().strokeBorder(Color.primary.opacity(0.1))
                 }
@@ -156,12 +156,11 @@ struct ScratchpadView: View {
         case .text(let text):
             session.insertIntoEditor(text)
         case .files(let urls):
-            session.insertIntoEditor(
-                urls.map(\.path).joined(separator: "\n")
+            session.addAttachments(from: .files(urls))
+        case .image(let data, let pasteboardType, let name):
+            session.addAttachments(
+                from: .image(data: data, pasteboardType: pasteboardType, name: name)
             )
-        case .image:
-            clipboardHistory.restore(item)
-            NSSound.beep()
         }
     }
 }

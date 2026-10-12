@@ -18,7 +18,7 @@ private struct StickyySettingsView: View {
     private var usesLiquidGlass = false
 
     @AppStorage(StickyyPreferences.globalShortcut)
-    private var shortcut = GlobalShortcutChoice.defaultChoice.rawValue
+    private var shortcut = GlobalShortcut.defaultShortcut.storageValue
 
     @AppStorage(StickyyPreferences.usesClipboardHistory)
     private var usesClipboardHistory = true
@@ -39,16 +39,15 @@ private struct StickyySettingsView: View {
             }
 
             Section("Keyboard Shortcut") {
-                Picker("Show Stickyy", selection: $shortcut) {
-                    ForEach(GlobalShortcutChoice.allCases) { choice in
-                        Text(choice.title).tag(choice.rawValue)
-                    }
+                LabeledContent("Show Stickyy") {
+                    ShortcutRecorderView(storageValue: $shortcut)
+                        .frame(width: 150, height: 24)
                 }
-                .pickerStyle(.menu)
-                .accessibilityIdentifier("globalShortcutPicker")
+                Text("Click the shortcut, then press your preferred key combination. The default is ⌘⌥Space.")
+                    .font(.caption).foregroundStyle(.secondary)
             }
 
-            Section("Clipboard") {
+            Section("Clipboard Pills") {
                 Toggle("Clipboard History", isOn: $usesClipboardHistory)
                     .accessibilityIdentifier("clipboardHistoryToggle")
                 Text(
@@ -78,11 +77,16 @@ private struct StickyySettingsView: View {
                 )
                 .font(.caption)
                 .foregroundStyle(.secondary)
+
+                Button("Show Welcome Tour…") {
+                    OnboardingController().show()
+                }
+                .accessibilityIdentifier("showOnboarding")
             }
         }
         .formStyle(.grouped)
         .padding(6)
-        .frame(width: 430, height: 390)
+        .frame(width: 450, height: 480)
         .navigationTitle("Stickyy Settings")
         .onAppear { refreshLoginItemState() }
         .onChange(of: usesClipboardHistory) {

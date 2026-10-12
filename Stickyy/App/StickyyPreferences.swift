@@ -5,6 +5,7 @@ enum StickyyPreferences {
     static let usesClipboardHistory = "usesClipboardHistory"
     static let globalShortcut = "globalShortcut"
     static let selectedScratchpadID = "selectedScratchpadID"
+    static let hasCompletedOnboarding = "hasCompletedOnboarding"
 
     static func clipboardHistoryEnabled(
         in defaults: UserDefaults = .standard
@@ -16,6 +17,9 @@ enum StickyyPreferences {
 }
 
 extension Notification.Name {
+    static let globalShortcutPreferenceDidChange = Notification.Name(
+        "Stickyy.globalShortcutPreferenceDidChange"
+    )
     static let clipboardHistoryPreferenceDidChange = Notification.Name(
         "Stickyy.clipboardHistoryPreferenceDidChange"
     )

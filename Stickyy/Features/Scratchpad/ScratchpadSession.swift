@@ -28,6 +28,10 @@ final class ScratchpadSession {
         activeScratchpad?.title ?? String(localized: "Untitled")
     }
 
+    var activeAttachments: [ScratchpadAttachment] {
+        activeScratchpad?.attachments ?? []
+    }
+
     var visibleScratchpads: [Scratchpad] {
         let query = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
         let matches = query.isEmpty ? scratchpads : scratchpads.filter {
@@ -98,6 +102,26 @@ final class ScratchpadSession {
         guard !text.isEmpty else { return }
         pendingTextInsertion = ScratchpadTextInsertion(text: text)
         requestEditorFocus()
+    }
+
+    func addAttachments(from content: ClipboardHistoryContent) {
+        guard let index = activeIndex else { return }
+        do {
+            let additions = try AttachmentStore.makeAttachments(from: content)
+            guard !additions.isEmpty else { return }
+            scratchpads[index].attachments.append(contentsOf: additions)
+            scratchpads[index].updatedAt = .now
+            persist(scratchpads[index])
+        } catch {
+            persistenceError = String(localized: "Stickyy couldn’t save that attachment.")
+        }
+    }
+
+    func removeAttachment(id: UUID) {
+        guard let index = activeIndex else { return }
+        scratchpads[index].attachments.removeAll { $0.id == id }
+        scratchpads[index].updatedAt = .now
+        persist(scratchpads[index])
     }
 
     @discardableResult

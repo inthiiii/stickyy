@@ -1,4 +1,5 @@
 import AppKit
+import QuartzCore
 import SwiftUI
 
 @MainActor
@@ -74,7 +75,13 @@ final class ClipboardShelfController {
             return
         }
 
-        let parentFrame = parentWindow.frame
+        let parentFrame: NSRect
+        if let contentView = parentWindow.contentView {
+            let inWindow = contentView.convert(contentView.bounds, to: nil)
+            parentFrame = parentWindow.convertToScreen(inWindow)
+        } else {
+            parentFrame = parentWindow.frame
+        }
         let shelfSize = panel.frame.size
         let origin = NSPoint(
             x: parentFrame.midX - (shelfSize.width / 2),
@@ -82,13 +89,32 @@ final class ClipboardShelfController {
                 - StickyyMetrics.clipboardShelfGap
                 - shelfSize.height
         )
-        panel.setFrameOrigin(origin)
+        let targetFrame = NSRect(origin: origin, size: shelfSize)
+        let isNewlyShown = !panel.isVisible
 
         if panel.parent !== parentWindow {
             panel.parent?.removeChildWindow(panel)
             parentWindow.addChildWindow(panel, ordered: .above)
         }
-        panel.orderFront(nil)
+        if isNewlyShown,
+           !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion {
+            panel.alphaValue = 0
+            panel.setFrame(
+                targetFrame.insetBy(dx: 10, dy: 0).offsetBy(dx: 0, dy: 8),
+                display: false
+            )
+            panel.orderFront(nil)
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = 0.28
+                context.timingFunction = CAMediaTimingFunction(controlPoints: 0.2, 0.9, 0.25, 1.15)
+                panel.animator().alphaValue = 1
+                panel.animator().setFrame(targetFrame, display: true)
+            }
+        } else {
+            panel.alphaValue = 1
+            panel.setFrame(targetFrame, display: true)
+            panel.orderFront(nil)
+        }
     }
 
     func hide() {

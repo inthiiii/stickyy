@@ -6,7 +6,8 @@ snapshot remains unchanged on `main` at commit
 
 ## Export to Apple Notes
 
-The share button in the scratchpad header opens the native macOS share sheet.
+The share button in the scratchpad header uses AppKit's native macOS sharing
+picker, which remains reliable inside the menu-bar popover.
 Choose Notes to create a note containing the scratchpad title followed by its
 text. The button is disabled while the scratchpad is empty.
 
@@ -38,9 +39,22 @@ changing the current system clipboard. Clipboard History can be turned off in
 Stickyy Settings whenever a distraction-free scratchpad is preferred. Turning
 it off immediately clears the temporary history and hides the entire shelf;
 turning it back on resumes monitoring new clipboard changes. While history is
-off, a small clipboard button remains in the editor's bottom-right corner for
-directly pasting plain text without storing any clipboard history. Images and
-files are deliberately ignored by that direct-paste button.
+off, a small clipboard button appears in the editor's bottom-right corner only
+when plain text is currently available to paste, without storing any clipboard
+history. Images and files are deliberately ignored by that direct-paste button.
+
+Liquid Glass now applies consistently to the optional clipboard pills as well
+as the scratchpad surface. The shelf is positioned against the visible edge of
+the scratchpad and uses the same opening animation.
+
+## Additional experiment features
+
+- A recordable keyboard shortcut with Command–Option–Space as the default
+- `---` expands into a visual divider in the editor
+- Pasted images and files appear as compact attachment previews with a Show in
+  Finder action
+- A three-page interactive onboarding tour for first launch
+- The header tagline has been removed to keep the editor visually quiet
 
 Clipboard history is intentionally temporary in this experiment. It is not
 written to Stickyy's scratchpad store, synced, or restored after the app quits.

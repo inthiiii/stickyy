@@ -37,7 +37,7 @@ struct ClipboardHistoryView: View {
                         .frame(width: 26, height: 26)
                 }
                 .buttonStyle(.plain)
-                .background(.regularMaterial, in: .circle)
+                .stickyyPillSurface(Circle())
                 .overlay {
                     Circle().strokeBorder(Color.primary.opacity(0.1))
                 }
@@ -62,7 +62,7 @@ struct ClipboardHistoryView: View {
             .foregroundStyle(.secondary)
             .padding(.horizontal, 10)
             .frame(height: 30)
-            .background(.regularMaterial, in: .capsule)
+            .stickyyPillSurface(Capsule())
             .overlay {
                 Capsule().strokeBorder(Color.primary.opacity(0.1))
             }
@@ -112,7 +112,7 @@ struct ClipboardHistoryView: View {
         .padding(.leading, 7)
         .padding(.trailing, 8)
         .frame(height: 32)
-        .background(.regularMaterial, in: .capsule)
+        .stickyyPillSurface(Capsule())
         .overlay {
             Capsule().strokeBorder(Color.primary.opacity(0.1))
         }
