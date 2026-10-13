@@ -60,4 +60,4 @@ the scratchpad and uses the same opening animation.
 Clipboard history is intentionally temporary in this experiment. It is not
 written to Stickyy's scratchpad store, synced, or restored after the app quits.
 
-This stable version is the release baseline for the future Phase 7 work.
+This stable version is the release baseline used by Phase 7.

@@ -6,7 +6,7 @@ Stickyy is a fast, local-first macOS menu-bar scratchpad built with SwiftUI, App
 
 ## Current status
 
-Stickyy is a stable local-first scratchpad with automated quality, recovery, accessibility, and performance coverage while preserving its original minimal design. Phase 7 has not started yet.
+Stickyy is a stable local-first scratchpad with automated quality, recovery, accessibility, and performance coverage while preserving its original minimal design. Phase 7 production-release preparation is in progress for version 1.0.0.
 
 - Xcode 27 project
 - Swift 6 language mode and complete concurrency checking
@@ -41,6 +41,7 @@ Stickyy is a stable local-first scratchpad with automated quality, recovery, acc
 - Forced-termination recovery coverage
 - Xcode static analysis plus Address Sanitizer and Thread Sanitizer validation
 - Release-build CPU, memory, and leak baselines
+- Production AppIcon, privacy policy, direct-download release tooling, and one-page website
 
 ## Requirements
 
@@ -58,6 +59,27 @@ Stickyy is a stable local-first scratchpad with automated quality, recovery, acc
 7. Right-click the menu-bar icon to open Settings or quit.
 
 The default global shortcut is **Control–Option–Space**. Click its recorder in Settings and press any preferred modified key combination to change it.
+
+## Direct-download releases
+
+Stickyy supports two direct-download paths. The free public-test build is ad-hoc signed and does not require an Apple Developer Program membership:
+
+```sh
+Scripts/build-public-test-dmg.sh
+```
+
+Because Apple does not notarize this build, a tester opens it the first time by Control-clicking **Stickyy**, choosing **Open**, and confirming **Open**. This is disclosed on the download page and in the release notes.
+
+For a future Developer ID-signed and Apple-notarized production disk image, run:
+
+```sh
+Scripts/check-release-readiness.sh
+Scripts/release.sh
+```
+
+The production release script requires a valid Developer ID Application identity and a `Stickyy-Notary` keychain profile. It creates, notarizes, staples, verifies, and checksums the `.dmg` without storing credentials in the repository.
+
+The complete process is documented in [Docs/Phase-7-Production-Release.md](Docs/Phase-7-Production-Release.md). The static download website lives in [Website](Website).
 
 ## Testing
 
@@ -78,3 +100,5 @@ The full Phase 6 validation record, measured baselines, and regression targets a
 ## Privacy
 
 Stickyy is local-first and requires no network connection for its core functionality. Scratchpad text is stored in the app's sandbox using SwiftData. The app requests no network, broad file-access, automation, accessibility, microphone, camera, contacts, calendar, or location entitlement.
+
+Read the full [Stickyy Privacy Policy](PRIVACY.md).
