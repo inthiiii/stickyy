@@ -26,6 +26,8 @@ website. A Mac App Store release remains a later option.
 - `Scripts/check-release-readiness.sh` audits the local release prerequisites.
 - `Scripts/release.sh` archives, signs, packages, notarizes, staples, verifies,
   and checksums the disk image without storing credentials in the repository.
+- `Config/ExportOptions-DeveloperID.plist` supports Xcode's Developer ID export
+  workflow with automatic signing.
 - The one-page website is ready for free deployment and automatically discovers
   the latest GitHub `.dmg` release.
 
@@ -90,6 +92,18 @@ complete App Privacy answers, validate sandbox behavior, and pass App Review.
 
 ## Remaining release gate
 
-This machine must have a valid Developer ID Application signing identity and a
-working `Stickyy-Notary` keychain profile before the notarized disk image can be
-created. These credentials are intentionally never committed.
+On October 13, 2026, Xcode successfully created the Release archive using the
+installed Apple Development identity. The Developer ID export then reached Apple
+and was rejected because team `W646PJF57Y` does not have a program membership
+eligible for Developer ID distribution. No Developer ID Application identity is
+available, and the `Stickyy-Notary` profile cannot be completed until the team is
+eligible.
+
+The Account Holder must activate or renew the Apple Developer Program membership.
+After Apple marks the team eligible, install a Developer ID Application
+certificate, create the notarization profile above, rerun the readiness check,
+and run the release script. These credentials are intentionally never committed.
+
+An unsigned or Apple Development-signed build is not a substitute for this gate:
+it would force public testers to bypass Gatekeeper and is not published by the
+release process.
