@@ -1,7 +1,9 @@
+import AppKit
 import SwiftUI
 
 struct ScratchpadView: View {
     @Bindable var session: ScratchpadSession
+    @Bindable var clipboardHistory: ClipboardHistoryController
     let onDismiss: () -> Void
 
     @State private var showsLibrary = false
@@ -62,19 +64,38 @@ struct ScratchpadView: View {
 
             Spacer()
 
-            Text(AppEnvironment.tagline)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
+            NativeShareButton(text: notesExportText, isEnabled: !session.text.isEmpty)
+                .frame(width: 24, height: 24)
+                .disabled(session.text.isEmpty)
         }
         .padding(StickyyMetrics.headerPadding)
     }
 
+    private var notesExportText: String {
+        "\(session.activeTitle)\n\n\(session.text)"
+    }
+
     private var editor: some View {
-        ZStack(alignment: .topLeading) {
+        VStack(spacing: 0) {
+            editorCanvas
+            if !session.activeAttachments.isEmpty {
+                Divider()
+                ScratchpadAttachmentsView(
+                    attachments: session.activeAttachments,
+                    onRemove: session.removeAttachment
+                )
+            }
+        }
+    }
+
+    private var editorCanvas: some View {
+        ZStack(alignment: .bottomTrailing) {
             ScratchpadEditor(
                 text: $session.text,
                 focusRequest: session.editorFocusRequest,
+                insertionRequest: session.pendingTextInsertion,
+                onQuickPaste: quickPaste,
+                onPasteAttachment: session.addAttachments,
                 onEscape: onDismiss
             )
             .accessibilityLabel("Scratchpad")
@@ -85,10 +106,61 @@ struct ScratchpadView: View {
                     .foregroundStyle(.tertiary)
                     .padding(.horizontal, StickyyMetrics.editorInset + 4)
                     .padding(.vertical, StickyyMetrics.editorInset + 2)
+                    .frame(
+                        maxWidth: .infinity,
+                        maxHeight: .infinity,
+                        alignment: .topLeading
+                    )
                     .allowsHitTesting(false)
                     .accessibilityHidden(true)
             }
+
+            if !clipboardHistory.isEnabled && clipboardHistory.hasPasteableText {
+                Button {
+                    pasteCurrentClipboardText()
+                } label: {
+                    Image(systemName: "clipboard")
+                        .font(.system(size: 12, weight: .semibold))
+                        .frame(width: 26, height: 26)
+                }
+                .buttonStyle(.plain)
+                .stickyyPillSurface(Circle())
+                .overlay {
+                    Circle().strokeBorder(Color.primary.opacity(0.1))
+                }
+                .shadow(color: .black.opacity(0.12), radius: 4, y: 2)
+                .padding(10)
+                .help("Paste into Stickyy")
+                .accessibilityLabel("Paste into Stickyy")
+                .accessibilityIdentifier("pasteCurrentClipboardText")
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private func pasteCurrentClipboardText() {
+        guard let text = clipboardHistory.currentTextForPasting() else {
+            NSSound.beep()
+            return
+        }
+        session.insertIntoEditor(text)
+    }
+
+    private func quickPaste(_ index: Int) {
+        guard let item = clipboardHistory.item(at: index) else {
+            NSSound.beep()
+            return
+        }
+
+        switch item.content {
+        case .text(let text):
+            session.insertIntoEditor(text)
+        case .files(let urls):
+            session.addAttachments(from: .files(urls))
+        case .image(let data, let pasteboardType, let name):
+            session.addAttachments(
+                from: .image(data: data, pasteboardType: pasteboardType, name: name)
+            )
+        }
     }
 }

@@ -27,4 +27,25 @@ extension View {
     func stickyySurface() -> some View {
         modifier(StickyySurfaceModifier())
     }
+
+    func stickyyPillSurface<S: Shape>(_ shape: S) -> some View {
+        modifier(StickyyPillSurfaceModifier(shape: shape))
+    }
+}
+
+private struct StickyyPillSurfaceModifier<S: Shape>: ViewModifier {
+    @AppStorage(StickyyPreferences.usesLiquidGlass) private var usesLiquidGlass = false
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    let shape: S
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if reduceTransparency {
+            content.background(Color(nsColor: .windowBackgroundColor), in: shape)
+        } else if usesLiquidGlass {
+            content.glassEffect(.regular, in: shape)
+        } else {
+            content.background(.regularMaterial, in: shape)
+        }
+    }
 }

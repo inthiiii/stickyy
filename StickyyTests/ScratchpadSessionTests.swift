@@ -14,6 +14,46 @@ struct ScratchpadSessionTests {
         #expect(store.scratchpads.count == 1)
     }
 
+    @Test("Clipboard paste requests focus the editor with exact text")
+    func requestsClipboardInsertion() {
+        let session = makeSession(store: RecordingScratchpadStore())
+        let previousFocusRequest = session.editorFocusRequest
+
+        session.insertIntoEditor("Pasted thought")
+
+        #expect(session.pendingTextInsertion?.text == "Pasted thought")
+        #expect(session.editorFocusRequest == previousFocusRequest + 1)
+    }
+
+    @Test("Onboarding prepares a saved welcome scratchpad")
+    func preparesWelcomeScratchpad() {
+        let store = RecordingScratchpadStore()
+        let session = makeSession(store: store)
+
+        session.prepareWelcomeScratchpad()
+
+        #expect(session.activeTitle == "Welcome to Stickyy")
+        #expect(session.text.contains("Welcome to Stickyy"))
+        #expect(session.text.contains("⌘1–⌘7"))
+        #expect(store.scratchpads.first?.text == session.text)
+    }
+
+    @Test("The welcome scratchpad never overwrites an existing thought")
+    func welcomeScratchpadPreservesExistingThought() {
+        let original = Scratchpad(title: "Keep", text: "Do not replace")
+        let store = RecordingScratchpadStore([original])
+        let session = makeSession(store: store)
+
+        session.prepareWelcomeScratchpad()
+
+        #expect(session.scratchpads.count == 2)
+        #expect(session.activeTitle == "Welcome to Stickyy")
+        #expect(
+            session.scratchpads.first(where: { $0.id == original.id })?.text
+                == "Do not replace"
+        )
+    }
+
     @Test("The remembered scratchpad becomes active")
     func restoresSelection() {
         let first = Scratchpad(title: "First", text: "One")

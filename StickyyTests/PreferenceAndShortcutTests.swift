@@ -19,26 +19,44 @@ struct PreferenceAndShortcutTests {
         #expect(store.selectedScratchpadID == nil)
     }
 
-    @Test("Every shortcut option has a stable unique identifier")
-    func shortcutIdentifiersAreUnique() {
-        let choices = GlobalShortcutChoice.allCases
-        #expect(Set(choices.map(\.rawValue)).count == choices.count)
-        #expect(GlobalShortcutChoice.defaultChoice == .controlOptionSpace)
+    @Test("The default shortcut is Control-Option-Space")
+    func defaultShortcut() {
+        #expect(GlobalShortcut.defaultShortcut.keyCode == UInt32(kVK_Space))
+        #expect(GlobalShortcut.defaultShortcut.modifiers == UInt32(controlKey | optionKey))
     }
 
-    @Test("Disabled shortcut does not register a key combination")
-    func disabledShortcutHasNoKey() {
-        #expect(GlobalShortcutChoice.disabled.keyCode == nil)
-        #expect(GlobalShortcutChoice.disabled.modifiers == 0)
+    @Test("Custom shortcuts round-trip through preference storage")
+    func shortcutRoundTrip() throws {
+        let shortcut = GlobalShortcut(keyCode: UInt32(kVK_ANSI_K), modifiers: UInt32(cmdKey | shiftKey))
+        let restored = try #require(GlobalShortcut(storageValue: shortcut.storageValue))
+        #expect(restored == shortcut)
     }
 
     @Test("Configured shortcuts map to the expected native keys")
     func nativeShortcutMappings() {
-        #expect(GlobalShortcutChoice.controlOptionSpace.keyCode == UInt32(kVK_Space))
-        #expect(GlobalShortcutChoice.controlOptionS.keyCode == UInt32(kVK_ANSI_S))
-        #expect(
-            GlobalShortcutChoice.commandShiftSpace.modifiers
-                == UInt32(cmdKey | shiftKey)
-        )
+        let restored = GlobalShortcut(storageValue: "commandShiftSpace")
+        #expect(restored?.keyCode == UInt32(kVK_Space))
+        #expect(restored?.modifiers == UInt32(cmdKey | shiftKey))
+    }
+
+    @Test("Clipboard pill count accepts only five or seven")
+    func clipboardPillCount() throws {
+        let suiteName = "StickyyTests.\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        #expect(StickyyPreferences.clipboardHistoryItemLimit(in: defaults) == 5)
+        defaults.set(7, forKey: StickyyPreferences.clipboardHistoryLimit)
+        #expect(StickyyPreferences.clipboardHistoryItemLimit(in: defaults) == 7)
+        defaults.set(6, forKey: StickyyPreferences.clipboardHistoryLimit)
+        #expect(StickyyPreferences.clipboardHistoryItemLimit(in: defaults) == 5)
+    }
+
+    @Test("The Shortcuts share destination is excluded")
+    func filtersShortcutsSharingService() {
+        #expect(!NativeShareControl.includesSharingService(title: "Shortcuts"))
+        #expect(!NativeShareControl.includesSharingService(title: "Add to Shortcuts"))
+        #expect(NativeShareControl.includesSharingService(title: "Messages"))
+        #expect(NativeShareControl.includesSharingService(title: "Add to Notes"))
     }
 }

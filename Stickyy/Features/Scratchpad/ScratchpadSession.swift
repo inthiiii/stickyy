@@ -1,6 +1,11 @@
 import Foundation
 import Observation
 
+struct ScratchpadTextInsertion: Equatable {
+    let id = UUID()
+    let text: String
+}
+
 @MainActor
 @Observable
 final class ScratchpadSession {
@@ -23,6 +28,10 @@ final class ScratchpadSession {
         activeScratchpad?.title ?? String(localized: "Untitled")
     }
 
+    var activeAttachments: [ScratchpadAttachment] {
+        activeScratchpad?.attachments ?? []
+    }
+
     var visibleScratchpads: [Scratchpad] {
         let query = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
         let matches = query.isEmpty ? scratchpads : scratchpads.filter {
@@ -36,6 +45,7 @@ final class ScratchpadSession {
     }
 
     private(set) var editorFocusRequest = 0
+    private(set) var pendingTextInsertion: ScratchpadTextInsertion?
     private(set) var persistenceError: String?
 
     @ObservationIgnored
@@ -86,6 +96,55 @@ final class ScratchpadSession {
 
     func requestEditorFocus() {
         editorFocusRequest &+= 1
+    }
+
+    func insertIntoEditor(_ text: String) {
+        guard !text.isEmpty else { return }
+        pendingTextInsertion = ScratchpadTextInsertion(text: text)
+        requestEditorFocus()
+    }
+
+    func prepareWelcomeScratchpad() {
+        if !text.isEmpty || !activeAttachments.isEmpty {
+            createScratchpad()
+        }
+        renameScratchpad(
+            id: activeScratchpadID,
+            to: String(localized: "Welcome to Stickyy")
+        )
+        text = String(
+            localized: """
+            Welcome to Stickyy 👋
+
+            Press ⌃⌥Space to open your scratchpad from anywhere.
+
+            Copy text, images, or files to see them in Clipboard Pills. Double-click a pill to copy it again, or press ⌘1–⌘7 to paste it into this scratchpad.
+
+            Your thoughts stay on this Mac.
+            """
+        )
+        flush()
+        requestEditorFocus()
+    }
+
+    func addAttachments(from content: ClipboardHistoryContent) {
+        guard let index = activeIndex else { return }
+        do {
+            let additions = try AttachmentStore.makeAttachments(from: content)
+            guard !additions.isEmpty else { return }
+            scratchpads[index].attachments.append(contentsOf: additions)
+            scratchpads[index].updatedAt = .now
+            persist(scratchpads[index])
+        } catch {
+            persistenceError = String(localized: "Stickyy couldn’t save that attachment.")
+        }
+    }
+
+    func removeAttachment(id: UUID) {
+        guard let index = activeIndex else { return }
+        scratchpads[index].attachments.removeAll { $0.id == id }
+        scratchpads[index].updatedAt = .now
+        persist(scratchpads[index])
     }
 
     @discardableResult
