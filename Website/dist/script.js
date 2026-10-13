@@ -21,7 +21,7 @@ fetch(releaseAPI, { headers: { Accept: "application/vnd.github+json" } })
     downloadLabel.textContent = `Download Stickyy ${version}`;
     mirrorDownload.href = diskImage.browser_download_url;
     mirrorDownload.textContent = `Download Stickyy ${version}`;
-    releaseStatus.textContent = `macOS 26 or later · ${formatSize(diskImage.size)} · Notarized direct download`;
+    releaseStatus.textContent = `macOS 26 or later · ${formatSize(diskImage.size)} · Free direct download`;
   })
   .catch(() => {
     const releasesURL = downloadButton.dataset.releasesUrl;

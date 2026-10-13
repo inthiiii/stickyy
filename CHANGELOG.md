@@ -12,4 +12,5 @@ All notable Stickyy changes are documented here.
 - Double-click clipboard restoration and Command-1 through Command-7 quick paste.
 - Native macOS sharing, attachment previews, onboarding, and built-in User Guide.
 - Accessibility, crash-recovery, performance, storage, and UI regression coverage.
-- Direct-download signing, notarization, packaging, and website preparation.
+- Free public-test DMG packaging and direct-download website, with a separate
+  Developer ID notarization path ready for future use.

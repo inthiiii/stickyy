@@ -60,16 +60,24 @@ Stickyy is a stable local-first scratchpad with automated quality, recovery, acc
 
 The default global shortcut is **Control–Option–Space**. Click its recorder in Settings and press any preferred modified key combination to change it.
 
-## Direct-download release
+## Direct-download releases
 
-Stickyy 1.0.0 is prepared for direct distribution as a Developer ID-signed and Apple-notarized disk image. Run the readiness audit and release pipeline with:
+Stickyy supports two direct-download paths. The free public-test build is ad-hoc signed and does not require an Apple Developer Program membership:
+
+```sh
+Scripts/build-public-test-dmg.sh
+```
+
+Because Apple does not notarize this build, a tester opens it the first time by Control-clicking **Stickyy**, choosing **Open**, and confirming **Open**. This is disclosed on the download page and in the release notes.
+
+For a future Developer ID-signed and Apple-notarized production disk image, run:
 
 ```sh
 Scripts/check-release-readiness.sh
 Scripts/release.sh
 ```
 
-The release script requires a valid Developer ID Application identity and a `Stickyy-Notary` keychain profile. It creates, notarizes, staples, verifies, and checksums the public `.dmg` without storing credentials in the repository.
+The production release script requires a valid Developer ID Application identity and a `Stickyy-Notary` keychain profile. It creates, notarizes, staples, verifies, and checksums the `.dmg` without storing credentials in the repository.
 
 The complete process is documented in [Docs/Phase-7-Production-Release.md](Docs/Phase-7-Production-Release.md). The static download website lives in [Website](Website).
 

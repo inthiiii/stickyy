@@ -72,6 +72,8 @@ h2 { font-size: clamp(42px, 5vw, 68px); }
 .button.secondary { background: rgba(255,255,255,.045); }
 .button svg { width: 19px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
 .requirements { color: #727b8b; font-size: 12px; }
+.install-note { max-width: 550px; margin-top: 10px; color: #8d97a8; font-size: 12px; line-height: 1.55; }
+.install-note strong { color: #bcc5d3; }
 
 .product-stage { position: relative; min-height: 490px; isolation: isolate; }
 .menu-bar { position: absolute; z-index: 4; top: 26px; right: 64px; display: flex; align-items: center; gap: 24px; color: #dce2ec; font-size: 15px; }
