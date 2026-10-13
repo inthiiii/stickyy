@@ -52,7 +52,8 @@ hdiutil create \
   "$dmg_path"
 
 hdiutil verify "$dmg_path"
-shasum -a 256 "$dmg_path" > "$checksum_path"
+checksum_value="$(shasum -a 256 "$dmg_path" | awk '{print $1}')"
+print "$checksum_value  ${dmg_path:t}" > "$checksum_path"
 
 echo "Public test release created:"
 echo "  $dmg_path"
