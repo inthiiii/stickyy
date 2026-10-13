@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Stickyy is a fast, private, native macOS menu-bar scratchpad. Catch a thought before it fades.">
+    <meta name="theme-color" content="#090b10">
+    <meta property="og:title" content="Stickyy — Catch a thought before it fades">
+    <meta property="og:description" content="A fast, private scratchpad that lives in your Mac menu bar.">
+    <meta property="og:type" content="website">
+    <title>Stickyy — A scratchpad for fleeting thoughts</title>
+    <link rel="icon" href="assets/stickyy-icon.png">
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <header class="nav" aria-label="Primary navigation">
+      <a class="brand" href="#top" aria-label="Stickyy home">
+        <img src="assets/stickyy-icon.png" alt="" width="36" height="36">
+        <span>Stickyy</span>
+      </a>
+      <nav>
+        <a href="#features">Features</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="https://github.com/inthiiii/stickyy" rel="noreferrer">GitHub</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow"><span></span> Native for macOS</p>
+          <h1 id="hero-title">Catch a thought<br>before it fades.</h1>
+          <p class="lede">Stickyy is a fast, private scratchpad that lives in your menu bar. Open it, type, and return to what you were doing.</p>
+          <div class="actions">
+            <a class="button primary" id="download-button" href="https://github.com/inthiiii/stickyy/releases" data-releases-url="https://github.com/inthiiii/stickyy/releases">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 5-5m-5 5-5-5M5 21h14"/></svg>
+              <span id="download-label">View releases</span>
+            </a>
+            <a class="button secondary" href="https://github.com/inthiiii/stickyy" rel="noreferrer">View source</a>
+          </div>
+          <p class="requirements" id="release-status">macOS 26 or later · Apple silicon · Free direct download</p>
+        </div>
+
+        <div class="product-stage" aria-label="Illustration of the Stickyy scratchpad and Clipboard Pills">
+          <div class="menu-bar" aria-hidden="true">
+            <span>●</span><span>◌</span><span class="menu-icon">▤</span><span>⌁</span><span>•••</span>
+          </div>
+          <div class="scratchpad">
+            <div class="scratchpad-head">
+              <div class="app-title"><span class="note-mark">▤</span> Stickyy</div>
+              <span class="share-mark">↥</span>
+            </div>
+            <div class="note-copy">
+              <p>Plan the tiny things.</p>
+              <p>Keep the big ideas close.</p>
+              <span class="cursor"></span>
+            </div>
+          </div>
+          <div class="pills" aria-hidden="true">
+            <div class="pill"><span>↗</span> launch notes</div>
+            <div class="pill"><span>▧</span> moodboard.png</div>
+            <div class="pill short"><span>⌁</span> idea</div>
+          </div>
+          <div class="ambient ambient-one"></div>
+          <div class="ambient ambient-two"></div>
+        </div>
+      </section>
+
+      <section class="principles" aria-label="Stickyy principles">
+        <p>Instant</p><span></span><p>Persistent</p><span></span><p>Private</p><span></span><p>Native</p>
+      </section>
+
+      <section class="features" id="features" aria-labelledby="features-title">
+        <div class="section-intro">
+          <p class="eyebrow"><span></span> Quietly capable</p>
+          <h2 id="features-title">Everything you need.<br>Nothing you don’t.</h2>
+          <p>Designed to disappear into your workflow—not become another system to manage.</p>
+        </div>
+
+        <div class="feature-grid">
+          <article class="feature feature-wide">
+            <div>
+              <p class="feature-number">01</p>
+              <h3>Always one shortcut away</h3>
+              <p>Press Control–Option–Space from anywhere. Stickyy appears, puts the cursor where you need it, and gets out of the way when you’re done.</p>
+            </div>
+            <div class="keycap-demo" aria-hidden="true"><kbd>⌃</kbd><span>+</span><kbd>⌥</kbd><span>+</span><kbd>Space</kbd></div>
+          </article>
+
+          <article class="feature">
+            <p class="feature-number">02</p>
+            <h3>Your thoughts stay yours</h3>
+            <p>No account, analytics, advertising, or cloud dependency. Notes live locally inside the macOS App Sandbox.</p>
+            <div class="privacy-orbit" aria-hidden="true"><span>⌂</span></div>
+          </article>
+
+          <article class="feature">
+            <p class="feature-number">03</p>
+            <h3>Clipboard, without the clutter</h3>
+            <p>Optional Clipboard Pills keep five or seven recent snippets, images, and files close. Turn them off whenever you want pure simplicity.</p>
+            <div class="mini-pills" aria-hidden="true"><span>⌘1</span><span>⌘2</span><span>⌘3</span></div>
+          </article>
+
+          <article class="feature feature-wide">
+            <div>
+              <p class="feature-number">04</p>
+              <h3>Small notes. Serious reliability.</h3>
+              <p>Automatic local saving, crash recovery, multiple scratchpads, search, pinning, and full keyboard editing are built in—without a save button.</p>
+            </div>
+            <div class="save-demo" aria-hidden="true"><span class="save-dot"></span><strong>Saved locally</strong><small>just now</small></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="closing" aria-labelledby="closing-title">
+        <img src="assets/stickyy-icon.png" alt="Stickyy app icon" width="112" height="112">
+        <p class="eyebrow"><span></span> Ready when inspiration arrives</p>
+        <h2 id="closing-title">One small place<br>for every passing thought.</h2>
+        <a class="button primary mirror-download" href="https://github.com/inthiiii/stickyy/releases">View releases</a>
+        <p>macOS 26 or later</p>
+      </section>
+    </main>
+
+    <footer>
+      <a class="brand" href="#top"><img src="assets/stickyy-icon.png" alt="" width="28" height="28"><span>Stickyy</span></a>
+      <p>Catch a thought before it fades.</p>
+      <div><a href="privacy.html">Privacy</a><a href="https://github.com/inthiiii/stickyy/issues">Support</a><a href="https://github.com/inthiiii/stickyy">GitHub</a></div>
+    </footer>
+  </body>
+</html>
