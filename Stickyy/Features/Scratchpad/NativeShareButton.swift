@@ -43,6 +43,7 @@ final class NativeShareControl: NSButton, NSSharingServiceDelegate {
         setSharingActive(true)
         isPerformingShare = false
         services = NSSharingService.sharingServices(forItems: [shareText])
+            .filter { Self.includesSharingService(title: $0.title) }
 
         let menu = NSMenu(title: String(localized: "Share"))
         for (index, service) in services.enumerated() {
@@ -109,5 +110,9 @@ final class NativeShareControl: NSButton, NSSharingServiceDelegate {
             name: .sharingPickerStateDidChange,
             object: isActive
         )
+    }
+
+    nonisolated static func includesSharingService(title: String) -> Bool {
+        !title.localizedCaseInsensitiveContains("shortcut")
     }
 }

@@ -23,6 +23,33 @@ struct ClipboardHistoryTests {
         #expect(text(from: history.items[4]) == "Item 2")
     }
 
+    @Test("Clipboard history can retain seven items and trims back to five")
+    func supportsFiveOrSevenItems() {
+        let pasteboard = makePasteboard()
+        let history = ClipboardHistoryController(
+            pasteboard: pasteboard,
+            monitoringEnabled: false,
+            initialItemLimit: 7
+        )
+
+        for index in 1...8 {
+            pasteboard.clearContents()
+            #expect(pasteboard.setString("Item \(index)", forType: .string))
+            history.captureIfChanged()
+        }
+
+        #expect(history.itemLimit == 7)
+        #expect(history.items.count == 7)
+        #expect(text(from: history.items[0]) == "Item 8")
+        #expect(text(from: history.items[6]) == "Item 2")
+
+        history.setItemLimit(5)
+
+        #expect(history.itemLimit == 5)
+        #expect(history.items.count == 5)
+        #expect(text(from: history.items[4]) == "Item 4")
+    }
+
     @Test("Copying the same item again moves it to the front")
     func movesDuplicateToFront() {
         let pasteboard = makePasteboard()

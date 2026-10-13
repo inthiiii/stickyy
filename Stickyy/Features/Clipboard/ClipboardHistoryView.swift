@@ -4,6 +4,7 @@ import SwiftUI
 struct ClipboardHistoryView: View {
     @Bindable var history: ClipboardHistoryController
     let onPasteText: (String) -> Void
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         HStack(spacing: 5) {
@@ -60,9 +61,10 @@ struct ClipboardHistoryView: View {
     private var emptyPill: some View {
         Label("Clipboard is ready", systemImage: "clipboard")
             .font(.caption2)
-            .foregroundStyle(.secondary)
+            .foregroundStyle(colorScheme == .dark ? Color.white : Color.black)
             .padding(.horizontal, 10)
             .frame(height: 30)
+            .background(colorScheme == .dark ? Color.black : Color.white, in: Capsule())
             .stickyyPillSurface(Capsule())
             .overlay {
                 Capsule().strokeBorder(Color.primary.opacity(0.1))
@@ -76,9 +78,7 @@ struct ClipboardHistoryView: View {
         position: Int
     ) -> some View {
         HStack(spacing: 5) {
-            Button {
-                history.restore(item)
-            } label: {
+            Button(action: {}) {
                 HStack(spacing: 5) {
                     preview(for: item)
                         .frame(width: 18, height: 18)
@@ -95,9 +95,17 @@ struct ClipboardHistoryView: View {
                 .contentShape(.rect)
             }
             .buttonStyle(.plain)
-            .help("Copy this item again")
+            .simultaneousGesture(
+                TapGesture(count: 2).onEnded {
+                    history.restore(item)
+                }
+            )
+            .help("Double-click to copy this item again")
             .accessibilityLabel(accessibilityLabel(for: item))
-            .accessibilityHint("Copies this item back to the clipboard")
+            .accessibilityHint("Double-click to copy this item back to the clipboard")
+            .accessibilityAction {
+                history.restore(item)
+            }
             .accessibilityIdentifier("clipboardHistoryItem_\(item.id)")
 
             if case .text(let text) = item.content {

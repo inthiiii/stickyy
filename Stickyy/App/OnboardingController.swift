@@ -27,6 +27,10 @@ final class OnboardingController {
                 UserDefaults.standard.set(true, forKey: StickyyPreferences.hasCompletedOnboarding)
                 Self.activePanel?.close()
                 Self.activePanel = nil
+                NotificationCenter.default.post(
+                    name: .onboardingDidFinish,
+                    object: nil
+                )
             }
         )
         panel.center()
@@ -58,8 +62,8 @@ private struct OnboardingView: View {
         ),
         OnboardingPage(
             icon: "rectangle.stack.fill", eyebrow: "CLIPBOARD PILLS",
-            title: "Your last five copies, close by.",
-            detail: "Text, links, images, and files float below the note—ready to reuse without breaking your flow.",
+            title: "Your recent copies, close by.",
+            detail: "Keep five or seven text, link, image, and file pills below the note. Double-click any pill to copy it again.",
             accent: .blue
         ),
         OnboardingPage(

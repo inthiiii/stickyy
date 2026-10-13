@@ -38,4 +38,25 @@ struct PreferenceAndShortcutTests {
         #expect(restored?.keyCode == UInt32(kVK_Space))
         #expect(restored?.modifiers == UInt32(cmdKey | shiftKey))
     }
+
+    @Test("Clipboard pill count accepts only five or seven")
+    func clipboardPillCount() throws {
+        let suiteName = "StickyyTests.\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        #expect(StickyyPreferences.clipboardHistoryItemLimit(in: defaults) == 5)
+        defaults.set(7, forKey: StickyyPreferences.clipboardHistoryLimit)
+        #expect(StickyyPreferences.clipboardHistoryItemLimit(in: defaults) == 7)
+        defaults.set(6, forKey: StickyyPreferences.clipboardHistoryLimit)
+        #expect(StickyyPreferences.clipboardHistoryItemLimit(in: defaults) == 5)
+    }
+
+    @Test("The Shortcuts share destination is excluded")
+    func filtersShortcutsSharingService() {
+        #expect(!NativeShareControl.includesSharingService(title: "Shortcuts"))
+        #expect(!NativeShareControl.includesSharingService(title: "Add to Shortcuts"))
+        #expect(NativeShareControl.includesSharingService(title: "Messages"))
+        #expect(NativeShareControl.includesSharingService(title: "Add to Notes"))
+    }
 }

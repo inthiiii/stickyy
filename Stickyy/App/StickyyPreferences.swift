@@ -3,6 +3,7 @@ import Foundation
 enum StickyyPreferences {
     static let usesLiquidGlass = "usesLiquidGlass"
     static let usesClipboardHistory = "usesClipboardHistory"
+    static let clipboardHistoryLimit = "clipboardHistoryLimit"
     static let globalShortcut = "globalShortcut"
     static let selectedScratchpadID = "selectedScratchpadID"
     static let hasCompletedOnboarding = "hasCompletedOnboarding"
@@ -13,6 +14,12 @@ enum StickyyPreferences {
         defaults.object(forKey: usesClipboardHistory) == nil
             ? true
             : defaults.bool(forKey: usesClipboardHistory)
+    }
+
+    static func clipboardHistoryItemLimit(
+        in defaults: UserDefaults = .standard
+    ) -> Int {
+        defaults.integer(forKey: clipboardHistoryLimit) == 7 ? 7 : 5
     }
 }
 
@@ -28,6 +35,9 @@ extension Notification.Name {
     )
     static let clipboardHistoryStateDidChange = Notification.Name(
         "Stickyy.clipboardHistoryStateDidChange"
+    )
+    static let onboardingDidFinish = Notification.Name(
+        "Stickyy.onboardingDidFinish"
     )
 }
 

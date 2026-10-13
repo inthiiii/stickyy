@@ -80,6 +80,7 @@ struct ClipboardHistoryItem: Identifiable, Equatable {
 final class ClipboardHistoryController {
     private(set) var items: [ClipboardHistoryItem] = []
     private(set) var isEnabled: Bool
+    private(set) var itemLimit: Int
     private(set) var hasPasteableText = false
 
     @ObservationIgnored
@@ -100,7 +101,8 @@ final class ClipboardHistoryController {
     init(
         pasteboard: NSPasteboard = .general,
         monitoringEnabled: Bool = true,
-        initiallyEnabled: Bool? = nil
+        initiallyEnabled: Bool? = nil,
+        initialItemLimit: Int? = nil
     ) {
         self.pasteboard = pasteboard
         allowsBackgroundMonitoring = monitoringEnabled
@@ -109,6 +111,12 @@ final class ClipboardHistoryController {
                 ? StickyyPreferences.clipboardHistoryEnabled()
                 : true)
         isEnabled = enabled
+        itemLimit = Self.validatedItemLimit(
+            initialItemLimit
+                ?? (monitoringEnabled
+                    ? StickyyPreferences.clipboardHistoryItemLimit()
+                    : 5)
+        )
         lastChangeCount = -1
 
         if monitoringEnabled {
@@ -120,6 +128,9 @@ final class ClipboardHistoryController {
                 Task { @MainActor [weak self] in
                     self?.setEnabled(
                         StickyyPreferences.clipboardHistoryEnabled()
+                    )
+                    self?.setItemLimit(
+                        StickyyPreferences.clipboardHistoryItemLimit()
                     )
                 }
             }
@@ -187,6 +198,13 @@ final class ClipboardHistoryController {
         )
     }
 
+    func setItemLimit(_ limit: Int) {
+        let validatedLimit = Self.validatedItemLimit(limit)
+        guard itemLimit != validatedLimit else { return }
+        itemLimit = validatedLimit
+        trimToItemLimit()
+    }
+
     func item(at index: Int) -> ClipboardHistoryItem? {
         guard items.indices.contains(index) else { return nil }
         return items[index]
@@ -211,12 +229,19 @@ final class ClipboardHistoryController {
 
     #if DEBUG
     func seedForUITesting(text: String) {
+        seedForUITesting(texts: [text])
+    }
+
+    func seedForUITesting(texts: [String]) {
+        guard let latestText = texts.last else { return }
         pasteboard.clearContents()
-        _ = pasteboard.setString(text, forType: .string)
+        _ = pasteboard.setString(latestText, forType: .string)
         lastChangeCount = pasteboard.changeCount
-        hasPasteableText = !text.isEmpty
+        hasPasteableText = !latestText.isEmpty
         if isEnabled {
-            record(.text(text))
+            for text in texts where !text.isEmpty {
+                record(.text(text))
+            }
         }
     }
     #endif
@@ -269,9 +294,17 @@ final class ClipboardHistoryController {
     private func record(_ content: ClipboardHistoryContent) {
         items.removeAll { $0.content == content }
         items.insert(ClipboardHistoryItem(content: content), at: 0)
-        if items.count > 5 {
-            items.removeLast(items.count - 5)
+        trimToItemLimit()
+    }
+
+    private func trimToItemLimit() {
+        if items.count > itemLimit {
+            items.removeLast(items.count - itemLimit)
         }
+    }
+
+    private static func validatedItemLimit(_ proposedLimit: Int) -> Int {
+        proposedLimit == 7 ? 7 : 5
     }
 
     private func startMonitoring() {

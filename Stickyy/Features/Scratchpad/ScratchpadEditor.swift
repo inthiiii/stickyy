@@ -144,7 +144,7 @@ private final class EscapeHandlingTextView: NSTextView {
         if modifiers == .command,
            let characters = event.charactersIgnoringModifiers,
            let number = Int(characters),
-           (1...5).contains(number) {
+           (1...7).contains(number) {
             onQuickPaste(number - 1)
             return true
         }

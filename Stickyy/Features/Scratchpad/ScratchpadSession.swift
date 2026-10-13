@@ -104,6 +104,29 @@ final class ScratchpadSession {
         requestEditorFocus()
     }
 
+    func prepareWelcomeScratchpad() {
+        if !text.isEmpty || !activeAttachments.isEmpty {
+            createScratchpad()
+        }
+        renameScratchpad(
+            id: activeScratchpadID,
+            to: String(localized: "Welcome to Stickyy")
+        )
+        text = String(
+            localized: """
+            Welcome to Stickyy 👋
+
+            Press ⌃⌥Space to open your scratchpad from anywhere.
+
+            Copy text, images, or files to see them in Clipboard Pills. Double-click a pill to copy it again, or press ⌘1–⌘7 to paste it into this scratchpad.
+
+            Your thoughts stay on this Mac.
+            """
+        )
+        flush()
+        requestEditorFocus()
+    }
+
     func addAttachments(from content: ClipboardHistoryContent) {
         guard let index = activeIndex else { return }
         do {

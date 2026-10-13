@@ -11,6 +11,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var globalShortcutController: GlobalShortcutController?
     private var clipboardHistoryController: ClipboardHistoryController?
     private var onboardingController: OnboardingController?
+    private var onboardingObserver: NSObjectProtocol?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -43,6 +44,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 forKey: StickyyPreferences.usesClipboardHistory
             )
             UserDefaults.standard.removeObject(
+                forKey: StickyyPreferences.clipboardHistoryLimit
+            )
+            UserDefaults.standard.removeObject(
                 forKey: StickyyPreferences.globalShortcut
             )
             do {
@@ -66,15 +70,31 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         } else {
             nil
         }
+        let clipboardTestItemCount: Int? = if let argumentIndex =
+            CommandLine.arguments.firstIndex(
+                of: "--ui-testing-clipboard-item-count"
+            ), CommandLine.arguments.indices.contains(argumentIndex + 1) {
+            Int(CommandLine.arguments[argumentIndex + 1])
+        } else {
+            nil
+        }
         let clipboardHistoryDisabledForTesting = CommandLine.arguments.contains(
             "--ui-testing-disable-clipboard-history"
         )
         let clipboardHistoryController = ClipboardHistoryController(
-            monitoringEnabled: clipboardTestText == nil,
-            initiallyEnabled: clipboardHistoryDisabledForTesting ? false : nil
+            monitoringEnabled: clipboardTestText == nil
+                && clipboardTestItemCount == nil,
+            initiallyEnabled: clipboardHistoryDisabledForTesting ? false : nil,
+            initialItemLimit: clipboardTestItemCount
         )
         if let clipboardTestText {
             clipboardHistoryController.seedForUITesting(text: clipboardTestText)
+        } else if let clipboardTestItemCount {
+            clipboardHistoryController.seedForUITesting(
+                texts: (1...clipboardTestItemCount).map {
+                    "Clipboard item \($0)"
+                }
+            )
         }
         #else
         let clipboardHistoryController = ClipboardHistoryController()
@@ -108,6 +128,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         let onboardingController = OnboardingController()
         self.onboardingController = onboardingController
+        onboardingObserver = NotificationCenter.default.addObserver(
+            forName: .onboardingDidFinish,
+            object: nil,
+            queue: .main
+        ) { [weak session, weak statusItemController] _ in
+            Task { @MainActor in
+                session?.prepareWelcomeScratchpad()
+                statusItemController?.showScratchpad()
+            }
+        }
         if !CommandLine.arguments.contains(where: { $0.hasPrefix("--ui-testing") }),
            !UserDefaults.standard.bool(forKey: StickyyPreferences.hasCompletedOnboarding) {
             Task { @MainActor in
