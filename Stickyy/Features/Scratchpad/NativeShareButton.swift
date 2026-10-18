@@ -55,6 +55,7 @@ final class NativeShareControl: NSButton, NSSharingServiceDelegate {
             item.target = self
             item.tag = index
             item.image = service.image
+            item.setAccessibilityIdentifier("sharingService_\(index)")
             menu.addItem(item)
         }
 

@@ -10,8 +10,8 @@ release remains available later if the team enrolls.
 | Field | Value |
 | --- | --- |
 | Product | Stickyy |
-| Version | 1.0.0 |
-| Build | 1 |
+| Version | 1.0.1 |
+| Build | 2 |
 | Bundle ID | `com.inthiiii.Stickyy` |
 | Team ID | `W646PJF57Y` |
 | Minimum macOS | 26.0 |
@@ -26,7 +26,7 @@ release remains available later if the team enrolls.
 - The privacy policy documents local storage and the absence of tracking.
 - `Scripts/check-release-readiness.sh` audits the local release prerequisites.
 - `Scripts/build-public-test-dmg.sh` builds, ad-hoc signs, verifies, packages,
-  and checksums a no-membership public test release.
+  styles, and checksums a no-membership public test release.
 - `Scripts/release.sh` archives, signs, packages, notarizes, staples, verifies,
   and checksums the disk image without storing credentials in the repository.
 - `Config/ExportOptions-DeveloperID.plist` supports Xcode's Developer ID export
@@ -44,17 +44,21 @@ Scripts/build-public-test-dmg.sh
 
 On success it produces:
 
-- `.build/PublicTest/Stickyy-1.0.0.dmg`
-- `.build/PublicTest/Stickyy-1.0.0.dmg.sha256`
+- `.build/PublicTest/Stickyy-1.0.1.dmg`
+- `.build/PublicTest/Stickyy-1.0.1.dmg.sha256`
 
 The app is ad-hoc signed and is not notarized. On first launch, a tester must:
 
-1. Drag Stickyy into Applications.
-2. Control-click Stickyy in Applications and choose **Open**.
-3. Confirm **Open** in the macOS prompt.
+1. Drag Stickyy into Applications using the installer window.
+2. Try to open Stickyy. If macOS blocks it, choose **Done** rather than moving
+   the app to Trash.
+3. Go to **System Settings → Privacy & Security**, click **Open Anyway** beside
+   Stickyy, and confirm **Open**.
 
-After this one-time approval, Stickyy opens normally. The website and GitHub
-release must keep this disclosure visible.
+After this one-time approval, Stickyy opens normally. Developer ID signing and
+Apple notarization are the only supported way to remove this Gatekeeper approval
+from a direct internet download. The website and GitHub release must keep this
+disclosure visible while the public build is ad-hoc signed.
 
 ## Optional notarized production release
 
@@ -84,31 +88,31 @@ Scripts/release.sh
 The release script stops before building if the signing identity or notarization
 profile is unavailable. On success it produces:
 
-- `.build/Release/Stickyy-1.0.0.dmg`
-- `.build/Release/Stickyy-1.0.0.dmg.sha256`
+- `.build/Release/Stickyy-1.0.1.dmg`
+- `.build/Release/Stickyy-1.0.1.dmg.sha256`
 
 ## Publish the GitHub release
 
 1. Confirm the full automated suite passes from a clean checkout.
 2. Run the free public-test script, or the production script if Developer ID is
    available.
-3. Create the annotated tag `v1.0.0` from the approved release commit.
-4. Create a GitHub release from that tag using the `1.0.0` changelog section.
+3. Create the annotated tag `v1.0.1` from the approved release commit.
+4. Create a GitHub release from that tag using the `1.0.1` changelog section.
 5. Upload the `.dmg` and `.sha256` files.
 6. Download the public asset on a separate Mac and verify its documented opening
    flow.
-7. Confirm the website changes its primary button to **Download Stickyy 1.0.0**.
+7. Confirm the website changes its primary button to **Download Stickyy 1.0.1**.
 
 For the free build, release notes must say that it is ad-hoc signed and not
 notarized. Never describe it as Apple-verified or notarized.
 
 ## Website hosting
 
-The static site lives in `Website/`. Its GitHub Pages workflow deploys the site
-after changes reach `main`. GitHub Pages must be configured once in repository
-Settings → Pages with **GitHub Actions** as the source. Until the first public
-`.dmg` exists, the site safely links visitors to the Releases page instead of a
-missing asset.
+The static site lives in `Website/` and is deployed from that directory through
+Vercel. Vercel watches the GitHub `main` branch and serves `Website/dist` as the
+static output. The former ChatGPT Sites publication is private and is no longer
+the public download endpoint. Until a public `.dmg` exists, the site safely links
+visitors to the Releases page instead of a missing asset.
 
 ## App Store option
 

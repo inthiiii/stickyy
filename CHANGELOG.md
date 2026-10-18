@@ -2,6 +2,15 @@
 
 All notable Stickyy changes are documented here.
 
+## 1.0.1 — Installer update
+
+- Replaced the plain disk image with a polished drag-to-Applications installer
+  window, clear visual guidance, and a first-launch notice.
+- Added an interactive three-step installation guide to the download website.
+- Migrated the public website from ChatGPT Sites to Vercel.
+- Clarified that eliminating macOS Gatekeeper approval requires Apple Developer
+  ID signing and notarization; the free public-test build remains ad-hoc signed.
+
 ## 1.0.0 — Release candidate
 
 - Instant menu-bar scratchpad with a configurable global shortcut.

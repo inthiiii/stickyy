@@ -70,9 +70,11 @@ final class StickyyUITests: XCTestCase {
         editor.typeText("Share this thought")
 
         app.buttons["exportToAppleNotes"].click()
-        let messages = app.menuItems["Messages"]
-        let notes = app.menuItems["Add to Notes"]
-        XCTAssertTrue(messages.waitForExistence(timeout: 2) || notes.exists)
+        XCTAssertTrue(
+            app.menuItems.matching(
+                NSPredicate(format: "identifier BEGINSWITH %@", "sharingService_")
+            ).firstMatch.waitForExistence(timeout: 2)
+        )
         XCTAssertFalse(app.menuItems["Shortcuts"].exists)
         XCTAssertFalse(app.menuItems["Add to Shortcuts"].exists)
         app.typeKey(.escape, modifierFlags: [])

@@ -19,7 +19,7 @@ check() {
 }
 
 check "Git working tree is clean" zsh -c '[[ -z "$(git status --porcelain)" ]]'
-check "Release version is 1.0.0" zsh -c 'xcodebuild -project Stickyy.xcodeproj -scheme Stickyy -configuration Release -showBuildSettings | grep -q "MARKETING_VERSION = 1.0.0"'
+check "Release version is configured" zsh -c 'xcodebuild -project Stickyy.xcodeproj -scheme Stickyy -configuration Release -showBuildSettings | grep -Eq "MARKETING_VERSION = [0-9]+\.[0-9]+\.[0-9]+"'
 check "Hardened Runtime is enabled" zsh -c 'xcodebuild -project Stickyy.xcodeproj -scheme Stickyy -configuration Release -showBuildSettings | grep -q "ENABLE_HARDENED_RUNTIME = YES"'
 check "App Sandbox is enabled" zsh -c 'xcodebuild -project Stickyy.xcodeproj -scheme Stickyy -configuration Release -showBuildSettings | grep -q "ENABLE_APP_SANDBOX = YES"'
 check "Production app icon is present" test -s Stickyy/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png

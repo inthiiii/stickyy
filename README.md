@@ -6,7 +6,7 @@ Stickyy is a fast, local-first macOS menu-bar scratchpad built with SwiftUI, App
 
 ## Current status
 
-Stickyy is a stable local-first scratchpad with automated quality, recovery, accessibility, and performance coverage while preserving its original minimal design. Phase 7 production-release preparation is in progress for version 1.0.0.
+Stickyy is a stable local-first scratchpad with automated quality, recovery, accessibility, and performance coverage while preserving its original minimal design. Version 1.0.1 adds a polished drag-to-Applications installer and clearer first-launch guidance.
 
 - Xcode 27 project
 - Swift 6 language mode and complete concurrency checking
@@ -68,7 +68,7 @@ Stickyy supports two direct-download paths. The free public-test build is ad-hoc
 Scripts/build-public-test-dmg.sh
 ```
 
-Because Apple does not notarize this build, a tester opens it the first time by Control-clicking **Stickyy**, choosing **Open**, and confirming **Open**. This is disclosed on the download page and in the release notes.
+Because Apple does not notarize this build, macOS may block its first launch. After attempting to open Stickyy, go to **System Settings → Privacy & Security**, click **Open Anyway** beside Stickyy, and confirm **Open**. This is disclosed in the installer, on the download page, and in the release notes.
 
 For a future Developer ID-signed and Apple-notarized production disk image, run:
 
@@ -79,7 +79,7 @@ Scripts/release.sh
 
 The production release script requires a valid Developer ID Application identity and a `Stickyy-Notary` keychain profile. It creates, notarizes, staples, verifies, and checksums the `.dmg` without storing credentials in the repository.
 
-The complete process is documented in [Docs/Phase-7-Production-Release.md](Docs/Phase-7-Production-Release.md). The static download website lives in [Website](Website).
+The complete process is documented in [Docs/Phase-7-Production-Release.md](Docs/Phase-7-Production-Release.md). The Vercel-hosted static download website lives in [Website](Website).
 
 ## Testing
 

@@ -74,6 +74,7 @@ h2 { font-size: clamp(42px, 5vw, 68px); }
 .requirements { color: #727b8b; font-size: 12px; }
 .install-note { max-width: 550px; margin-top: 10px; color: #8d97a8; font-size: 12px; line-height: 1.55; }
 .install-note strong { color: #bcc5d3; }
+.install-note a { color: #aecfff; text-decoration: underline; text-underline-offset: 3px; }
 
 .product-stage { position: relative; min-height: 490px; isolation: isolate; }
 .menu-bar { position: absolute; z-index: 4; top: 26px; right: 64px; display: flex; align-items: center; gap: 24px; color: #dce2ec; font-size: 15px; }
@@ -110,6 +111,13 @@ h2 { font-size: clamp(42px, 5vw, 68px); }
 
 .principles { min-height: 96px; padding: 0 24px; display: flex; align-items: center; justify-content: center; gap: 34px; border-block: 1px solid var(--line); color: #8f98a8; font-size: 12px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
 .principles span { width: 3px; height: 3px; border-radius: 50%; background: var(--blue); }
+.install-guide { width: min(1100px, calc(100% - 40px)); margin: 0 auto; padding: 130px 0 20px; }
+.install-steps { margin: 52px 0 24px; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; list-style: none; counter-reset: steps; }
+.install-steps li { min-height: 225px; padding: 28px; display: flex; align-items: flex-start; gap: 18px; border: 1px solid var(--line); border-radius: 24px; background: linear-gradient(145deg, rgba(255,255,255,.052), rgba(255,255,255,.018)); }
+.install-steps li > strong { flex: 0 0 38px; height: 38px; display: grid; place-items: center; border: 1px solid rgba(129,184,255,.3); border-radius: 50%; color: var(--blue); background: rgba(129,184,255,.08); }
+.install-steps h3 { margin: 5px 0 10px; font-size: 19px; letter-spacing: -.025em; }
+.install-steps p { margin: 0; color: var(--muted); font-size: 14px; }
+.install-footnote { color: #778191; font-size: 12px; }
 .features { width: min(1100px, calc(100% - 40px)); margin: 0 auto; padding: 140px 0; }
 .section-intro { margin-bottom: 60px; }
 .feature-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
@@ -151,11 +159,12 @@ footer { width: min(1180px, calc(100% - 40px)); min-height: 110px; margin: 0 aut
   .scratchpad { right: 0; width: 100%; }
   .pills { right: 10px; }
   .feature-wide { grid-template-columns: 1fr; }
+  .install-steps { grid-template-columns: 1fr; }
   .principles { gap: 15px; }
 }
 
 @media (max-width: 620px) {
-  .hero, .features { width: min(100% - 28px, 1180px); }
+  .hero, .features, .install-guide { width: min(100% - 28px, 1180px); }
   .hero { min-height: auto; padding-bottom: 60px; }
   h1 { font-size: 50px; }
   .actions { align-items: stretch; flex-direction: column; }
