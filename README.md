@@ -79,7 +79,7 @@ Scripts/release.sh
 
 The production release script requires a valid Developer ID Application identity and a `Stickyy-Notary` keychain profile. It creates, notarizes, staples, verifies, and checksums the `.dmg` without storing credentials in the repository.
 
-The complete process is documented in [Docs/Phase-7-Production-Release.md](Docs/Phase-7-Production-Release.md). The Vercel-hosted static download website lives in [Website](Website).
+The complete process is documented in [Docs/Phase-7-Production-Release.md](Docs/Phase-7-Production-Release.md). The source for the public [Stickyy website](https://stickyyformac.vercel.app) lives in [Website](Website).
 
 ## Testing
 

@@ -108,11 +108,12 @@ notarized. Never describe it as Apple-verified or notarized.
 
 ## Website hosting
 
-The static site lives in `Website/` and is deployed from that directory through
-Vercel. Vercel watches the GitHub `main` branch and serves `Website/dist` as the
+The static site lives in `Website/` and is deployed at
+<https://stickyyformac.vercel.app> through Vercel. Vercel watches the GitHub
+`main` branch and serves `Website/dist` as the
 static output. The former ChatGPT Sites publication is private and is no longer
-the public download endpoint. Until a public `.dmg` exists, the site safely links
-visitors to the Releases page instead of a missing asset.
+the public download endpoint. The primary download button resolves the latest
+GitHub Release and links directly to its `.dmg` asset.
 
 ## App Store option
 
