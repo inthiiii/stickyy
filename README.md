@@ -6,7 +6,7 @@ Stickyy is a fast, local-first macOS menu-bar scratchpad built with SwiftUI, App
 
 ## Current status
 
-Stickyy is a stable local-first scratchpad with automated quality, recovery, accessibility, and performance coverage while preserving its original minimal design. Version 1.0.1 adds a polished drag-to-Applications installer and clearer first-launch guidance.
+Stickyy 1.1 is a stable local-first scratchpad with automated quality, recovery, accessibility, and performance coverage while preserving its original minimal design. Its global shortcut can now open a focused floating note above every app, and signed in-app updates keep future releases one click away.
 
 - Xcode 27 project
 - Swift 6 language mode and complete concurrency checking
@@ -23,6 +23,8 @@ Stickyy is a stable local-first scratchpad with automated quality, recovery, acc
 - Create, rename, pin, search, and delete workflows
 - Destructive delete confirmation and automatic blank-note replacement
 - Recordable global keyboard shortcut (Control–Option–Space by default)
+- Optional movable, resizable floating note that stays above apps and full-screen Spaces
+- Choose whether the floating shortcut reuses the active note or creates a new one
 - Optional launch at login
 - A real Settings window available from the menu-bar context menu
 - Original minimal material appearance by default
@@ -42,6 +44,7 @@ Stickyy is a stable local-first scratchpad with automated quality, recovery, acc
 - Xcode static analysis plus Address Sanitizer and Thread Sanitizer validation
 - Release-build CPU, memory, and leak baselines
 - Production AppIcon, privacy policy, direct-download release tooling, and one-page website
+- Signed Sparkle update feed with automatic checks and a manual Check for Updates action
 
 ## Requirements
 

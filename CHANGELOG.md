@@ -2,7 +2,7 @@
 
 All notable Stickyy changes are documented here.
 
-## 1.1.0 — Floating notes and in-app updates (prepared, not published)
+## 1.1.0 — Floating notes and in-app updates
 
 - Added a movable, resizable, always-on-top floating note triggered by the
   global shortcut, including full-screen Space support.
