@@ -2,6 +2,16 @@
 
 All notable Stickyy changes are documented here.
 
+## 1.1.1 — Compatibility and onboarding update
+
+- Expanded compatibility from macOS 26 to macOS 14 and guarded Liquid Glass
+  behind its macOS 26 availability requirement.
+- Fixed public-build startup by signing Stickyy and every embedded Sparkle
+  component with one consistent identity.
+- Added a dedicated floating-note preview to the welcome tour.
+- Moved public downloads and the Sparkle update archive onto the Stickyy domain.
+- Removed public GitHub navigation and source links from the website.
+
 ## 1.1.0 — Floating notes and in-app updates
 
 - Added a movable, resizable, always-on-top floating note triggered by the

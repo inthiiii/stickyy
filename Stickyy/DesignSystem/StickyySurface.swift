@@ -13,7 +13,13 @@ private struct StickyySurfaceModifier: ViewModifier {
             content
                 .background(Color(nsColor: .windowBackgroundColor))
         } else if usesLiquidGlass {
-            content.glassEffect(.regular, in: Rectangle())
+            if #available(macOS 26.0, *) {
+                content.glassEffect(.regular, in: Rectangle())
+            } else {
+                content.background {
+                    Rectangle().fill(.regularMaterial)
+                }
+            }
         } else {
             content
                 .background {
@@ -43,7 +49,11 @@ private struct StickyyPillSurfaceModifier<S: Shape>: ViewModifier {
         if reduceTransparency {
             content.background(Color(nsColor: .windowBackgroundColor), in: shape)
         } else if usesLiquidGlass {
-            content.glassEffect(.regular, in: shape)
+            if #available(macOS 26.0, *) {
+                content.glassEffect(.regular, in: shape)
+            } else {
+                content.background(.regularMaterial, in: shape)
+            }
         } else {
             content.background(.regularMaterial, in: shape)
         }

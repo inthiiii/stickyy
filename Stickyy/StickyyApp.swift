@@ -111,19 +111,26 @@ private struct StickyySettingsView: View {
             }
 
             Section("Appearance") {
-                Toggle("Use Liquid Glass", isOn: $usesLiquidGlass)
-                    .accessibilityIdentifier("liquidGlassToggle")
-                Text(
-                    usesLiquidGlass
-                        ? String(
-                            localized: "Liquid Glass changes only the window surface. The minimal layout stays the same."
-                        )
-                        : String(
-                            localized: "The original minimal material is the default."
-                        )
-                )
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                if #available(macOS 26.0, *) {
+                    Toggle("Use Liquid Glass", isOn: $usesLiquidGlass)
+                        .accessibilityIdentifier("liquidGlassToggle")
+                    Text(
+                        usesLiquidGlass
+                            ? String(
+                                localized: "Liquid Glass changes only the window surface. The minimal layout stays the same."
+                            )
+                            : String(
+                                localized: "The original minimal material is the default."
+                            )
+                    )
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                } else {
+                    Text("The original minimal material is used on this version of macOS. Liquid Glass is available on macOS 26 or later.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .accessibilityIdentifier("liquidGlassUnavailableMessage")
+                }
             }
 
             Section("Updates") {

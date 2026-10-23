@@ -10,7 +10,7 @@ Stickyy 1.1 is a stable local-first scratchpad with automated quality, recovery,
 
 - Xcode 27 project
 - Swift 6 language mode and complete concurrency checking
-- macOS 26 deployment target
+- macOS 14 deployment target, with Liquid Glass available on macOS 26 or later
 - App Sandbox and Hardened Runtime
 - Menu-bar-only application with a reusable popover
 - Native AppKit text editor with focus, selection, undo/redo, and scrolling
@@ -48,7 +48,7 @@ Stickyy 1.1 is a stable local-first scratchpad with automated quality, recovery,
 
 ## Requirements
 
-- macOS 26 or later
+- macOS 14 or later
 - Xcode 27 or later
 
 ## Running
@@ -65,7 +65,7 @@ The default global shortcut is **Control–Option–Space**. Click its recorder 
 
 ## Direct-download releases
 
-Stickyy supports two direct-download paths. The free public-test build is ad-hoc signed and does not require an Apple Developer Program membership:
+Stickyy supports two direct-download paths. The free public-test build is uniformly development-signed and does not require an Apple Developer Program membership:
 
 ```sh
 Scripts/build-public-test-dmg.sh

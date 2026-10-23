@@ -4,10 +4,10 @@ set -euo pipefail
 
 root_dir="${0:A:h:h}"
 build_dir="$root_dir/.build/PublicTest"
-updates_dir="$root_dir/.build/Updates"
 derived_data="$build_dir/DerivedData"
 sparkle_tools="$derived_data/SourcePackages/artifacts/sparkle/Sparkle/bin"
 version="$(xcodebuild -project "$root_dir/Stickyy.xcodeproj" -scheme Stickyy -configuration Release -showBuildSettings | awk '/MARKETING_VERSION/ { print $3; exit }')"
+updates_dir="$root_dir/.build/Updates/$version"
 dmg_name="Stickyy-$version.dmg"
 dmg_path="$build_dir/$dmg_name"
 release_notes="$root_dir/Docs/Release-Notes-$version.md"
@@ -39,7 +39,7 @@ if [[ -f "$release_notes" ]]; then
 fi
 
 "$sparkle_tools/generate_appcast" \
-  --download-url-prefix "https://github.com/inthiiii/stickyy/releases/download/v$version/" \
+  --download-url-prefix "https://stickyyformac.vercel.app/downloads/" \
   --link "https://stickyyformac.vercel.app" \
   --embed-release-notes \
   --maximum-versions 3 \
@@ -51,5 +51,5 @@ ditto "$appcast_path" "$root_dir/Website/dist/appcast.xml"
 print "Sparkle update prepared locally:"
 print "  $appcast_path"
 print "  $root_dir/Website/dist/appcast.xml"
-print "Nothing has been uploaded. Publish the GitHub release before deploying"
-print "the appcast, otherwise its download URL will not exist yet."
+print "Nothing has been uploaded. Deploy the DMG and appcast together so the"
+print "update archive exists as soon as clients can discover it."

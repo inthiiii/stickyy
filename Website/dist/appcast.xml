@@ -3,31 +3,32 @@
     <channel>
         <title>Stickyy</title>
         <item>
-            <title>1.1.0</title>
-            <pubDate>Fri, 23 Oct 2026 18:57:30 +0530</pubDate>
+            <title>1.1.1</title>
+            <pubDate>Sat, 24 Oct 2026 01:40:53 +0530</pubDate>
             <link>https://stickyyformac.vercel.app</link>
-            <sparkle:version>3</sparkle:version>
-            <sparkle:shortVersionString>1.1.0</sparkle:shortVersionString>
-            <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
-            <description sparkle:format="markdown"><![CDATA[# Stickyy 1.1
+            <sparkle:version>4</sparkle:version>
+            <sparkle:shortVersionString>1.1.1</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <description sparkle:format="markdown"><![CDATA[# Stickyy 1.1.1
 
-## Floating Notes
+## Wider Mac compatibility
 
-- Press your Stickyy shortcut to toggle a clean, movable note above every app.
-- Keep working in the active menu-bar note or create a fresh note every time.
-- Floating notes work across Spaces and alongside full-screen apps.
-- The focused panel keeps the note editor only—no header, sharing button, or
-  Clipboard Pills.
-- The original material and Liquid Glass appearances both remain available.
+- Stickyy now supports macOS 14 and later on both Apple silicon and Intel Macs.
+- Liquid Glass remains available on macOS 26 and later; earlier systems use
+  Stickyy's original minimal material appearance.
+- Fixed a packaging-signature mismatch that could stop the downloaded app from
+  launching after installation.
 
-## In-app Updates
+## A clearer welcome
 
-- Added secure Sparkle updates with signed downloads and automatic checks.
-- Added **Check for Updates…** and an automatic-check toggle in Settings.
-- Existing v1.0.1 users need to install v1.1 manually once. Later releases can
-  be installed from inside Stickyy.
+- The welcome tour now includes an interactive preview of the floating note.
+
+## Distribution
+
+- Downloads and in-app update archives are now served directly from the
+  Stickyy website.
 ]]></description>
-            <enclosure url="https://github.com/inthiiii/stickyy/releases/download/v1.1.0/Stickyy-1.1.0.dmg" length="5196757" type="application/octet-stream" sparkle:edSignature="D3Qd9rR/r7e6dgG+Jwz2WXszrUxLSv72Uxbwtx0VQlkFyKkrpyMfIfc1qSCvgjMwUiobu9q1k25jvOsAcfKFCw=="/>
+            <enclosure url="https://stickyyformac.vercel.app/downloads/Stickyy-1.1.1.dmg" length="5294738" type="application/octet-stream" sparkle:edSignature="SHBLjdSxp4zVKd2u4C/IQ/hGc5Es7wxKL2Wn64jbRSg0bHs3P3r8LMcbVukVgqqAB/g9IB/aMH+BszXL1zMmCA=="/>
         </item>
     </channel>
 </rss>

@@ -16,6 +16,13 @@ dmg_path="$build_dir/Stickyy-$version.dmg"
 rw_dmg_path="$build_dir/Stickyy-$version-rw.dmg"
 checksum_path="$dmg_path.sha256"
 mounted_device=""
+signing_identity="${STICKYY_SIGNING_IDENTITY:-$(security find-identity -v -p codesigning | awk '/Apple Development:/ { print $2; exit }')}"
+
+if [[ -z "$signing_identity" ]]; then
+  print -u2 "No Apple Development signing identity is available."
+  print -u2 "Set STICKYY_SIGNING_IDENTITY to a valid identity hash and retry."
+  exit 1
+fi
 
 cleanup() {
   if [[ -n "$mounted_device" ]]; then
@@ -39,20 +46,20 @@ xcodebuild \
 sparkle_framework="$app_path/Contents/Frameworks/Sparkle.framework"
 sparkle_version="$sparkle_framework/Versions/B"
 
-# Sparkle contains privileged update helpers. Sign each nested component in
-# dependency order so their own entitlements are preserved, then sign the
-# framework and finally Stickyy itself. Do not use --deep for distribution.
-codesign --force --sign - --options runtime \
+# Sparkle contains privileged update helpers. Sign every nested component and
+# Stickyy with the same identity so Hardened Runtime library validation accepts
+# the embedded framework on other Macs. Do not use --deep for distribution.
+codesign --force --sign "$signing_identity" --options runtime \
   "$sparkle_version/XPCServices/Installer.xpc"
-codesign --force --sign - --options runtime --preserve-metadata=entitlements \
+codesign --force --sign "$signing_identity" --options runtime --preserve-metadata=entitlements \
   "$sparkle_version/XPCServices/Downloader.xpc"
-codesign --force --sign - --options runtime \
+codesign --force --sign "$signing_identity" --options runtime \
   "$sparkle_version/Autoupdate"
-codesign --force --sign - --options runtime \
+codesign --force --sign "$signing_identity" --options runtime \
   "$sparkle_version/Updater.app"
-codesign --force --sign - --options runtime \
+codesign --force --sign "$signing_identity" --options runtime \
   "$sparkle_framework"
-codesign --force --sign - --options runtime \
+codesign --force --sign "$signing_identity" --options runtime \
   --entitlements "$root_dir/Stickyy/Stickyy.entitlements" \
   "$app_path"
 
@@ -142,5 +149,5 @@ print "$checksum_value  ${dmg_path:t}" > "$checksum_path"
 echo "Public test release created:"
 echo "  $dmg_path"
 echo "  $checksum_path"
-echo "This build is ad-hoc signed and not Apple-notarized. Gatekeeper will require"
+echo "This build is development-signed and not Apple-notarized. Gatekeeper will require"
 echo "the user to approve it in System Settings > Privacy & Security on first launch."

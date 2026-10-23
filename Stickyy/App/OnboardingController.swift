@@ -67,6 +67,12 @@ private struct OnboardingView: View {
             accent: .blue
         ),
         OnboardingPage(
+            icon: "macwindow.on.rectangle", eyebrow: "FLOATING NOTE",
+            title: "Stay with the thought you are in.",
+            detail: "Press ⌃⌥Space for a focused, movable note above every app—even while you are working in full screen.",
+            accent: .mint
+        ),
+        OnboardingPage(
             icon: "hand.raised.fill", eyebrow: "YOURS, LOCALLY",
             title: "Simple by design. Private by default.",
             detail: "Your scratchpads stay on this Mac. Choose the original minimal surface or Liquid Glass anytime.",
@@ -105,9 +111,11 @@ private struct OnboardingView: View {
                     .multilineTextAlignment(.center).lineSpacing(3)
                     .frame(maxWidth: 420).padding(.top, 10)
 
-                if page == 2 {
-                    Toggle("Use Liquid Glass", isOn: $usesLiquidGlass)
-                        .toggleStyle(.switch).controlSize(.small).padding(.top, 14)
+                if page == 3 {
+                    if #available(macOS 26.0, *) {
+                        Toggle("Use Liquid Glass", isOn: $usesLiquidGlass)
+                            .toggleStyle(.switch).controlSize(.small).padding(.top, 14)
+                    }
                 } else if page == 1 {
                     HStack(spacing: 7) {
                         demoPill("link", "A useful link")
@@ -115,6 +123,9 @@ private struct OnboardingView: View {
                         demoPill("text.quote", "A thought")
                     }
                     .padding(.top, 14)
+                } else if page == 2 {
+                    floatingPanelPreview
+                        .padding(.top, 12)
                 }
 
                 Spacer()
@@ -154,5 +165,29 @@ private struct OnboardingView: View {
             .background(.regularMaterial, in: .capsule)
             .overlay { Capsule().strokeBorder(.white.opacity(0.16)) }
             .shadow(color: .black.opacity(0.12), radius: 5, y: 2)
+    }
+
+    private var floatingPanelPreview: some View {
+        VStack(alignment: .leading, spacing: 9) {
+            Text("A thought worth keeping")
+                .font(.system(size: 13, weight: .semibold, design: .rounded))
+            RoundedRectangle(cornerRadius: 2)
+                .fill(.secondary.opacity(0.28))
+                .frame(width: 154, height: 4)
+            RoundedRectangle(cornerRadius: 2)
+                .fill(.secondary.opacity(0.18))
+                .frame(width: 112, height: 4)
+        }
+        .padding(16)
+        .frame(width: 224, height: 88, alignment: .topLeading)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 15, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 15, style: .continuous)
+                .strokeBorder(.white.opacity(0.18))
+        }
+        .shadow(color: .black.opacity(0.2), radius: 12, y: 6)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Floating note preview")
+        .accessibilityIdentifier("onboardingFloatingPreview")
     }
 }

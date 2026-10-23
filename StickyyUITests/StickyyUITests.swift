@@ -426,6 +426,12 @@ final class StickyyUITests: XCTestCase {
         continueButton.click()
         XCTAssertTrue(continueButton.waitForExistence(timeout: 2))
         continueButton.click()
+        XCTAssertTrue(
+            app.descendants(matching: .any)["onboardingFloatingPreview"]
+                .waitForExistence(timeout: 2)
+        )
+        XCTAssertTrue(continueButton.waitForExistence(timeout: 2))
+        continueButton.click()
 
         let startButton = app.buttons["Start catching thoughts"]
         XCTAssertTrue(startButton.waitForExistence(timeout: 2))
