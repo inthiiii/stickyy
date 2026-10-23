@@ -115,4 +115,15 @@ struct PreferenceAndShortcutTests {
             !StickyyPreferences.automaticUpdateChecksEnabled(in: defaults)
         )
     }
+
+    @Test("Onboarding appears only until the user completes it")
+    func onboardingCompletion() throws {
+        let suiteName = "StickyyTests.\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        #expect(StickyyPreferences.shouldShowOnboarding(in: defaults))
+        defaults.set(true, forKey: StickyyPreferences.hasCompletedOnboarding)
+        #expect(!StickyyPreferences.shouldShowOnboarding(in: defaults))
+    }
 }

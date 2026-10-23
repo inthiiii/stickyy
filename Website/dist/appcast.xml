@@ -3,32 +3,42 @@
     <channel>
         <title>Stickyy</title>
         <item>
-            <title>1.1.1</title>
-            <pubDate>Sat, 24 Oct 2026 01:40:53 +0530</pubDate>
+            <title>1.2.1</title>
+            <pubDate>Sat, 24 Oct 2026 02:19:08 +0530</pubDate>
             <link>https://stickyyformac.vercel.app</link>
-            <sparkle:version>4</sparkle:version>
-            <sparkle:shortVersionString>1.1.1</sparkle:shortVersionString>
+            <sparkle:version>5</sparkle:version>
+            <sparkle:shortVersionString>1.2.1</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-            <description sparkle:format="markdown"><![CDATA[# Stickyy 1.1.1
+            <description sparkle:format="markdown"><![CDATA[# Stickyy 1.2.1
 
-## Wider Mac compatibility
+## Links that behave like links
 
-- Stickyy now supports macOS 14 and later on both Apple silicon and Intel Macs.
-- Liquid Glass remains available on macOS 26 and later; earlier systems use
-  Stickyy's original minimal material appearance.
-- Fixed a packaging-signature mismatch that could stop the downloaded app from
-  launching after installation.
+- URLs inside a scratchpad now appear in blue with an underline.
+- Click a detected URL to open it in the default browser.
 
-## A clearer welcome
+## More context, still minimal
 
-- The welcome tour now includes an interactive preview of the floating note.
+- Click **Stickyy** in the menu-bar scratchpad header to reveal the active note
+  title.
+- The title returns to **Stickyy** after five seconds or immediately when clicked
+  again.
 
-## Distribution
+## Faster clipboard capture
 
-- Downloads and in-app update archives are now served directly from the
-  Stickyy website.
+- The newest clipboard item appears as a compact button in the bottom-right of
+  the floating note.
+- Click it to insert text or attach the copied image or file.
+- The full Clipboard Pills shelf remains hidden from the floating note.
+
+## A clearer first launch and every update
+
+- New users reliably receive the interactive onboarding tour and welcome note.
+- Existing users receive a dedicated **Latest update 1.2.1 and the features**
+  scratchpad once after upgrading.
+- The Drag Stickyy into Applications window now preserves its custom installer
+  background and layout.
 ]]></description>
-            <enclosure url="https://stickyyformac.vercel.app/downloads/Stickyy-1.1.1.dmg" length="5294738" type="application/octet-stream" sparkle:edSignature="SHBLjdSxp4zVKd2u4C/IQ/hGc5Es7wxKL2Wn64jbRSg0bHs3P3r8LMcbVukVgqqAB/g9IB/aMH+BszXL1zMmCA=="/>
+            <enclosure url="https://stickyyformac.vercel.app/downloads/Stickyy-1.2.1.dmg" length="5333881" type="application/octet-stream" sparkle:edSignature="3nMLk9GOJhBceSinV96T7XleBt5jLeIBBeQ36wvjswd+cPKBKCXmQP1iHtE5W1G3js84WeSnyzDUML4fvt5yBw=="/>
         </item>
     </channel>
 </rss>

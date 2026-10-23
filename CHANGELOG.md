@@ -2,6 +2,19 @@
 
 All notable Stickyy changes are documented here.
 
+## 1.2.1 — Links, context, and smoother updates
+
+- URLs in scratchpads now appear as blue, underlined, clickable links.
+- Clicking the Stickyy header briefly reveals the active note title, then
+  automatically returns to the app name after five seconds.
+- Floating notes now offer the latest clipboard item in a compact bottom-right
+  button without bringing the full Clipboard Pills shelf into the panel.
+- First-time users reliably receive the onboarding tour and welcome note.
+- Existing users receive a dedicated “Latest update” scratchpad once per app
+  version, without replacing their current notes.
+- The public DMG now uses a Finder-compatible HFS+ layout and verifies that the
+  custom Drag to Applications design is saved before packaging.
+
 ## 1.1.1 — Compatibility and onboarding update
 
 - Expanded compatibility from macOS 26 to macOS 14 and guarded Liquid Glass

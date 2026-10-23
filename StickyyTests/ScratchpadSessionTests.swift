@@ -65,6 +65,30 @@ struct ScratchpadSessionTests {
         )
     }
 
+    @Test("An update creates a dedicated release-notes scratchpad")
+    func preparesLatestUpdateScratchpad() {
+        let original = Scratchpad(title: "Keep", text: "Existing thought")
+        let store = RecordingScratchpadStore([original])
+        let session = makeSession(store: store)
+
+        session.prepareLatestUpdateScratchpad(
+            title: "Latest update 1.2.1 and the features",
+            notes: "• Clickable links\n• Floating clipboard"
+        )
+
+        #expect(session.scratchpads.count == 2)
+        #expect(
+            session.activeTitle
+                == "Latest update 1.2.1 and the features"
+        )
+        #expect(session.text.contains("Clickable links"))
+        #expect(
+            session.scratchpads.first(where: { $0.id == original.id })?.text
+                == "Existing thought"
+        )
+        #expect(store.scratchpads.contains { $0.title.contains("1.2.1") })
+    }
+
     @Test("The remembered scratchpad becomes active")
     func restoresSelection() {
         let first = Scratchpad(title: "First", text: "One")

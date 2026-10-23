@@ -26,6 +26,8 @@ enum StickyyPreferences {
     static let usesFloatingPanelShortcut = "usesFloatingPanelShortcut"
     static let floatingNoteMode = "floatingNoteMode"
     static let automaticallyChecksForUpdates = "automaticallyChecksForUpdates"
+    static let lastPresentedReleaseNotesVersion =
+        "lastPresentedReleaseNotesVersion"
 
     static func clipboardHistoryEnabled(
         in defaults: UserDefaults = .standard
@@ -65,6 +67,12 @@ enum StickyyPreferences {
         defaults.object(forKey: automaticallyChecksForUpdates) == nil
             ? true
             : defaults.bool(forKey: automaticallyChecksForUpdates)
+    }
+
+    static func shouldShowOnboarding(
+        in defaults: UserDefaults = .standard
+    ) -> Bool {
+        !defaults.bool(forKey: hasCompletedOnboarding)
     }
 }
 

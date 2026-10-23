@@ -60,6 +60,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             UserDefaults.standard.removeObject(
                 forKey: StickyyPreferences.automaticallyChecksForUpdates
             )
+            UserDefaults.standard.removeObject(
+                forKey: StickyyPreferences.hasCompletedOnboarding
+            )
+            UserDefaults.standard.removeObject(
+                forKey: StickyyPreferences.lastPresentedReleaseNotesVersion
+            )
             do {
                 try store.deleteAllScratchpads()
             } catch {
@@ -126,7 +132,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             session: session,
             clipboardHistory: clipboardHistoryController
         )
-        let floatingPanelController = FloatingPanelController(session: session)
+        let floatingPanelController = FloatingPanelController(
+            session: session,
+            clipboardHistory: clipboardHistoryController
+        )
         let statusItemController = StatusItemController(
             popoverController: popoverController,
             floatingPanelController: floatingPanelController
@@ -137,6 +146,43 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         self.statusItemController = statusItemController
         self.floatingPanelController = floatingPanelController
         self.clipboardHistoryController = clipboardHistoryController
+
+        #if DEBUG
+        if let versionArgumentIndex = CommandLine.arguments.firstIndex(
+            of: "--ui-testing-existing-version"
+        ), CommandLine.arguments.indices.contains(versionArgumentIndex + 1) {
+            UserDefaults.standard.set(
+                true,
+                forKey: StickyyPreferences.hasCompletedOnboarding
+            )
+            UserDefaults.standard.set(
+                CommandLine.arguments[versionArgumentIndex + 1],
+                forKey: StickyyPreferences.lastPresentedReleaseNotesVersion
+            )
+        }
+        #endif
+
+        let hasCompletedOnboarding = UserDefaults.standard.bool(
+            forKey: StickyyPreferences.hasCompletedOnboarding
+        )
+        let lastReleaseNotesVersion = UserDefaults.standard.string(
+            forKey: StickyyPreferences.lastPresentedReleaseNotesVersion
+        )
+        let shouldPresentReleaseNotes = hasCompletedOnboarding
+            && lastReleaseNotesVersion != AppEnvironment.version
+
+        if shouldPresentReleaseNotes {
+            session.prepareLatestUpdateScratchpad()
+            UserDefaults.standard.set(
+                AppEnvironment.version,
+                forKey: StickyyPreferences.lastPresentedReleaseNotesVersion
+            )
+        } else if !hasCompletedOnboarding {
+            UserDefaults.standard.set(
+                AppEnvironment.version,
+                forKey: StickyyPreferences.lastPresentedReleaseNotesVersion
+            )
+        }
 
         let previousDefault = GlobalShortcut(
             keyCode: UInt32(kVK_Space),
@@ -169,11 +215,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 statusItemController?.showScratchpad()
             }
         }
-        if !CommandLine.arguments.contains(where: { $0.hasPrefix("--ui-testing") }),
-           !UserDefaults.standard.bool(forKey: StickyyPreferences.hasCompletedOnboarding) {
+        let isUITesting = CommandLine.arguments.contains {
+            $0.hasPrefix("--ui-testing")
+        }
+        if !isUITesting,
+           StickyyPreferences.shouldShowOnboarding() {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                onboardingController.show()
+            }
+        } else if shouldPresentReleaseNotes {
             Task { @MainActor in
                 try? await Task.sleep(for: .milliseconds(350))
-                onboardingController.show()
+                statusItemController.showScratchpad()
             }
         }
 

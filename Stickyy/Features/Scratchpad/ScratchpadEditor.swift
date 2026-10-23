@@ -61,6 +61,10 @@ struct ScratchpadEditor: NSViewRepresentable {
         textView.isGrammarCheckingEnabled = false
         textView.isAutomaticQuoteSubstitutionEnabled = true
         textView.isAutomaticDashSubstitutionEnabled = false
+        textView.linkTextAttributes = [
+            .foregroundColor: NSColor.linkColor,
+            .underlineStyle: NSUnderlineStyle.single.rawValue,
+        ]
         textView.onEscape = onEscape
         textView.onQuickPaste = onQuickPaste
         textView.onPasteAttachment = onPasteAttachment
@@ -68,6 +72,7 @@ struct ScratchpadEditor: NSViewRepresentable {
         textView.setAccessibilityIdentifier(accessibilityIdentifier)
 
         context.coordinator.textView = textView
+        context.coordinator.refreshDetectedLinks()
         context.coordinator.lastFocusRequest = focusRequest
         context.coordinator.lastInsertionID = insertionRequest?.id
         scrollView.documentView = textView
@@ -93,6 +98,7 @@ struct ScratchpadEditor: NSViewRepresentable {
                     length: 0
                 )
             )
+            context.coordinator.refreshDetectedLinks()
         }
 
         if context.coordinator.lastFocusRequest != focusRequest {
@@ -129,7 +135,35 @@ struct ScratchpadEditor: NSViewRepresentable {
 
         func textDidChange(_ notification: Notification) {
             guard let textView else { return }
+            refreshDetectedLinks()
             parent.text = textView.string
+        }
+
+        func refreshDetectedLinks() {
+            guard let textView,
+                  let textStorage = textView.textStorage else { return }
+            let fullRange = NSRange(
+                location: 0,
+                length: (textView.string as NSString).length
+            )
+            textStorage.beginEditing()
+            textStorage.removeAttribute(.link, range: fullRange)
+            if let detector = try? NSDataDetector(
+                types: NSTextCheckingResult.CheckingType.link.rawValue
+            ) {
+                detector.enumerateMatches(
+                    in: textView.string,
+                    range: fullRange
+                ) { result, _, _ in
+                    guard let result, let url = result.url else { return }
+                    textStorage.addAttribute(
+                        .link,
+                        value: url,
+                        range: result.range
+                    )
+                }
+            }
+            textStorage.endEditing()
         }
     }
 }

@@ -7,6 +7,8 @@ struct ScratchpadView: View {
     let onDismiss: () -> Void
 
     @State private var showsLibrary = false
+    @State private var showsActiveTitle = false
+    @State private var titleResetTask: Task<Void, Never>?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -38,6 +40,11 @@ struct ScratchpadView: View {
             height: StickyyMetrics.popoverHeight
         )
         .stickyySurface()
+        .onDisappear {
+            titleResetTask?.cancel()
+            titleResetTask = nil
+            showsActiveTitle = false
+        }
     }
 
     private var header: some View {
@@ -59,8 +66,30 @@ struct ScratchpadView: View {
                 }
             }
 
-            Text(AppEnvironment.productName)
+            Button {
+                toggleHeaderTitle()
+            } label: {
+                Text(
+                    showsActiveTitle
+                        ? session.activeTitle
+                        : AppEnvironment.productName
+                )
                 .font(.headline)
+                .lineLimit(1)
+                .contentTransition(.opacity)
+            }
+            .buttonStyle(.plain)
+            .help(
+                showsActiveTitle
+                    ? "Show Stickyy"
+                    : "Show the current note title"
+            )
+            .accessibilityLabel(
+                showsActiveTitle
+                    ? session.activeTitle
+                    : AppEnvironment.productName
+            )
+            .accessibilityIdentifier("scratchpadHeaderTitle")
 
             Spacer()
 
@@ -162,6 +191,32 @@ struct ScratchpadView: View {
             session.addAttachments(
                 from: .image(data: data, pasteboardType: pasteboardType, name: name)
             )
+        }
+    }
+
+    private func toggleHeaderTitle() {
+        titleResetTask?.cancel()
+        titleResetTask = nil
+
+        if showsActiveTitle {
+            withAnimation(.easeInOut(duration: 0.18)) {
+                showsActiveTitle = false
+            }
+            return
+        }
+
+        withAnimation(.easeInOut(duration: 0.18)) {
+            showsActiveTitle = true
+        }
+        titleResetTask = Task {
+            try? await Task.sleep(for: .seconds(5))
+            guard !Task.isCancelled else { return }
+            await MainActor.run {
+                withAnimation(.easeInOut(duration: 0.18)) {
+                    showsActiveTitle = false
+                }
+                titleResetTask = nil
+            }
         }
     }
 }

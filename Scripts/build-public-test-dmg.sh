@@ -77,6 +77,7 @@ touch "$staging_dir/.metadata_never_index"
 mkdir -p "$staging_dir/.background"
 xcrun swift "$background_renderer" "$background_svg" "$background_png"
 ditto "$background_png" "$staging_dir/.background/installer-background.png"
+SetFile -a V "$staging_dir/.background"
 
 if [[ -f "$dmg_path" ]]; then
   rm "$dmg_path"
@@ -95,6 +96,7 @@ fi
 hdiutil create \
   -volname Stickyy \
   -srcfolder "$staging_dir" \
+  -fs HFS+ \
   -ov \
   -format UDRW \
   "$rw_dmg_path"
@@ -128,10 +130,17 @@ tell application "Finder"
   set position of item "Stickyy.app" of volumeFolder to {170, 235}
   set position of item "Applications" of volumeFolder to {490, 235}
   update volumeFolder without registering applications
-  delay 2
+  delay 4
   close installerWindow
 end tell
 APPLESCRIPT
+
+if [[ ! -f "$mount_dir/.DS_Store" ]]; then
+  print -u2 "Finder did not save the installer-window design."
+  exit 1
+fi
+
+sync
 
 hdiutil detach "$mounted_device"
 mounted_device=""

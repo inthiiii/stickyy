@@ -152,6 +152,17 @@ final class ScratchpadSession {
         requestEditorFocus()
     }
 
+    func prepareLatestUpdateScratchpad(
+        title: String = AppEnvironment.latestUpdateTitle,
+        notes: String = AppEnvironment.latestUpdateNotes
+    ) {
+        createScratchpad()
+        renameScratchpad(id: activeScratchpadID, to: title)
+        text = notes
+        flush()
+        requestEditorFocus()
+    }
+
     func addAttachments(from content: ClipboardHistoryContent) {
         guard let index = activeIndex else { return }
         do {

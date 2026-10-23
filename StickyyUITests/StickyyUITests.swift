@@ -100,6 +100,48 @@ final class StickyyUITests: XCTestCase {
     }
 
     @MainActor
+    func testHeaderTemporarilyShowsTheActiveNoteTitle() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-reset-persistence",
+            "--ui-testing-open-scratchpad",
+        ]
+        app.launch()
+
+        XCTAssertTrue(
+            app.textViews["scratchpadEditor"].waitForExistence(timeout: 5)
+        )
+        let titleButton = app.buttons["scratchpadHeaderTitle"]
+        XCTAssertTrue(titleButton.exists)
+        XCTAssertEqual(titleButton.label, "Stickyy")
+
+        titleButton.click()
+        XCTAssertEqual(titleButton.label, "Untitled")
+
+        titleButton.click()
+        XCTAssertEqual(titleButton.label, "Stickyy")
+    }
+
+    @MainActor
+    func testURLIsExposedAsAClickableLink() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-reset-persistence",
+            "--ui-testing-open-scratchpad",
+        ]
+        app.launch()
+
+        let editor = app.textViews["scratchpadEditor"]
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+        editor.typeText("Visit https://stickyyformac.vercel.app today")
+
+        XCTAssertTrue(
+            app.links["https://stickyyformac.vercel.app"]
+                .waitForExistence(timeout: 2)
+        )
+    }
+
+    @MainActor
     func testClipboardPasteButtonAndKeyboardShortcutInsertText() {
         let app = XCUIApplication()
         app.launchArguments = [
@@ -521,6 +563,48 @@ final class StickyyUITests: XCTestCase {
         app.typeKey(.space, modifierFlags: [.control, .option])
         XCTAssertTrue(editor.waitForExistence(timeout: 5))
         XCTAssertEqual(editor.value as? String, "")
+    }
+
+    @MainActor
+    func testFloatingPanelCanInsertTheLatestClipboardItem() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-reset-persistence",
+            "--ui-testing-clipboard-text",
+            "Latest copied thought",
+            "--ui-testing-open-floating-panel",
+        ]
+        app.launch()
+
+        let editor = app.textViews["floatingScratchpadEditor"]
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+        let clipboardButton = app.buttons["floatingRecentClipboard"]
+        XCTAssertTrue(clipboardButton.waitForExistence(timeout: 2))
+        clipboardButton.click()
+        XCTAssertEqual(editor.value as? String, "Latest copied thought")
+    }
+
+    @MainActor
+    func testExistingInstallReceivesTheLatestUpdateNote() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-reset-persistence",
+            "--ui-testing-existing-version",
+            "1.1.1",
+        ]
+        app.launch()
+
+        let editor = app.textViews["scratchpadEditor"]
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+        XCTAssertTrue(
+            (editor.value as? String)?.contains("Stickyy 1.2.1 is ready")
+                == true
+        )
+        app.buttons["scratchpadHeaderTitle"].click()
+        XCTAssertEqual(
+            app.buttons["scratchpadHeaderTitle"].label,
+            "Latest update 1.2.1 and the features"
+        )
     }
 
     @MainActor

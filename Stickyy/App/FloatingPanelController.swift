@@ -6,7 +6,10 @@ final class FloatingPanelController: NSObject, NSWindowDelegate {
     private let session: ScratchpadSession
     private let panel: FloatingNotePanel
 
-    init(session: ScratchpadSession) {
+    init(
+        session: ScratchpadSession,
+        clipboardHistory: ClipboardHistoryController
+    ) {
         self.session = session
         panel = FloatingNotePanel(
             contentRect: NSRect(
@@ -48,6 +51,7 @@ final class FloatingPanelController: NSObject, NSWindowDelegate {
         panel.contentViewController = NSHostingController(
             rootView: FloatingScratchpadView(
                 session: session,
+                clipboardHistory: clipboardHistory,
                 onDismiss: { [weak self] in
                     self?.close()
                 }
