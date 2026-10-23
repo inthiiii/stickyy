@@ -26,6 +26,15 @@ private struct StickyySettingsView: View {
     @AppStorage(StickyyPreferences.clipboardHistoryLimit)
     private var clipboardHistoryLimit = 5
 
+    @AppStorage(StickyyPreferences.usesFloatingPanelShortcut)
+    private var usesFloatingPanelShortcut = true
+
+    @AppStorage(StickyyPreferences.floatingNoteMode)
+    private var floatingNoteMode = FloatingNoteMode.recent.rawValue
+
+    @AppStorage(StickyyPreferences.automaticallyChecksForUpdates)
+    private var automaticallyChecksForUpdates = true
+
     @State private var launchesAtLogin = SMAppService.mainApp.status == .enabled
     @State private var loginItemMessage: String?
     @State private var showsUserGuide = false
@@ -49,6 +58,34 @@ private struct StickyySettingsView: View {
                 }
                 Text("Click the shortcut, then press your preferred key combination. The default is ⌃⌥Space.")
                     .font(.caption).foregroundStyle(.secondary)
+            }
+
+            Section("Floating Note") {
+                Toggle(
+                    "Open a Floating Note with the Shortcut",
+                    isOn: $usesFloatingPanelShortcut
+                )
+                .accessibilityIdentifier("floatingPanelToggle")
+
+                Picker("When Opened", selection: $floatingNoteMode) {
+                    ForEach(FloatingNoteMode.allCases) { mode in
+                        Text(mode.title).tag(mode.rawValue)
+                    }
+                }
+                .disabled(!usesFloatingPanelShortcut)
+                .accessibilityIdentifier("floatingNoteModePicker")
+
+                Text(
+                    usesFloatingPanelShortcut
+                        ? String(
+                            localized: "The shortcut opens a movable note above every app. Clipboard Pills, the header, and sharing stay hidden."
+                        )
+                        : String(
+                            localized: "The shortcut opens the regular menu-bar scratchpad."
+                        )
+                )
+                .font(.caption)
+                .foregroundStyle(.secondary)
             }
 
             Section("Clipboard Pills") {
@@ -89,6 +126,23 @@ private struct StickyySettingsView: View {
                 .foregroundStyle(.secondary)
             }
 
+            Section("Updates") {
+                Toggle(
+                    "Automatically Check for Updates",
+                    isOn: $automaticallyChecksForUpdates
+                )
+                .accessibilityIdentifier("automaticUpdateChecksToggle")
+
+                Button("Check for Updates…") {
+                    UpdateController.shared.checkForUpdates()
+                }
+                .accessibilityIdentifier("checkForUpdates")
+
+                Text("Stickyy securely checks the update feed and can install future releases without downloading another DMG manually.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
             Section("Help") {
                 Button("Show Welcome Tour…") {
                     OnboardingController().show()
@@ -103,7 +157,7 @@ private struct StickyySettingsView: View {
         }
         .formStyle(.grouped)
         .padding(6)
-        .frame(width: 450, height: 540)
+        .frame(width: 470, height: 700)
         .navigationTitle("Stickyy Settings")
         .onAppear { refreshLoginItemState() }
         .onChange(of: usesClipboardHistory) {
@@ -116,6 +170,16 @@ private struct StickyySettingsView: View {
             NotificationCenter.default.post(
                 name: .clipboardHistoryPreferenceDidChange,
                 object: nil
+            )
+        }
+        .onAppear {
+            UpdateController.shared.setAutomaticChecks(
+                automaticallyChecksForUpdates
+            )
+        }
+        .onChange(of: automaticallyChecksForUpdates) {
+            UpdateController.shared.setAutomaticChecks(
+                automaticallyChecksForUpdates
             )
         }
         .sheet(isPresented: $showsUserGuide) {
@@ -180,7 +244,12 @@ private struct StickyyUserGuideView: View {
             guideRow(
                 icon: "keyboard",
                 title: "Open from anywhere",
-                detail: "Press ⌃⌥Space. You can record another shortcut in Settings."
+                detail: "Press ⌃⌥Space to toggle the floating note. Disable Floating Note in Settings to use the regular menu-bar scratchpad instead."
+            )
+            guideRow(
+                icon: "macwindow.on.rectangle",
+                title: "Keep a note above every app",
+                detail: "Move and resize the floating note anywhere. Choose whether the shortcut opens your recent note or creates a new one."
             )
             guideRow(
                 icon: "clipboard",
@@ -196,6 +265,11 @@ private struct StickyyUserGuideView: View {
                 icon: "square.and.arrow.up",
                 title: "Share a thought",
                 detail: "Use the share button to send the current scratchpad to Notes, Messages, or another available app."
+            )
+            guideRow(
+                icon: "arrow.triangle.2.circlepath",
+                title: "Stay up to date",
+                detail: "Use Check for Updates in Settings. Automatic update checks can be turned on or off at any time."
             )
         }
         .padding(24)

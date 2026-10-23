@@ -8,6 +8,8 @@ struct ScratchpadEditor: NSViewRepresentable {
     let onQuickPaste: (Int) -> Void
     let onPasteAttachment: (ClipboardHistoryContent) -> Void
     let onEscape: () -> Void
+    var accessibilityIdentifier = "scratchpadEditor"
+    var onInsertionApplied: (UUID) -> Void = { _ in }
 
     func makeCoordinator() -> Coordinator {
         Coordinator(parent: self)
@@ -23,7 +25,7 @@ struct ScratchpadEditor: NSViewRepresentable {
         scrollView.setAccessibilityLabel(
             String(localized: "Scratchpad editor")
         )
-        scrollView.setAccessibilityIdentifier("scratchpadScrollView")
+        scrollView.setAccessibilityIdentifier("\(accessibilityIdentifier)ScrollView")
 
         let textView = EscapeHandlingTextView()
         textView.delegate = context.coordinator
@@ -63,7 +65,7 @@ struct ScratchpadEditor: NSViewRepresentable {
         textView.onQuickPaste = onQuickPaste
         textView.onPasteAttachment = onPasteAttachment
         textView.setAccessibilityLabel(String(localized: "Scratchpad"))
-        textView.setAccessibilityIdentifier("scratchpadEditor")
+        textView.setAccessibilityIdentifier(accessibilityIdentifier)
 
         context.coordinator.textView = textView
         context.coordinator.lastFocusRequest = focusRequest
@@ -101,11 +103,16 @@ struct ScratchpadEditor: NSViewRepresentable {
         if let insertionRequest,
            context.coordinator.lastInsertionID != insertionRequest.id {
             context.coordinator.lastInsertionID = insertionRequest.id
+            guard insertionRequest.consume() else { return }
             textView.window?.makeFirstResponder(textView)
             textView.insertText(
                 insertionRequest.text,
                 replacementRange: textView.selectedRange()
             )
+            let insertionID = insertionRequest.id
+            Task { @MainActor in
+                onInsertionApplied(insertionID)
+            }
         }
     }
 

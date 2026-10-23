@@ -381,6 +381,16 @@ final class StickyyUITests: XCTestCase {
             app.descendants(matching: .any)["clipboardHistoryLimitPicker"].exists
         )
         XCTAssertTrue(app.buttons["showUserGuide"].exists)
+        XCTAssertTrue(
+            app.descendants(matching: .any)["floatingPanelToggle"].exists
+        )
+        XCTAssertTrue(
+            app.descendants(matching: .any)["floatingNoteModePicker"].exists
+        )
+        XCTAssertTrue(
+            app.descendants(matching: .any)["automaticUpdateChecksToggle"].exists
+        )
+        XCTAssertTrue(app.buttons["checkForUpdates"].exists)
     }
 
     @MainActor
@@ -454,11 +464,57 @@ final class StickyyUITests: XCTestCase {
         try? await Task.sleep(for: .milliseconds(500))
         app.typeKey(.space, modifierFlags: [.control, .option])
 
+        let editor = app.textViews["floatingScratchpadEditor"]
+        if !editor.waitForExistence(timeout: 2) {
+            app.typeKey(.space, modifierFlags: [.control, .option])
+        }
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["exportToAppleNotes"].exists)
+        XCTAssertFalse(
+            app.descendants(matching: .any)["clipboardShelf"].exists
+        )
+    }
+
+    @MainActor
+    func testDisablingFloatingPanelRestoresMenuBarShortcutBehavior() async {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-reset-persistence",
+            "--ui-testing-disable-floating-panel",
+        ]
+        app.launch()
+
+        try? await Task.sleep(for: .milliseconds(500))
+        app.typeKey(.space, modifierFlags: [.control, .option])
+
         let editor = app.textViews["scratchpadEditor"]
         if !editor.waitForExistence(timeout: 2) {
             app.typeKey(.space, modifierFlags: [.control, .option])
         }
         XCTAssertTrue(editor.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["exportToAppleNotes"].exists)
+    }
+
+    @MainActor
+    func testFloatingPanelCanCreateANewNoteEveryTime() async {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-reset-persistence",
+            "--ui-testing-floating-mode-new",
+            "--ui-testing-open-floating-panel",
+        ]
+        app.launch()
+
+        let editor = app.textViews["floatingScratchpadEditor"]
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+        editor.typeText("First floating thought")
+        editor.typeKey(.escape, modifierFlags: [])
+        XCTAssertTrue(editor.waitForNonExistence(timeout: 2))
+
+        try? await Task.sleep(for: .milliseconds(300))
+        app.typeKey(.space, modifierFlags: [.control, .option])
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+        XCTAssertEqual(editor.value as? String, "")
     }
 
     @MainActor

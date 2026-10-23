@@ -16,6 +16,7 @@ DerivedData/
 # Swift Package Manager
 .swiftpm/
 Package.resolved
+!Stickyy.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 
 # macOS
 .DS_Store

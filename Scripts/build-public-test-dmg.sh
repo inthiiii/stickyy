@@ -36,11 +36,23 @@ xcodebuild \
   CODE_SIGNING_ALLOWED=NO \
   clean build
 
-codesign \
-  --force \
-  --deep \
-  --sign - \
-  --options runtime \
+sparkle_framework="$app_path/Contents/Frameworks/Sparkle.framework"
+sparkle_version="$sparkle_framework/Versions/B"
+
+# Sparkle contains privileged update helpers. Sign each nested component in
+# dependency order so their own entitlements are preserved, then sign the
+# framework and finally Stickyy itself. Do not use --deep for distribution.
+codesign --force --sign - --options runtime \
+  "$sparkle_version/XPCServices/Installer.xpc"
+codesign --force --sign - --options runtime --preserve-metadata=entitlements \
+  "$sparkle_version/XPCServices/Downloader.xpc"
+codesign --force --sign - --options runtime \
+  "$sparkle_version/Autoupdate"
+codesign --force --sign - --options runtime \
+  "$sparkle_version/Updater.app"
+codesign --force --sign - --options runtime \
+  "$sparkle_framework"
+codesign --force --sign - --options runtime \
   --entitlements "$root_dir/Stickyy/Stickyy.entitlements" \
   "$app_path"
 

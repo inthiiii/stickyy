@@ -11,10 +11,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var globalShortcutController: GlobalShortcutController?
     private var clipboardHistoryController: ClipboardHistoryController?
     private var onboardingController: OnboardingController?
+    private var floatingPanelController: FloatingPanelController?
     private var onboardingObserver: NSObjectProtocol?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
+        _ = UpdateController.shared
 
         let store: any ScratchpadStoring
 
@@ -49,6 +51,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             UserDefaults.standard.removeObject(
                 forKey: StickyyPreferences.globalShortcut
             )
+            UserDefaults.standard.removeObject(
+                forKey: StickyyPreferences.usesFloatingPanelShortcut
+            )
+            UserDefaults.standard.removeObject(
+                forKey: StickyyPreferences.floatingNoteMode
+            )
+            UserDefaults.standard.removeObject(
+                forKey: StickyyPreferences.automaticallyChecksForUpdates
+            )
             do {
                 try store.deleteAllScratchpads()
             } catch {
@@ -57,6 +68,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                     error.localizedDescription
                 )
             }
+        }
+        if CommandLine.arguments.contains("--ui-testing-disable-floating-panel") {
+            UserDefaults.standard.set(
+                false,
+                forKey: StickyyPreferences.usesFloatingPanelShortcut
+            )
+        }
+        if CommandLine.arguments.contains("--ui-testing-floating-mode-new") {
+            UserDefaults.standard.set(
+                FloatingNoteMode.newEveryTime.rawValue,
+                forKey: StickyyPreferences.floatingNoteMode
+            )
         }
         #endif
 
@@ -103,13 +126,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             session: session,
             clipboardHistory: clipboardHistoryController
         )
+        let floatingPanelController = FloatingPanelController(session: session)
         let statusItemController = StatusItemController(
-            popoverController: popoverController
+            popoverController: popoverController,
+            floatingPanelController: floatingPanelController
         )
 
         scratchpadSession = session
         self.popoverController = popoverController
         self.statusItemController = statusItemController
+        self.floatingPanelController = floatingPanelController
         self.clipboardHistoryController = clipboardHistoryController
 
         let previousDefault = GlobalShortcut(
@@ -123,7 +149,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             )
         }
         globalShortcutController = GlobalShortcutController {
-            statusItemController.showScratchpad()
+            if StickyyPreferences.floatingPanelEnabled() {
+                popoverController.close()
+                floatingPanelController.toggle()
+            } else {
+                statusItemController.showScratchpad()
+            }
         }
 
         let onboardingController = OnboardingController()
@@ -151,6 +182,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             Task { @MainActor [weak statusItemController] in
                 try? await Task.sleep(for: .milliseconds(150))
                 statusItemController?.showScratchpad()
+            }
+        }
+
+        if CommandLine.arguments.contains("--ui-testing-open-floating-panel") {
+            Task { @MainActor [weak floatingPanelController] in
+                try? await Task.sleep(for: .milliseconds(150))
+                floatingPanelController?.show()
             }
         }
 

@@ -1,9 +1,29 @@
 import Foundation
 import Observation
 
-struct ScratchpadTextInsertion: Equatable {
+@MainActor
+final class ScratchpadTextInsertion: Equatable {
     let id = UUID()
     let text: String
+
+    private var hasBeenConsumed = false
+
+    init(text: String) {
+        self.text = text
+    }
+
+    func consume() -> Bool {
+        guard !hasBeenConsumed else { return false }
+        hasBeenConsumed = true
+        return true
+    }
+
+    static func == (
+        lhs: ScratchpadTextInsertion,
+        rhs: ScratchpadTextInsertion
+    ) -> Bool {
+        lhs.id == rhs.id && lhs.text == rhs.text
+    }
 }
 
 @MainActor
@@ -102,6 +122,11 @@ final class ScratchpadSession {
         guard !text.isEmpty else { return }
         pendingTextInsertion = ScratchpadTextInsertion(text: text)
         requestEditorFocus()
+    }
+
+    func didApplyTextInsertion(id: UUID) {
+        guard pendingTextInsertion?.id == id else { return }
+        pendingTextInsertion = nil
     }
 
     func prepareWelcomeScratchpad() {

@@ -4,10 +4,15 @@ import AppKit
 final class StatusItemController: NSObject {
     private let statusItem: NSStatusItem
     private let popoverController: PopoverController
+    private let floatingPanelController: FloatingPanelController
     private lazy var contextMenu = makeContextMenu()
 
-    init(popoverController: PopoverController) {
+    init(
+        popoverController: PopoverController,
+        floatingPanelController: FloatingPanelController
+    ) {
         self.popoverController = popoverController
+        self.floatingPanelController = floatingPanelController
         statusItem = NSStatusBar.system.statusItem(
             withLength: NSStatusItem.squareLength
         )
@@ -32,6 +37,7 @@ final class StatusItemController: NSObject {
 
     func showScratchpad() {
         guard let button = statusItem.button else { return }
+        floatingPanelController.close()
         popoverController.show(relativeTo: button)
     }
 
@@ -40,12 +46,14 @@ final class StatusItemController: NSObject {
         if NSApp.currentEvent?.type == .rightMouseUp {
             showContextMenu(from: sender)
         } else {
+            floatingPanelController.close()
             popoverController.toggle(relativeTo: sender)
         }
     }
 
     private func showContextMenu(from button: NSStatusBarButton) {
         popoverController.close()
+        floatingPanelController.close()
         statusItem.menu = contextMenu
         button.performClick(nil)
         statusItem.menu = nil
@@ -54,7 +62,7 @@ final class StatusItemController: NSObject {
     private func makeContextMenu() -> NSMenu {
         let menu = NSMenu()
         let phaseLabel = NSMenuItem(
-            title: String(localized: "Stickyy — Phase 6"),
+            title: String(localized: "Stickyy — 1.1"),
             action: nil,
             keyEquivalent: ""
         )
@@ -84,6 +92,7 @@ final class StatusItemController: NSObject {
     @objc
     private func showSettings() {
         popoverController.close()
+        floatingPanelController.close()
         NSApp.activate()
         NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
     }

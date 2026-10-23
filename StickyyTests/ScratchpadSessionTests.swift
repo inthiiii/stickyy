@@ -25,6 +25,17 @@ struct ScratchpadSessionTests {
         #expect(session.editorFocusRequest == previousFocusRequest + 1)
     }
 
+    @Test("Applied editor insertions cannot replay")
+    func appliedInsertionIsCleared() throws {
+        let session = makeSession(store: RecordingScratchpadStore())
+        session.insertIntoEditor("Paste once")
+        let insertion = try #require(session.pendingTextInsertion)
+
+        session.didApplyTextInsertion(id: insertion.id)
+
+        #expect(session.pendingTextInsertion == nil)
+    }
+
     @Test("Onboarding prepares a saved welcome scratchpad")
     func preparesWelcomeScratchpad() {
         let store = RecordingScratchpadStore()

@@ -59,4 +59,60 @@ struct PreferenceAndShortcutTests {
         #expect(NativeShareControl.includesSharingService(title: "Messages"))
         #expect(NativeShareControl.includesSharingService(title: "Add to Notes"))
     }
+
+    @Test("Floating notes are enabled with the recent note by default")
+    func floatingNoteDefaults() throws {
+        let suiteName = "StickyyTests.\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        #expect(StickyyPreferences.floatingPanelEnabled(in: defaults))
+        #expect(
+            StickyyPreferences.selectedFloatingNoteMode(in: defaults)
+                == .recent
+        )
+    }
+
+    @Test("Floating note preferences validate stored values")
+    func floatingNotePreferences() throws {
+        let suiteName = "StickyyTests.\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        defaults.set(false, forKey: StickyyPreferences.usesFloatingPanelShortcut)
+        defaults.set(
+            FloatingNoteMode.newEveryTime.rawValue,
+            forKey: StickyyPreferences.floatingNoteMode
+        )
+
+        #expect(!StickyyPreferences.floatingPanelEnabled(in: defaults))
+        #expect(
+            StickyyPreferences.selectedFloatingNoteMode(in: defaults)
+                == .newEveryTime
+        )
+
+        defaults.set("not-a-mode", forKey: StickyyPreferences.floatingNoteMode)
+        #expect(
+            StickyyPreferences.selectedFloatingNoteMode(in: defaults)
+                == .recent
+        )
+    }
+
+    @Test("Automatic update checks are enabled by default")
+    func automaticUpdateDefaults() throws {
+        let suiteName = "StickyyTests.\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        #expect(
+            StickyyPreferences.automaticUpdateChecksEnabled(in: defaults)
+        )
+        defaults.set(
+            false,
+            forKey: StickyyPreferences.automaticallyChecksForUpdates
+        )
+        #expect(
+            !StickyyPreferences.automaticUpdateChecksEnabled(in: defaults)
+        )
+    }
 }

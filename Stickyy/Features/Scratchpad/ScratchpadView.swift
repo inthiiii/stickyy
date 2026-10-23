@@ -96,7 +96,8 @@ struct ScratchpadView: View {
                 insertionRequest: session.pendingTextInsertion,
                 onQuickPaste: quickPaste,
                 onPasteAttachment: session.addAttachments,
-                onEscape: onDismiss
+                onEscape: onDismiss,
+                onInsertionApplied: session.didApplyTextInsertion
             )
             .accessibilityLabel("Scratchpad")
             .accessibilityIdentifier("scratchpadEditor")
