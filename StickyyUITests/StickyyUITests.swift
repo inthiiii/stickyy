@@ -33,6 +33,27 @@ final class StickyyUITests: XCTestCase {
     }
 
     @MainActor
+    func testLongScratchpadRemainsResponsiveWhileTypingAtTheEnd() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-reset-persistence",
+            "--ui-testing-seed-long-note",
+            "--ui-testing-open-scratchpad",
+        ]
+        app.launch()
+
+        let editor = app.textViews["scratchpadEditor"]
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+        editor.typeKey(.downArrow, modifierFlags: .command)
+
+        let addition = "\nMain editor remains responsive."
+        let startedAt = Date()
+        editor.typeText(addition)
+        XCTAssertLessThan(Date().timeIntervalSince(startedAt), 2.5)
+        XCTAssertTrue((editor.value as? String)?.hasSuffix(addition) == true)
+    }
+
+    @MainActor
     func testNotesExportAndClipboardHistoryAreAvailable() {
         let app = XCUIApplication()
         app.launchArguments = [
@@ -593,6 +614,27 @@ final class StickyyUITests: XCTestCase {
         app.typeKey(.space, modifierFlags: [.control, .option])
         XCTAssertTrue(editor.waitForExistence(timeout: 5))
         XCTAssertEqual(editor.value as? String, "")
+    }
+
+    @MainActor
+    func testLongFloatingPanelRemainsResponsiveWhileTypingAtTheEnd() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-reset-persistence",
+            "--ui-testing-seed-long-note",
+            "--ui-testing-open-floating-panel",
+        ]
+        app.launch()
+
+        let editor = app.textViews["floatingScratchpadEditor"]
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+        editor.typeKey(.downArrow, modifierFlags: .command)
+
+        let addition = "\nFloating editor remains responsive."
+        let startedAt = Date()
+        editor.typeText(addition)
+        XCTAssertLessThan(Date().timeIntervalSince(startedAt), 2.5)
+        XCTAssertTrue((editor.value as? String)?.hasSuffix(addition) == true)
     }
 
     @MainActor

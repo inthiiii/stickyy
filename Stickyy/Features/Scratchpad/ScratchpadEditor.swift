@@ -175,6 +175,7 @@ struct ScratchpadEditor: NSViewRepresentable {
         var lastFormattingID: UUID?
         var lastPushedRichTextData: Data?
         var isApplyingModelContent = false
+        private var richTextSyncTask: Task<Void, Never>?
 
         init(parent: ScratchpadEditor) {
             self.parent = parent
@@ -183,9 +184,7 @@ struct ScratchpadEditor: NSViewRepresentable {
         func textDidChange(_ notification: Notification) {
             guard let textView, !isApplyingModelContent else { return }
             parent.text = textView.string
-            let data = serializedRichText(from: textView)
-            lastPushedRichTextData = data
-            parent.richTextData = data
+            scheduleRichTextSync(from: textView)
             textView.refreshDocumentHeight()
             textView.keepSelectionAboveTypingControls()
         }
@@ -208,6 +207,8 @@ struct ScratchpadEditor: NSViewRepresentable {
         fileprivate func applyModelContent(
             to textView: EscapeHandlingTextView
         ) {
+            richTextSyncTask?.cancel()
+            richTextSyncTask = nil
             isApplyingModelContent = true
             defer { isApplyingModelContent = false }
 
@@ -239,18 +240,29 @@ struct ScratchpadEditor: NSViewRepresentable {
             in scrollView: NSScrollView
         ) {
             let visibleSize = scrollView.contentSize
+            let sizeChanged = abs(
+                textView.minimumDocumentHeight - visibleSize.height
+            ) > 0.5 || abs(textView.frame.width - visibleSize.width) > 0.5
+            guard sizeChanged else { return }
+
             textView.minimumDocumentHeight = visibleSize.height
             textView.minSize = NSSize(width: 0, height: visibleSize.height)
-            textView.textContainer?.containerSize = NSSize(
-                width: visibleSize.width,
-                height: CGFloat.greatestFiniteMagnitude
-            )
-            textView.setFrameSize(
-                NSSize(
+            if let textContainer = textView.textContainer,
+               abs(textContainer.containerSize.width - visibleSize.width) > 0.5 {
+                textContainer.containerSize = NSSize(
                     width: visibleSize.width,
-                    height: max(textView.frame.height, visibleSize.height)
+                    height: CGFloat.greatestFiniteMagnitude
                 )
-            )
+            }
+            if abs(textView.frame.width - visibleSize.width) > 0.5
+                || textView.frame.height < visibleSize.height {
+                textView.setFrameSize(
+                    NSSize(
+                        width: visibleSize.width,
+                        height: max(textView.frame.height, visibleSize.height)
+                    )
+                )
+            }
             textView.refreshDocumentHeight()
         }
 
@@ -350,6 +362,27 @@ struct ScratchpadEditor: NSViewRepresentable {
                 documentAttributes: [.documentType: NSAttributedString.DocumentType.rtf]
             )
         }
+
+        private func scheduleRichTextSync(
+            from textView: EscapeHandlingTextView
+        ) {
+            richTextSyncTask?.cancel()
+            richTextSyncTask = Task { @MainActor [weak self, weak textView] in
+                do {
+                    try await Task.sleep(for: .milliseconds(120))
+                } catch {
+                    return
+                }
+                guard !Task.isCancelled,
+                      let self,
+                      let textView,
+                      !isApplyingModelContent else { return }
+                let data = serializedRichText(from: textView)
+                lastPushedRichTextData = data
+                parent.richTextData = data
+                richTextSyncTask = nil
+            }
+        }
     }
 }
 
@@ -361,6 +394,7 @@ fileprivate final class EscapeHandlingTextView: NSTextView {
     var onCreateScratchpad: (() -> Void)?
     var typingBottomClearance: CGFloat = 0
     var minimumDocumentHeight: CGFloat = 0
+    private var caretVisibilityUpdateIsScheduled = false
 
     func refreshDocumentHeight() {
         guard let layoutManager, let textContainer else { return }
@@ -377,13 +411,17 @@ fileprivate final class EscapeHandlingTextView: NSTextView {
     }
 
     func keepSelectionAboveTypingControls() {
-        guard typingBottomClearance > 0 else { return }
+        guard typingBottomClearance > 0,
+              window?.firstResponder === self,
+              !caretVisibilityUpdateIsScheduled else { return }
+        caretVisibilityUpdateIsScheduled = true
         DispatchQueue.main.async { [weak self] in
-            guard let self,
+            guard let self else { return }
+            caretVisibilityUpdateIsScheduled = false
+            guard window?.firstResponder === self,
                   let scrollView = enclosingScrollView,
                   let layoutManager,
                   let textContainer else { return }
-            refreshDocumentHeight()
             layoutManager.ensureLayout(for: textContainer)
 
             let textLength = textStorage?.length ?? 0

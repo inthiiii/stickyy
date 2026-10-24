@@ -103,6 +103,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         let session = ScratchpadSession(store: store)
         #if DEBUG
+        if CommandLine.arguments.contains("--ui-testing-seed-long-note") {
+            session.text = (1...180).map { line in
+                "Line \(line): a longer thought used to verify smooth editing."
+            }.joined(separator: "\n")
+            session.flush()
+        }
         let clipboardTestText: String? = if let argumentIndex =
             CommandLine.arguments.firstIndex(
             of: "--ui-testing-clipboard-text"
