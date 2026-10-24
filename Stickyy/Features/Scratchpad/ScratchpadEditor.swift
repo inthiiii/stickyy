@@ -87,6 +87,7 @@ struct ScratchpadEditor: NSViewRepresentable {
         textView.onQuickPaste = onQuickPaste
         textView.onPasteAttachment = onPasteAttachment
         textView.onCreateScratchpad = onCreateScratchpad
+        textView.typingBottomClearance = 50
         textView.setAccessibilityLabel(String(localized: "Scratchpad"))
         textView.setAccessibilityIdentifier(accessibilityIdentifier)
 
@@ -168,7 +169,7 @@ struct ScratchpadEditor: NSViewRepresentable {
     @MainActor
     final class Coordinator: NSObject, NSTextViewDelegate {
         var parent: ScratchpadEditor
-        weak var textView: NSTextView?
+        fileprivate weak var textView: EscapeHandlingTextView?
         var lastFocusRequest = 0
         var lastInsertionID: UUID?
         var lastFormattingID: UUID?
@@ -185,6 +186,13 @@ struct ScratchpadEditor: NSViewRepresentable {
             let data = serializedRichText(from: textView)
             lastPushedRichTextData = data
             parent.richTextData = data
+            textView.refreshDocumentHeight()
+            textView.keepSelectionAboveTypingControls()
+        }
+
+        func textViewDidChangeSelection(_ notification: Notification) {
+            guard let textView, !isApplyingModelContent else { return }
+            textView.keepSelectionAboveTypingControls()
         }
 
         func shouldApplyModelContent(
@@ -197,7 +205,9 @@ struct ScratchpadEditor: NSViewRepresentable {
                     && richTextData != lastPushedRichTextData)
         }
 
-        func applyModelContent(to textView: NSTextView) {
+        fileprivate func applyModelContent(
+            to textView: EscapeHandlingTextView
+        ) {
             isApplyingModelContent = true
             defer { isApplyingModelContent = false }
 
@@ -221,27 +231,27 @@ struct ScratchpadEditor: NSViewRepresentable {
                 lastPushedRichTextData = nil
             }
             textView.textStorage?.setAttributedString(attributedText)
+            textView.refreshDocumentHeight()
         }
 
-        func ensureVisibleEditorHeight(
-            _ textView: NSTextView,
+        fileprivate func ensureVisibleEditorHeight(
+            _ textView: EscapeHandlingTextView,
             in scrollView: NSScrollView
         ) {
             let visibleSize = scrollView.contentSize
+            textView.minimumDocumentHeight = visibleSize.height
             textView.minSize = NSSize(width: 0, height: visibleSize.height)
             textView.textContainer?.containerSize = NSSize(
                 width: visibleSize.width,
                 height: CGFloat.greatestFiniteMagnitude
             )
-            if textView.frame.width != visibleSize.width
-                || textView.frame.height < visibleSize.height {
-                textView.setFrameSize(
-                    NSSize(
-                        width: visibleSize.width,
-                        height: max(textView.frame.height, visibleSize.height)
-                    )
+            textView.setFrameSize(
+                NSSize(
+                    width: visibleSize.width,
+                    height: max(textView.frame.height, visibleSize.height)
                 )
-            }
+            )
+            textView.refreshDocumentHeight()
         }
 
         func applyFormatting(
@@ -344,11 +354,46 @@ struct ScratchpadEditor: NSViewRepresentable {
 }
 
 @MainActor
-private final class EscapeHandlingTextView: NSTextView {
+fileprivate final class EscapeHandlingTextView: NSTextView {
     var onEscape: () -> Void = {}
     var onQuickPaste: (Int) -> Void = { _ in }
     var onPasteAttachment: (ClipboardHistoryContent) -> Void = { _ in }
     var onCreateScratchpad: (() -> Void)?
+    var typingBottomClearance: CGFloat = 0
+    var minimumDocumentHeight: CGFloat = 0
+
+    func refreshDocumentHeight() {
+        guard let layoutManager, let textContainer else { return }
+        layoutManager.ensureLayout(for: textContainer)
+        let usedHeight = ceil(
+            layoutManager.usedRect(for: textContainer).height
+        )
+        let requiredHeight = usedHeight
+            + (textContainerInset.height * 2)
+            + typingBottomClearance
+        let targetHeight = max(minimumDocumentHeight, requiredHeight)
+        guard abs(frame.height - targetHeight) > 0.5 else { return }
+        setFrameSize(NSSize(width: frame.width, height: targetHeight))
+    }
+
+    func keepSelectionAboveTypingControls() {
+        guard typingBottomClearance > 0 else { return }
+        DispatchQueue.main.async { [weak self] in
+            guard let self, let window else { return }
+            refreshDocumentHeight()
+            var actualRange = NSRange()
+            let screenRect = firstRect(
+                forCharacterRange: selectedRange(),
+                actualRange: &actualRange
+            )
+            guard !screenRect.isEmpty else { return }
+            let windowRect = window.convertFromScreen(screenRect)
+            var visibilityRect = convert(windowRect, from: nil)
+            visibilityRect.size.width = max(visibilityRect.width, 2)
+            visibilityRect.size.height += typingBottomClearance
+            scrollToVisible(visibilityRect)
+        }
+    }
 
     override func cancelOperation(_ sender: Any?) {
         onEscape()

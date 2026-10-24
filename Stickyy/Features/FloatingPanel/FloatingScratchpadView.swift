@@ -80,7 +80,7 @@ struct FloatingScratchpadView: View {
                         Button {
                             insert(latestItem)
                         } label: {
-                            Image(systemName: "clipboard")
+                            Image(systemName: "text.quote")
                                 .font(.system(size: 12, weight: .semibold))
                                 .frame(width: 26, height: 26)
                         }
