@@ -597,13 +597,13 @@ final class StickyyUITests: XCTestCase {
         let editor = app.textViews["scratchpadEditor"]
         XCTAssertTrue(editor.waitForExistence(timeout: 5))
         XCTAssertTrue(
-            (editor.value as? String)?.contains("Stickyy 1.2.1 is ready")
+            (editor.value as? String)?.contains("Stickyy 1.2.5 is ready")
                 == true
         )
         app.buttons["scratchpadHeaderTitle"].click()
         XCTAssertEqual(
             app.buttons["scratchpadHeaderTitle"].label,
-            "Latest update 1.2.1 and the features"
+            "Latest update 1.2.5 and the features"
         )
     }
 

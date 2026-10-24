@@ -42,6 +42,7 @@ fi
   --download-url-prefix "https://stickyyformac.vercel.app/downloads/" \
   --link "https://stickyyformac.vercel.app" \
   --embed-release-notes \
+  --informational-update-versions '<6' \
   --maximum-versions 3 \
   -o "$appcast_path" \
   "$updates_dir"

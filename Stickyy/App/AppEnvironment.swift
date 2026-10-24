@@ -7,7 +7,7 @@ enum AppEnvironment {
     static var version: String {
         Bundle.main.object(
             forInfoDictionaryKey: "CFBundleShortVersionString"
-        ) as? String ?? "1.2.1"
+        ) as? String ?? "1.2.5"
     }
 
     static var latestUpdateTitle: String {
@@ -22,6 +22,7 @@ enum AppEnvironment {
         • Click “Stickyy” in the scratchpad header to briefly reveal the current note title.
         • Your latest clipboard item is available inside the floating panel.
         • First-time setup and the Drag to Applications installer are clearer and more reliable.
+        • The in-app updater now has the correct sandbox permission for reliable future updates.
         • Every future update can introduce itself in a dedicated note like this one.
 
         Thank you for testing Stickyy.

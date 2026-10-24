@@ -2,6 +2,16 @@
 
 All notable Stickyy changes are documented here.
 
+## 1.2.5 — Updater repair
+
+- Fixed the sandbox permission used to connect Stickyy to Sparkle's installer.
+- Added release-time verification that rejects unresolved Sparkle service names
+  before a DMG can be published.
+- Versions older than build 6 now receive an informational update that directs
+  them to the website for the one-time manual repair install.
+- Once 1.2.5 is installed, future signed updates can be installed from inside
+  Stickyy normally.
+
 ## 1.2.1 — Links, context, and smoother updates
 
 - URLs in scratchpads now appear as blue, underlined, clickable links.

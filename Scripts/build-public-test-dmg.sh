@@ -15,6 +15,7 @@ version="$(xcodebuild -project "$root_dir/Stickyy.xcodeproj" -scheme Stickyy -co
 dmg_path="$build_dir/Stickyy-$version.dmg"
 rw_dmg_path="$build_dir/Stickyy-$version-rw.dmg"
 checksum_path="$dmg_path.sha256"
+resolved_entitlements="$build_dir/Stickyy-resolved.entitlements"
 mounted_device=""
 signing_identity="${STICKYY_SIGNING_IDENTITY:-$(security find-identity -v -p codesigning | awk '/Apple Development:/ { print $2; exit }')}"
 
@@ -45,6 +46,18 @@ xcodebuild \
 
 sparkle_framework="$app_path/Contents/Frameworks/Sparkle.framework"
 sparkle_version="$sparkle_framework/Versions/B"
+bundle_identifier="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$app_path/Contents/Info.plist")"
+
+# codesign does not expand Xcode build-setting placeholders in entitlement
+# files. Resolve Sparkle's mach-service names before signing so a sandboxed
+# release can contact its installer on another Mac.
+ditto "$root_dir/Stickyy/Stickyy.entitlements" "$resolved_entitlements"
+/usr/libexec/PlistBuddy -c \
+  "Set :com.apple.security.temporary-exception.mach-lookup.global-name:0 $bundle_identifier-spks" \
+  "$resolved_entitlements"
+/usr/libexec/PlistBuddy -c \
+  "Set :com.apple.security.temporary-exception.mach-lookup.global-name:1 $bundle_identifier-spki" \
+  "$resolved_entitlements"
 
 # Sparkle contains privileged update helpers. Sign every nested component and
 # Stickyy with the same identity so Hardened Runtime library validation accepts
@@ -60,10 +73,22 @@ codesign --force --sign "$signing_identity" --options runtime \
 codesign --force --sign "$signing_identity" --options runtime \
   "$sparkle_framework"
 codesign --force --sign "$signing_identity" --options runtime \
-  --entitlements "$root_dir/Stickyy/Stickyy.entitlements" \
+  --entitlements "$resolved_entitlements" \
   "$app_path"
 
 codesign --verify --deep --strict --verbose=2 "$app_path"
+
+signed_entitlements="$(codesign -d --entitlements - "$app_path" 2>&1)"
+if [[ "$signed_entitlements" == *'$(PRODUCT_BUNDLE_IDENTIFIER)'* ]]; then
+  print -u2 "Unresolved bundle identifier found in signed entitlements."
+  exit 1
+fi
+for service_name in "$bundle_identifier-spks" "$bundle_identifier-spki"; do
+  if [[ "$signed_entitlements" != *"$service_name"* ]]; then
+    print -u2 "Missing Sparkle service entitlement: $service_name"
+    exit 1
+  fi
+done
 
 if [[ -d "$staging_dir" ]]; then
   find "$staging_dir" -mindepth 1 -maxdepth 1 -exec rm -rf {} +

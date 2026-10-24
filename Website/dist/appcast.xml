@@ -3,42 +3,37 @@
     <channel>
         <title>Stickyy</title>
         <item>
-            <title>1.2.1</title>
-            <pubDate>Sat, 24 Oct 2026 02:19:08 +0530</pubDate>
+            <title>1.2.5</title>
+            <pubDate>Sat, 24 Oct 2026 02:44:53 +0530</pubDate>
             <link>https://stickyyformac.vercel.app</link>
-            <sparkle:version>5</sparkle:version>
-            <sparkle:shortVersionString>1.2.1</sparkle:shortVersionString>
+            <sparkle:informationalUpdate>
+                <sparkle:belowVersion>6</sparkle:belowVersion>
+            </sparkle:informationalUpdate>
+            <sparkle:version>6</sparkle:version>
+            <sparkle:shortVersionString>1.2.5</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-            <description sparkle:format="markdown"><![CDATA[# Stickyy 1.2.1
+            <description sparkle:format="markdown"><![CDATA[# Stickyy 1.2.5
 
-## Links that behave like links
+## Reliable updates from here forward
 
-- URLs inside a scratchpad now appear in blue with an underline.
-- Click a detected URL to open it in the default browser.
+- Fixed the sandbox permission Stickyy uses to connect to its update installer.
+- Added a release check that prevents an incorrectly configured updater from
+  being published again.
+- Future signed updates can be installed directly from Stickyy after 1.2.5 is
+  installed.
 
-## More context, still minimal
+## One-time repair for older installations
 
-- Click **Stickyy** in the menu-bar scratchpad header to reveal the active note
-  title.
-- The title returns to **Stickyy** after five seconds or immediately when clicked
-  again.
+Stickyy 1.2.1 and earlier contain the broken installer permission, so those
+versions cannot replace themselves. Their update window now directs you to the
+Stickyy website instead of attempting an installation that will fail.
 
-## Faster clipboard capture
+Download 1.2.5, quit Stickyy, and drag the new copy into Applications to replace
+the old copy. Your existing notes and settings remain on the Mac.
 
-- The newest clipboard item appears as a compact button in the bottom-right of
-  the floating note.
-- Click it to insert text or attach the copied image or file.
-- The full Clipboard Pills shelf remains hidden from the floating note.
-
-## A clearer first launch and every update
-
-- New users reliably receive the interactive onboarding tour and welcome note.
-- Existing users receive a dedicated **Latest update 1.2.1 and the features**
-  scratchpad once after upgrading.
-- The Drag Stickyy into Applications window now preserves its custom installer
-  background and layout.
+All features introduced in 1.2.1 are included in this release.
 ]]></description>
-            <enclosure url="https://stickyyformac.vercel.app/downloads/Stickyy-1.2.1.dmg" length="5333881" type="application/octet-stream" sparkle:edSignature="3nMLk9GOJhBceSinV96T7XleBt5jLeIBBeQ36wvjswd+cPKBKCXmQP1iHtE5W1G3js84WeSnyzDUML4fvt5yBw=="/>
+            <enclosure url="https://stickyyformac.vercel.app/downloads/Stickyy-1.2.5.dmg" length="5333998" type="application/octet-stream" sparkle:edSignature="ZeH6XWkRctz2VbEU1pIjXLt0oIlskV3PBPEtelJzOnx2plUe/KlNNNRmLzuplarIxTgNd98P++OWDG+aqEeSCQ=="/>
         </item>
     </channel>
 </rss>
