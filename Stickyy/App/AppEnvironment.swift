@@ -7,7 +7,7 @@ enum AppEnvironment {
     static var version: String {
         Bundle.main.object(
             forInfoDictionaryKey: "CFBundleShortVersionString"
-        ) as? String ?? "1.2.5"
+        ) as? String ?? "1.2.6"
     }
 
     static var latestUpdateTitle: String {
@@ -24,6 +24,7 @@ enum AppEnvironment {
         • First-time setup and the Drag to Applications installer are clearer and more reliable.
         • The in-app updater now has the correct sandbox permission for reliable future updates.
         • Every future update can introduce itself in a dedicated note like this one.
+        • Press Command–N while the menu-bar scratchpad is open to create a fresh note instantly.
 
         Thank you for testing Stickyy.
         """

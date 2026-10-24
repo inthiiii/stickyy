@@ -294,6 +294,36 @@ final class StickyyUITests: XCTestCase {
     }
 
     @MainActor
+    func testCommandNCreatesANewMenuBarScratchpad() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-reset-persistence",
+            "--ui-testing-open-scratchpad",
+        ]
+        app.launch()
+
+        let editor = app.textViews["scratchpadEditor"]
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+        editor.typeText("Keep this in the first note")
+
+        editor.typeKey("n", modifierFlags: .command)
+
+        XCTAssertTrue(editor.exists)
+        XCTAssertEqual(editor.value as? String, "")
+
+        app.buttons["scratchpadLibrary"].click()
+        XCTAssertTrue(
+            app.buttons.matching(
+                NSPredicate(
+                    format: "value CONTAINS %@",
+                    "Keep this in the first note"
+                )
+            ).firstMatch
+                .waitForExistence(timeout: 2)
+        )
+    }
+
+    @MainActor
     func testScratchpadRestoresTextAfterRelaunch() {
         let firstLaunch = XCUIApplication()
         firstLaunch.launchArguments = [
@@ -597,13 +627,13 @@ final class StickyyUITests: XCTestCase {
         let editor = app.textViews["scratchpadEditor"]
         XCTAssertTrue(editor.waitForExistence(timeout: 5))
         XCTAssertTrue(
-            (editor.value as? String)?.contains("Stickyy 1.2.5 is ready")
+            (editor.value as? String)?.contains("Stickyy 1.2.6 is ready")
                 == true
         )
         app.buttons["scratchpadHeaderTitle"].click()
         XCTAssertEqual(
             app.buttons["scratchpadHeaderTitle"].label,
-            "Latest update 1.2.5 and the features"
+            "Latest update 1.2.6 and the features"
         )
     }
 

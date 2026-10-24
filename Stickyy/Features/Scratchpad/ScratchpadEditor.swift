@@ -8,6 +8,7 @@ struct ScratchpadEditor: NSViewRepresentable {
     let onQuickPaste: (Int) -> Void
     let onPasteAttachment: (ClipboardHistoryContent) -> Void
     let onEscape: () -> Void
+    var onCreateScratchpad: (() -> Void)? = nil
     var accessibilityIdentifier = "scratchpadEditor"
     var onInsertionApplied: (UUID) -> Void = { _ in }
 
@@ -68,6 +69,7 @@ struct ScratchpadEditor: NSViewRepresentable {
         textView.onEscape = onEscape
         textView.onQuickPaste = onQuickPaste
         textView.onPasteAttachment = onPasteAttachment
+        textView.onCreateScratchpad = onCreateScratchpad
         textView.setAccessibilityLabel(String(localized: "Scratchpad"))
         textView.setAccessibilityIdentifier(accessibilityIdentifier)
 
@@ -88,6 +90,7 @@ struct ScratchpadEditor: NSViewRepresentable {
         textView.onEscape = onEscape
         textView.onQuickPaste = onQuickPaste
         textView.onPasteAttachment = onPasteAttachment
+        textView.onCreateScratchpad = onCreateScratchpad
 
         if textView.string != text {
             let selection = textView.selectedRange()
@@ -173,6 +176,7 @@ private final class EscapeHandlingTextView: NSTextView {
     var onEscape: () -> Void = {}
     var onQuickPaste: (Int) -> Void = { _ in }
     var onPasteAttachment: (ClipboardHistoryContent) -> Void = { _ in }
+    var onCreateScratchpad: (() -> Void)?
 
     override func cancelOperation(_ sender: Any?) {
         onEscape()
@@ -182,6 +186,13 @@ private final class EscapeHandlingTextView: NSTextView {
         let modifiers = event.modifierFlags.intersection(
             .deviceIndependentFlagsMask
         )
+        if modifiers == .command,
+           let characters = event.charactersIgnoringModifiers,
+           characters.lowercased() == "n",
+           let onCreateScratchpad {
+            onCreateScratchpad()
+            return true
+        }
         if modifiers == .command,
            let characters = event.charactersIgnoringModifiers,
            let number = Int(characters),

@@ -2,6 +2,12 @@
 
 All notable Stickyy changes are documented here.
 
+## 1.2.6 — Faster note creation
+
+- Press Command-N while the menu-bar scratchpad is open to create and switch to
+  a new blank scratchpad immediately.
+- Removed the temporary updater-repair notice from the public download page.
+
 ## 1.2.5 — Updater repair
 
 - Fixed the sandbox permission used to connect Stickyy to Sparkle's installer.

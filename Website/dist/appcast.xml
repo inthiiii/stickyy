@@ -3,37 +3,27 @@
     <channel>
         <title>Stickyy</title>
         <item>
-            <title>1.2.5</title>
-            <pubDate>Sat, 24 Oct 2026 02:44:53 +0530</pubDate>
+            <title>1.2.6</title>
+            <pubDate>Sat, 24 Oct 2026 11:59:44 +0530</pubDate>
             <link>https://stickyyformac.vercel.app</link>
             <sparkle:informationalUpdate>
                 <sparkle:belowVersion>6</sparkle:belowVersion>
             </sparkle:informationalUpdate>
-            <sparkle:version>6</sparkle:version>
-            <sparkle:shortVersionString>1.2.5</sparkle:shortVersionString>
+            <sparkle:version>7</sparkle:version>
+            <sparkle:shortVersionString>1.2.6</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-            <description sparkle:format="markdown"><![CDATA[# Stickyy 1.2.5
+            <description sparkle:format="markdown"><![CDATA[# Stickyy 1.2.6
 
-## Reliable updates from here forward
+## A new scratchpad in one keystroke
 
-- Fixed the sandbox permission Stickyy uses to connect to its update installer.
-- Added a release check that prevents an incorrectly configured updater from
-  being published again.
-- Future signed updates can be installed directly from Stickyy after 1.2.5 is
-  installed.
+- Press **Command-N** while the menu-bar scratchpad is open.
+- Stickyy creates a new blank scratchpad and switches to it immediately.
+- Your previous note stays safely stored in the scratchpad library.
 
-## One-time repair for older installations
-
-Stickyy 1.2.1 and earlier contain the broken installer permission, so those
-versions cannot replace themselves. Their update window now directs you to the
-Stickyy website instead of attempting an installation that will fail.
-
-Download 1.2.5, quit Stickyy, and drag the new copy into Applications to replace
-the old copy. Your existing notes and settings remain on the Mac.
-
-All features introduced in 1.2.1 are included in this release.
+This small release is also the first end-to-end test of the repaired in-app
+updater introduced in Stickyy 1.2.5.
 ]]></description>
-            <enclosure url="https://stickyyformac.vercel.app/downloads/Stickyy-1.2.5.dmg" length="5333998" type="application/octet-stream" sparkle:edSignature="ZeH6XWkRctz2VbEU1pIjXLt0oIlskV3PBPEtelJzOnx2plUe/KlNNNRmLzuplarIxTgNd98P++OWDG+aqEeSCQ=="/>
+            <enclosure url="https://stickyyformac.vercel.app/downloads/Stickyy-1.2.6.dmg" length="5337828" type="application/octet-stream" sparkle:edSignature="wMg6Q7spzoZ6om3nEgljgwXaTEOkEtMconMnKBZw+vJWYmyJ1LcoHXUbXiJh/bVxuUD2rF3Wn1C89vqIQqB4Dg=="/>
         </item>
     </channel>
 </rss>
