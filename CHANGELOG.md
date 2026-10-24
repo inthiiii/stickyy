@@ -2,6 +2,19 @@
 
 All notable Stickyy changes are documented here.
 
+## 1.2.7 — Richer notes and pinned Clipboard Pills
+
+- Added optional live word or character counts to the menu-bar scratchpad and
+  floating note.
+- Added persistent bold, italic, and underline formatting to both editors.
+- Added optional pinned Clipboard Pills. Pinned items stay available while the
+  remaining five- or seven-item capacity continues to rotate.
+- Clipboard clearing now preserves pinned items, which can be managed from
+  Settings.
+- Simplified the floating note clipboard action to one text-only icon.
+- Fixed the long-note layout issue that could push text toward the middle or
+  bottom of the editor while typing.
+
 ## 1.2.6 — Faster note creation
 
 - Press Command-N while the menu-bar scratchpad is open to create and switch to
