@@ -379,19 +379,62 @@ fileprivate final class EscapeHandlingTextView: NSTextView {
     func keepSelectionAboveTypingControls() {
         guard typingBottomClearance > 0 else { return }
         DispatchQueue.main.async { [weak self] in
-            guard let self, let window else { return }
+            guard let self,
+                  let scrollView = enclosingScrollView,
+                  let layoutManager,
+                  let textContainer else { return }
             refreshDocumentHeight()
-            var actualRange = NSRange()
-            let screenRect = firstRect(
-                forCharacterRange: selectedRange(),
-                actualRange: &actualRange
+            layoutManager.ensureLayout(for: textContainer)
+
+            let textLength = textStorage?.length ?? 0
+            let selectionEnd = min(
+                NSMaxRange(selectedRange()),
+                textLength
             )
-            guard !screenRect.isEmpty else { return }
-            let windowRect = window.convertFromScreen(screenRect)
-            var visibilityRect = convert(windowRect, from: nil)
-            visibilityRect.size.width = max(visibilityRect.width, 2)
-            visibilityRect.size.height += typingBottomClearance
-            scrollToVisible(visibilityRect)
+            let caretRect: NSRect
+            if selectionEnd == textLength,
+               layoutManager.extraLineFragmentTextContainer != nil {
+                caretRect = layoutManager.extraLineFragmentRect
+            } else if layoutManager.numberOfGlyphs > 0 {
+                let characterIndex = min(
+                    selectionEnd,
+                    max(textLength - 1, 0)
+                )
+                let glyphIndex = min(
+                    layoutManager.glyphIndexForCharacter(
+                        at: characterIndex
+                    ),
+                    layoutManager.numberOfGlyphs - 1
+                )
+                caretRect = layoutManager.lineFragmentUsedRect(
+                    forGlyphAt: glyphIndex,
+                    effectiveRange: nil
+                )
+            } else {
+                caretRect = NSRect(
+                    x: 0,
+                    y: 0,
+                    width: 1,
+                    height: font?.pointSize ?? 14
+                )
+            }
+
+            let caretBottom = caretRect.maxY + textContainerInset.height
+            let safeBottom = visibleRect.maxY - typingBottomClearance
+            guard caretBottom > safeBottom else { return }
+
+            let clipView = scrollView.contentView
+            var origin = clipView.bounds.origin
+            let maximumOriginY = max(
+                0,
+                frame.height - clipView.bounds.height
+            )
+            origin.y = min(
+                maximumOriginY,
+                origin.y + caretBottom - safeBottom
+            )
+            clipView.scroll(to: origin)
+            scrollView.reflectScrolledClipView(clipView)
         }
     }
 
