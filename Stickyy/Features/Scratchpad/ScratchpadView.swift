@@ -9,6 +9,13 @@ struct ScratchpadView: View {
     @State private var showsLibrary = false
     @State private var showsActiveTitle = false
     @State private var titleResetTask: Task<Void, Never>?
+    @State private var formattingRequest: ScratchpadFormattingRequest?
+
+    @AppStorage(StickyyPreferences.showsTextCount)
+    private var showsTextCount = false
+
+    @AppStorage(StickyyPreferences.textCountMode)
+    private var textCountMode = TextCountMode.words.rawValue
 
     var body: some View {
         VStack(spacing: 0) {
@@ -121,13 +128,16 @@ struct ScratchpadView: View {
         ZStack(alignment: .bottomTrailing) {
             ScratchpadEditor(
                 text: $session.text,
+                richTextData: $session.richTextData,
                 focusRequest: session.editorFocusRequest,
                 insertionRequest: session.pendingTextInsertion,
+                formattingRequest: formattingRequest,
                 onQuickPaste: quickPaste,
                 onPasteAttachment: session.addAttachments,
                 onEscape: onDismiss,
                 onCreateScratchpad: { _ = session.createScratchpad() },
-                onInsertionApplied: session.didApplyTextInsertion
+                onInsertionApplied: session.didApplyTextInsertion,
+                onFormattingApplied: didApplyFormatting
             )
             .accessibilityLabel("Scratchpad")
             .accessibilityIdentifier("scratchpadEditor")
@@ -146,27 +156,54 @@ struct ScratchpadView: View {
                     .accessibilityHidden(true)
             }
 
-            if !clipboardHistory.isEnabled && clipboardHistory.hasPasteableText {
-                Button {
-                    pasteCurrentClipboardText()
-                } label: {
-                    Image(systemName: "clipboard")
-                        .font(.system(size: 12, weight: .semibold))
-                        .frame(width: 26, height: 26)
+            HStack(alignment: .bottom, spacing: 8) {
+                ScratchpadFormattingControls { action in
+                    formattingRequest = ScratchpadFormattingRequest(
+                        action: action
+                    )
                 }
-                .buttonStyle(.plain)
-                .stickyyPillSurface(Circle())
-                .overlay {
-                    Circle().strokeBorder(Color.primary.opacity(0.1))
+
+                Spacer(minLength: 8)
+
+                if showsTextCount {
+                    ScratchpadTextCountLabel(
+                        text: session.text,
+                        mode: selectedTextCountMode
+                    )
                 }
-                .shadow(color: .black.opacity(0.12), radius: 4, y: 2)
-                .padding(10)
-                .help("Paste into Stickyy")
-                .accessibilityLabel("Paste into Stickyy")
-                .accessibilityIdentifier("pasteCurrentClipboardText")
+
+                if !clipboardHistory.isEnabled
+                    && clipboardHistory.hasPasteableText {
+                    Button {
+                        pasteCurrentClipboardText()
+                    } label: {
+                        Image(systemName: "clipboard")
+                            .font(.system(size: 12, weight: .semibold))
+                            .frame(width: 26, height: 26)
+                    }
+                    .buttonStyle(.plain)
+                    .stickyyPillSurface(Circle())
+                    .overlay {
+                        Circle().strokeBorder(Color.primary.opacity(0.1))
+                    }
+                    .shadow(color: .black.opacity(0.12), radius: 4, y: 2)
+                    .help("Paste into Stickyy")
+                    .accessibilityLabel("Paste into Stickyy")
+                    .accessibilityIdentifier("pasteCurrentClipboardText")
+                }
             }
+            .padding(10)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private var selectedTextCountMode: TextCountMode {
+        TextCountMode(rawValue: textCountMode) ?? .words
+    }
+
+    private func didApplyFormatting(_ id: UUID) {
+        guard formattingRequest?.id == id else { return }
+        formattingRequest = nil
     }
 
     private func pasteCurrentClipboardText() {

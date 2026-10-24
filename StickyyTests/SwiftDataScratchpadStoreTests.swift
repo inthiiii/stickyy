@@ -5,6 +5,27 @@ import Testing
 
 @MainActor
 struct SwiftDataScratchpadStoreTests {
+    @Test("Rich text data survives persistence")
+    @MainActor
+    func savesRichTextData() throws {
+        let persistence = try PersistenceController(
+            isStoredInMemoryOnly: true
+        )
+        let richTextData = Data("{\\rtf1 formatted}".utf8)
+        let scratchpad = Scratchpad(
+            title: "Formatted",
+            text: "formatted",
+            richTextData: richTextData
+        )
+
+        try persistence.scratchpadStore.save(scratchpad)
+        let restored = try #require(
+            persistence.scratchpadStore.loadScratchpads().first
+        )
+
+        #expect(restored.richTextData == richTextData)
+    }
+
     @Test("SwiftData stores and restores multiple scratchpads")
     func roundTripsScratchpads() throws {
         let persistence = try PersistenceController(

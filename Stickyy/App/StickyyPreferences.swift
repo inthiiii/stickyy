@@ -16,16 +16,34 @@ enum FloatingNoteMode: String, CaseIterable, Identifiable, Sendable {
     }
 }
 
+enum TextCountMode: String, CaseIterable, Identifiable, Sendable {
+    case words
+    case characters
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .words: String(localized: "Words")
+        case .characters: String(localized: "Characters")
+        }
+    }
+}
+
 enum StickyyPreferences {
     static let usesLiquidGlass = "usesLiquidGlass"
     static let usesClipboardHistory = "usesClipboardHistory"
     static let clipboardHistoryLimit = "clipboardHistoryLimit"
+    static let usesPinnedClipboardItems = "usesPinnedClipboardItems"
+    static let pinnedClipboardItems = "pinnedClipboardItems"
     static let globalShortcut = "globalShortcut"
     static let selectedScratchpadID = "selectedScratchpadID"
     static let hasCompletedOnboarding = "hasCompletedOnboarding"
     static let usesFloatingPanelShortcut = "usesFloatingPanelShortcut"
     static let floatingNoteMode = "floatingNoteMode"
     static let automaticallyChecksForUpdates = "automaticallyChecksForUpdates"
+    static let showsTextCount = "showsTextCount"
+    static let textCountMode = "textCountMode"
     static let lastPresentedReleaseNotesVersion =
         "lastPresentedReleaseNotesVersion"
 
@@ -41,6 +59,28 @@ enum StickyyPreferences {
         in defaults: UserDefaults = .standard
     ) -> Int {
         defaults.integer(forKey: clipboardHistoryLimit) == 7 ? 7 : 5
+    }
+
+    static func pinnedClipboardItemsEnabled(
+        in defaults: UserDefaults = .standard
+    ) -> Bool {
+        defaults.bool(forKey: usesPinnedClipboardItems)
+    }
+
+    static func textCountEnabled(
+        in defaults: UserDefaults = .standard
+    ) -> Bool {
+        defaults.bool(forKey: showsTextCount)
+    }
+
+    static func selectedTextCountMode(
+        in defaults: UserDefaults = .standard
+    ) -> TextCountMode {
+        guard let rawValue = defaults.string(forKey: textCountMode),
+              let mode = TextCountMode(rawValue: rawValue) else {
+            return .words
+        }
+        return mode
     }
 
     static func floatingPanelEnabled(
@@ -88,6 +128,9 @@ extension Notification.Name {
     )
     static let clipboardHistoryStateDidChange = Notification.Name(
         "Stickyy.clipboardHistoryStateDidChange"
+    )
+    static let pinnedClipboardItemsDidChange = Notification.Name(
+        "Stickyy.pinnedClipboardItemsDidChange"
     )
     static let onboardingDidFinish = Notification.Name(
         "Stickyy.onboardingDidFinish"

@@ -39,6 +39,18 @@ final class ScratchpadSession {
             guard let index = activeIndex,
                   scratchpads[index].text != newValue else { return }
             scratchpads[index].text = newValue
+            scratchpads[index].richTextData = nil
+            scratchpads[index].updatedAt = .now
+            scheduleAutosave(for: scratchpads[index].id)
+        }
+    }
+
+    var richTextData: Data? {
+        get { activeScratchpad?.richTextData }
+        set {
+            guard let index = activeIndex,
+                  scratchpads[index].richTextData != newValue else { return }
+            scratchpads[index].richTextData = newValue
             scratchpads[index].updatedAt = .now
             scheduleAutosave(for: scratchpads[index].id)
         }

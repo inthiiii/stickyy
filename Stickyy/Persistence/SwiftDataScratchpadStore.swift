@@ -18,6 +18,7 @@ final class SwiftDataScratchpadStore: ScratchpadStoring {
                 id: record.key,
                 title: record.title ?? legacyTitle(for: record),
                 text: record.text,
+                richTextData: record.richTextData,
                 isPinned: record.isPinned ?? false,
                 attachments: decodeAttachments(record.attachmentsData),
                 createdAt: record.createdAt ?? record.updatedAt,
@@ -30,6 +31,7 @@ final class SwiftDataScratchpadStore: ScratchpadStoring {
         if let record = try record(id: scratchpad.id) {
             record.title = scratchpad.title
             record.text = scratchpad.text
+            record.richTextData = scratchpad.richTextData
             record.isPinned = scratchpad.isPinned
             record.attachmentsData = encodeAttachments(scratchpad.attachments)
             record.createdAt = scratchpad.createdAt
@@ -40,6 +42,7 @@ final class SwiftDataScratchpadStore: ScratchpadStoring {
                     key: scratchpad.id,
                     title: scratchpad.title,
                     text: scratchpad.text,
+                    richTextData: scratchpad.richTextData,
                     isPinned: scratchpad.isPinned,
                     attachmentsData: encodeAttachments(scratchpad.attachments),
                     createdAt: scratchpad.createdAt,

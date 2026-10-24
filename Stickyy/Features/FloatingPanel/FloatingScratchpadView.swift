@@ -5,6 +5,14 @@ struct FloatingScratchpadView: View {
     @Bindable var clipboardHistory: ClipboardHistoryController
     let onDismiss: () -> Void
 
+    @State private var formattingRequest: ScratchpadFormattingRequest?
+
+    @AppStorage(StickyyPreferences.showsTextCount)
+    private var showsTextCount = false
+
+    @AppStorage(StickyyPreferences.textCountMode)
+    private var textCountMode = TextCountMode.words.rawValue
+
     var body: some View {
         VStack(spacing: 0) {
             if let persistenceError = session.persistenceError {
@@ -28,13 +36,16 @@ struct FloatingScratchpadView: View {
             ZStack(alignment: .bottomTrailing) {
                 ScratchpadEditor(
                     text: $session.text,
+                    richTextData: $session.richTextData,
                     focusRequest: session.editorFocusRequest,
                     insertionRequest: session.pendingTextInsertion,
+                    formattingRequest: formattingRequest,
                     onQuickPaste: quickPaste,
                     onPasteAttachment: session.addAttachments,
                     onEscape: onDismiss,
                     accessibilityIdentifier: "floatingScratchpadEditor",
-                    onInsertionApplied: session.didApplyTextInsertion
+                    onInsertionApplied: session.didApplyTextInsertion,
+                    onFormattingApplied: didApplyFormatting
                 )
                 .accessibilityLabel("Floating scratchpad")
                 .accessibilityIdentifier("floatingScratchpadEditor")
@@ -48,32 +59,43 @@ struct FloatingScratchpadView: View {
                         .accessibilityHidden(true)
                 }
 
-                if clipboardHistory.isEnabled,
-                   let latestItem = clipboardHistory.items.first {
-                    Button {
-                        insert(latestItem)
-                    } label: {
-                        Label(
-                            floatingClipboardTitle(for: latestItem),
-                            systemImage: floatingClipboardIcon(for: latestItem)
+                HStack(alignment: .bottom, spacing: 8) {
+                    ScratchpadFormattingControls { action in
+                        formattingRequest = ScratchpadFormattingRequest(
+                            action: action
                         )
-                        .font(.caption2.weight(.semibold))
-                        .lineLimit(1)
-                        .frame(maxWidth: 142)
-                        .padding(.horizontal, 9)
-                        .frame(height: 28)
                     }
-                    .buttonStyle(.plain)
-                    .stickyyPillSurface(Capsule())
-                    .overlay {
-                        Capsule().strokeBorder(Color.primary.opacity(0.1))
+
+                    Spacer(minLength: 8)
+
+                    if showsTextCount {
+                        ScratchpadTextCountLabel(
+                            text: session.text,
+                            mode: selectedTextCountMode
+                        )
                     }
-                    .shadow(color: .black.opacity(0.14), radius: 5, y: 2)
-                    .padding(10)
-                    .help("Add the latest clipboard item to this note")
-                    .accessibilityLabel("Add latest clipboard item")
-                    .accessibilityIdentifier("floatingRecentClipboard")
+
+                    if clipboardHistory.isEnabled,
+                       let latestItem = clipboardHistory.latestTextItem {
+                        Button {
+                            insert(latestItem)
+                        } label: {
+                            Image(systemName: "clipboard")
+                                .font(.system(size: 12, weight: .semibold))
+                                .frame(width: 26, height: 26)
+                        }
+                        .buttonStyle(.plain)
+                        .stickyyPillSurface(Circle())
+                        .overlay {
+                            Circle().strokeBorder(Color.primary.opacity(0.1))
+                        }
+                        .shadow(color: .black.opacity(0.14), radius: 5, y: 2)
+                        .help("Add the latest copied text to this note")
+                        .accessibilityLabel("Add latest copied text")
+                        .accessibilityIdentifier("floatingRecentClipboard")
+                    }
                 }
+                .padding(10)
             }
 
             if !session.activeAttachments.isEmpty {
@@ -112,6 +134,10 @@ struct FloatingScratchpadView: View {
             NSSound.beep()
             return
         }
+        guard case .text = item.content else {
+            NSSound.beep()
+            return
+        }
         insert(item)
     }
 
@@ -119,49 +145,17 @@ struct FloatingScratchpadView: View {
         switch item.content {
         case .text(let text):
             session.insertIntoEditor(text)
-        case .files(let urls):
-            session.addAttachments(from: .files(urls))
-        case .image(let data, let pasteboardType, let name):
-            session.addAttachments(
-                from: .image(
-                    data: data,
-                    pasteboardType: pasteboardType,
-                    name: name
-                )
-            )
+        case .files, .image:
+            NSSound.beep()
         }
     }
 
-    private func floatingClipboardIcon(
-        for item: ClipboardHistoryItem
-    ) -> String {
-        switch item.content {
-        case .text(let text):
-            ClipboardTextKind.detect(in: text).systemImage
-        case .image:
-            "photo"
-        case .files(let urls):
-            urls.count == 1 ? "doc" : "doc.on.doc"
-        }
+    private var selectedTextCountMode: TextCountMode {
+        TextCountMode(rawValue: textCountMode) ?? .words
     }
 
-    private func floatingClipboardTitle(
-        for item: ClipboardHistoryItem
-    ) -> String {
-        switch item.content {
-        case .text(let text):
-            String(
-                text
-                    .split(whereSeparator: \.isNewline)
-                    .joined(separator: " ")
-                    .prefix(36)
-            )
-        case .image(_, _, let name):
-            name
-        case .files(let urls):
-            urls.count == 1
-                ? urls[0].lastPathComponent
-                : String(localized: "\(urls.count) files")
-        }
+    private func didApplyFormatting(_ id: UUID) {
+        guard formattingRequest?.id == id else { return }
+        formattingRequest = nil
     }
 }

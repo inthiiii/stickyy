@@ -7,7 +7,7 @@ enum AppEnvironment {
     static var version: String {
         Bundle.main.object(
             forInfoDictionaryKey: "CFBundleShortVersionString"
-        ) as? String ?? "1.2.6"
+        ) as? String ?? "1.2.7"
     }
 
     static var latestUpdateTitle: String {
@@ -18,13 +18,11 @@ enum AppEnvironment {
         """
         Stickyy \(version) is ready ✨
 
-        • URLs now appear as highlighted, clickable links.
-        • Click “Stickyy” in the scratchpad header to briefly reveal the current note title.
-        • Your latest clipboard item is available inside the floating panel.
-        • First-time setup and the Drag to Applications installer are clearer and more reliable.
-        • The in-app updater now has the correct sandbox permission for reliable future updates.
-        • Every future update can introduce itself in a dedicated note like this one.
-        • Press Command–N while the menu-bar scratchpad is open to create a fresh note instantly.
+        • Optional word or character counts now appear in the bottom-right corner of both note styles.
+        • Bold, italic, and underline controls are available in the scratchpad and floating note.
+        • Clipboard Pills can be pinned so important items remain while newer copies rotate through the remaining slots.
+        • The floating note’s clipboard action is now a single compact icon and accepts text only.
+        • Long notes remain anchored correctly while typing and scrolling.
 
         Thank you for testing Stickyy.
         """

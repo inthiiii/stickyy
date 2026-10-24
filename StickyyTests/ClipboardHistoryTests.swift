@@ -224,6 +224,68 @@ struct ClipboardHistoryTests {
         #expect(history.currentTextForPasting() == nil)
     }
 
+    @Test("Pinned pills survive rotation and clearing while dynamic slots change")
+    func pinnedItemsRemainProtected() throws {
+        let suiteName = "StickyyTests.\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let pasteboard = makePasteboard()
+        let history = ClipboardHistoryController(
+            pasteboard: pasteboard,
+            monitoringEnabled: false,
+            initialItemLimit: 7,
+            initiallyPinningEnabled: true,
+            defaults: defaults
+        )
+
+        for index in 1...7 {
+            pasteboard.clearContents()
+            #expect(pasteboard.setString("Item \(index)", forType: .string))
+            history.captureIfChanged()
+        }
+        history.togglePin(try #require(history.items.first))
+        history.togglePin(try #require(history.items.last))
+
+        for index in 8...10 {
+            pasteboard.clearContents()
+            #expect(pasteboard.setString("Item \(index)", forType: .string))
+            history.captureIfChanged()
+        }
+
+        #expect(history.items.count == 7)
+        #expect(history.items.filter(\.isPinned).count == 2)
+        #expect(history.items.contains { text(from: $0) == "Item 7" && $0.isPinned })
+        #expect(history.items.contains { text(from: $0) == "Item 1" && $0.isPinned })
+
+        history.clearHistory()
+
+        #expect(history.items.count == 2)
+        let allRemainingItemsArePinned = history.items.allSatisfy {
+            $0.isPinned
+        }
+        #expect(allRemainingItemsArePinned)
+    }
+
+    @Test("Pinned pills round-trip through preference storage")
+    func pinnedItemsPersist() throws {
+        let suiteName = "StickyyTests.\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let item = ClipboardHistoryItem(
+            content: .text("Keep me"),
+            isPinned: true
+        )
+
+        PinnedClipboardStore.save([item], to: defaults)
+        let restored = try #require(
+            PinnedClipboardStore.load(from: defaults).first
+        )
+
+        #expect(restored.id == item.id)
+        #expect(restored.content == item.content)
+        #expect(restored.isPinned)
+    }
+
     private func makePasteboard() -> NSPasteboard {
         NSPasteboard(name: .init("StickyyTests.\(UUID().uuidString)"))
     }

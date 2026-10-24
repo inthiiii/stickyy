@@ -4,6 +4,7 @@ struct Scratchpad: Identifiable, Equatable, Sendable {
     let id: String
     var title: String
     var text: String
+    var richTextData: Data?
     var isPinned: Bool
     var attachments: [ScratchpadAttachment]
     let createdAt: Date
@@ -13,6 +14,7 @@ struct Scratchpad: Identifiable, Equatable, Sendable {
         id: String = UUID().uuidString,
         title: String = String(localized: "Untitled"),
         text: String = "",
+        richTextData: Data? = nil,
         isPinned: Bool = false,
         attachments: [ScratchpadAttachment] = [],
         createdAt: Date = .now,
@@ -21,6 +23,7 @@ struct Scratchpad: Identifiable, Equatable, Sendable {
         self.id = id
         self.title = title
         self.text = text
+        self.richTextData = richTextData
         self.isPinned = isPinned
         self.attachments = attachments
         self.createdAt = createdAt

@@ -49,6 +49,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 forKey: StickyyPreferences.clipboardHistoryLimit
             )
             UserDefaults.standard.removeObject(
+                forKey: StickyyPreferences.usesPinnedClipboardItems
+            )
+            UserDefaults.standard.removeObject(
+                forKey: StickyyPreferences.pinnedClipboardItems
+            )
+            UserDefaults.standard.removeObject(
                 forKey: StickyyPreferences.globalShortcut
             )
             UserDefaults.standard.removeObject(
@@ -59,6 +65,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             )
             UserDefaults.standard.removeObject(
                 forKey: StickyyPreferences.automaticallyChecksForUpdates
+            )
+            UserDefaults.standard.removeObject(
+                forKey: StickyyPreferences.showsTextCount
+            )
+            UserDefaults.standard.removeObject(
+                forKey: StickyyPreferences.textCountMode
             )
             UserDefaults.standard.removeObject(
                 forKey: StickyyPreferences.hasCompletedOnboarding

@@ -1,16 +1,30 @@
 import AppKit
 import SwiftUI
 
+enum ScratchpadFormattingAction: Sendable {
+    case bold
+    case italic
+    case underline
+}
+
+struct ScratchpadFormattingRequest: Equatable, Sendable {
+    let id = UUID()
+    let action: ScratchpadFormattingAction
+}
+
 struct ScratchpadEditor: NSViewRepresentable {
     @Binding var text: String
+    @Binding var richTextData: Data?
     let focusRequest: Int
     let insertionRequest: ScratchpadTextInsertion?
+    let formattingRequest: ScratchpadFormattingRequest?
     let onQuickPaste: (Int) -> Void
     let onPasteAttachment: (ClipboardHistoryContent) -> Void
     let onEscape: () -> Void
     var onCreateScratchpad: (() -> Void)? = nil
     var accessibilityIdentifier = "scratchpadEditor"
     var onInsertionApplied: (UUID) -> Void = { _ in }
+    var onFormattingApplied: (UUID) -> Void = { _ in }
 
     func makeCoordinator() -> Coordinator {
         Coordinator(parent: self)
@@ -30,8 +44,7 @@ struct ScratchpadEditor: NSViewRepresentable {
 
         let textView = EscapeHandlingTextView()
         textView.delegate = context.coordinator
-        textView.string = text
-        textView.isRichText = false
+        textView.isRichText = true
         textView.importsGraphics = false
         textView.allowsUndo = true
         textView.isEditable = true
@@ -47,7 +60,10 @@ struct ScratchpadEditor: NSViewRepresentable {
         textView.isVerticallyResizable = true
         textView.isHorizontallyResizable = false
         textView.autoresizingMask = [.width]
-        textView.minSize = .zero
+        textView.minSize = NSSize(
+            width: 0,
+            height: scrollView.contentSize.height
+        )
         textView.maxSize = NSSize(
             width: CGFloat.greatestFiniteMagnitude,
             height: CGFloat.greatestFiniteMagnitude
@@ -55,11 +71,12 @@ struct ScratchpadEditor: NSViewRepresentable {
         textView.textContainer?.widthTracksTextView = true
         textView.textContainer?.heightTracksTextView = false
         textView.textContainer?.containerSize = NSSize(
-            width: 0,
+            width: scrollView.contentSize.width,
             height: CGFloat.greatestFiniteMagnitude
         )
         textView.isContinuousSpellCheckingEnabled = true
         textView.isGrammarCheckingEnabled = false
+        textView.isAutomaticLinkDetectionEnabled = true
         textView.isAutomaticQuoteSubstitutionEnabled = true
         textView.isAutomaticDashSubstitutionEnabled = false
         textView.linkTextAttributes = [
@@ -73,10 +90,13 @@ struct ScratchpadEditor: NSViewRepresentable {
         textView.setAccessibilityLabel(String(localized: "Scratchpad"))
         textView.setAccessibilityIdentifier(accessibilityIdentifier)
 
+        textView.frame = scrollView.contentView.bounds
+        context.coordinator.applyModelContent(to: textView)
+
         context.coordinator.textView = textView
-        context.coordinator.refreshDetectedLinks()
         context.coordinator.lastFocusRequest = focusRequest
         context.coordinator.lastInsertionID = insertionRequest?.id
+        context.coordinator.lastFormattingID = formattingRequest?.id
         scrollView.documentView = textView
         return scrollView
     }
@@ -91,17 +111,23 @@ struct ScratchpadEditor: NSViewRepresentable {
         textView.onQuickPaste = onQuickPaste
         textView.onPasteAttachment = onPasteAttachment
         textView.onCreateScratchpad = onCreateScratchpad
+        context.coordinator.ensureVisibleEditorHeight(
+            textView,
+            in: scrollView
+        )
 
-        if textView.string != text {
+        if context.coordinator.shouldApplyModelContent(
+            text: text,
+            richTextData: richTextData
+        ) {
             let selection = textView.selectedRange()
-            textView.string = text
+            context.coordinator.applyModelContent(to: textView)
             textView.setSelectedRange(
                 NSRange(
                     location: min(selection.location, text.utf16.count),
                     length: 0
                 )
             )
-            context.coordinator.refreshDetectedLinks()
         }
 
         if context.coordinator.lastFocusRequest != focusRequest {
@@ -123,6 +149,20 @@ struct ScratchpadEditor: NSViewRepresentable {
                 onInsertionApplied(insertionID)
             }
         }
+
+        if let formattingRequest,
+           context.coordinator.lastFormattingID != formattingRequest.id {
+            context.coordinator.lastFormattingID = formattingRequest.id
+            textView.window?.makeFirstResponder(textView)
+            context.coordinator.applyFormatting(
+                formattingRequest.action,
+                to: textView
+            )
+            let formattingID = formattingRequest.id
+            Task { @MainActor in
+                onFormattingApplied(formattingID)
+            }
+        }
     }
 
     @MainActor
@@ -131,42 +171,174 @@ struct ScratchpadEditor: NSViewRepresentable {
         weak var textView: NSTextView?
         var lastFocusRequest = 0
         var lastInsertionID: UUID?
+        var lastFormattingID: UUID?
+        var lastPushedRichTextData: Data?
+        var isApplyingModelContent = false
 
         init(parent: ScratchpadEditor) {
             self.parent = parent
         }
 
         func textDidChange(_ notification: Notification) {
-            guard let textView else { return }
-            refreshDetectedLinks()
+            guard let textView, !isApplyingModelContent else { return }
             parent.text = textView.string
+            let data = serializedRichText(from: textView)
+            lastPushedRichTextData = data
+            parent.richTextData = data
         }
 
-        func refreshDetectedLinks() {
-            guard let textView,
-                  let textStorage = textView.textStorage else { return }
-            let fullRange = NSRange(
-                location: 0,
-                length: (textView.string as NSString).length
+        func shouldApplyModelContent(
+            text: String,
+            richTextData: Data?
+        ) -> Bool {
+            guard let textView else { return true }
+            return textView.string != text
+                || (richTextData != nil
+                    && richTextData != lastPushedRichTextData)
+        }
+
+        func applyModelContent(to textView: NSTextView) {
+            isApplyingModelContent = true
+            defer { isApplyingModelContent = false }
+
+            let attributedText: NSAttributedString
+            if let data = parent.richTextData,
+               let restored = NSAttributedString(
+                   rtf: data,
+                   documentAttributes: nil
+               ),
+               restored.string == parent.text {
+                attributedText = restored
+                lastPushedRichTextData = data
+            } else {
+                attributedText = NSAttributedString(
+                    string: parent.text,
+                    attributes: [
+                        .font: NSFont.preferredFont(forTextStyle: .body),
+                        .foregroundColor: NSColor.labelColor,
+                    ]
+                )
+                lastPushedRichTextData = nil
+            }
+            textView.textStorage?.setAttributedString(attributedText)
+        }
+
+        func ensureVisibleEditorHeight(
+            _ textView: NSTextView,
+            in scrollView: NSScrollView
+        ) {
+            let visibleSize = scrollView.contentSize
+            textView.minSize = NSSize(width: 0, height: visibleSize.height)
+            textView.textContainer?.containerSize = NSSize(
+                width: visibleSize.width,
+                height: CGFloat.greatestFiniteMagnitude
             )
-            textStorage.beginEditing()
-            textStorage.removeAttribute(.link, range: fullRange)
-            if let detector = try? NSDataDetector(
-                types: NSTextCheckingResult.CheckingType.link.rawValue
-            ) {
-                detector.enumerateMatches(
-                    in: textView.string,
-                    range: fullRange
-                ) { result, _, _ in
-                    guard let result, let url = result.url else { return }
-                    textStorage.addAttribute(
-                        .link,
-                        value: url,
-                        range: result.range
+            if textView.frame.width != visibleSize.width
+                || textView.frame.height < visibleSize.height {
+                textView.setFrameSize(
+                    NSSize(
+                        width: visibleSize.width,
+                        height: max(textView.frame.height, visibleSize.height)
                     )
+                )
+            }
+        }
+
+        func applyFormatting(
+            _ action: ScratchpadFormattingAction,
+            to textView: NSTextView
+        ) {
+            switch action {
+            case .bold:
+                toggleFontTrait(.boldFontMask, in: textView)
+            case .italic:
+                toggleFontTrait(.italicFontMask, in: textView)
+            case .underline:
+                toggleUnderline(in: textView)
+            }
+            textDidChange(Notification(name: NSText.didChangeNotification))
+        }
+
+        private func toggleFontTrait(
+            _ trait: NSFontTraitMask,
+            in textView: NSTextView
+        ) {
+            let range = textView.selectedRange()
+            let fontManager = NSFontManager.shared
+            if range.length == 0 {
+                let current = textView.typingAttributes[.font] as? NSFont
+                    ?? NSFont.preferredFont(forTextStyle: .body)
+                let hasTrait = fontManager.traits(of: current).contains(trait)
+                var attributes = textView.typingAttributes
+                attributes[.font] = hasTrait
+                    ? fontManager.convert(current, toNotHaveTrait: trait)
+                    : fontManager.convert(current, toHaveTrait: trait)
+                textView.typingAttributes = attributes
+                return
+            }
+
+            guard let textStorage = textView.textStorage else { return }
+            var everyRunHasTrait = true
+            textStorage.enumerateAttribute(
+                .font,
+                in: range
+            ) { value, _, _ in
+                let font = value as? NSFont
+                    ?? NSFont.preferredFont(forTextStyle: .body)
+                if !fontManager.traits(of: font).contains(trait) {
+                    everyRunHasTrait = false
                 }
             }
-            textStorage.endEditing()
+            textStorage.enumerateAttribute(
+                .font,
+                in: range
+            ) { value, runRange, _ in
+                let font = value as? NSFont
+                    ?? NSFont.preferredFont(forTextStyle: .body)
+                let converted = everyRunHasTrait
+                    ? fontManager.convert(font, toNotHaveTrait: trait)
+                    : fontManager.convert(font, toHaveTrait: trait)
+                textStorage.addAttribute(.font, value: converted, range: runRange)
+            }
+        }
+
+        private func toggleUnderline(in textView: NSTextView) {
+            let range = textView.selectedRange()
+            if range.length == 0 {
+                var attributes = textView.typingAttributes
+                let current = attributes[.underlineStyle] as? Int ?? 0
+                attributes[.underlineStyle] = current == 0
+                    ? NSUnderlineStyle.single.rawValue
+                    : 0
+                textView.typingAttributes = attributes
+                return
+            }
+
+            guard let textStorage = textView.textStorage else { return }
+            var everyRunIsUnderlined = true
+            textStorage.enumerateAttribute(
+                .underlineStyle,
+                in: range
+            ) { value, _, _ in
+                if (value as? Int ?? 0) == 0 {
+                    everyRunIsUnderlined = false
+                }
+            }
+            textStorage.addAttribute(
+                .underlineStyle,
+                value: everyRunIsUnderlined
+                    ? 0
+                    : NSUnderlineStyle.single.rawValue,
+                range: range
+            )
+        }
+
+        private func serializedRichText(from textView: NSTextView) -> Data? {
+            guard let textStorage = textView.textStorage else { return nil }
+            return textStorage.rtf(
+                from: NSRange(location: 0, length: textStorage.length),
+                documentAttributes: [.documentType: NSAttributedString.DocumentType.rtf]
+            )
         }
     }
 }

@@ -627,13 +627,13 @@ final class StickyyUITests: XCTestCase {
         let editor = app.textViews["scratchpadEditor"]
         XCTAssertTrue(editor.waitForExistence(timeout: 5))
         XCTAssertTrue(
-            (editor.value as? String)?.contains("Stickyy 1.2.6 is ready")
+            (editor.value as? String)?.contains("Stickyy 1.2.7 is ready")
                 == true
         )
         app.buttons["scratchpadHeaderTitle"].click()
         XCTAssertEqual(
             app.buttons["scratchpadHeaderTitle"].label,
-            "Latest update 1.2.6 and the features"
+            "Latest update 1.2.7 and the features"
         )
     }
 
@@ -663,6 +663,13 @@ final class StickyyUITests: XCTestCase {
             {
                 // The system Siri/Touch Bar candidate dialog is also exposed
                 // as part of the app hierarchy on macOS 27.
+                return true
+            }
+            if let element = issue.element,
+               element.descendants(matching: .button)["Capslock"].exists
+            {
+                // The macOS keyboard-state HUD can briefly appear while UI
+                // tests type and is reported as though Stickyy owned it.
                 return true
             }
             print(

@@ -26,6 +26,15 @@ private struct StickyySettingsView: View {
     @AppStorage(StickyyPreferences.clipboardHistoryLimit)
     private var clipboardHistoryLimit = 5
 
+    @AppStorage(StickyyPreferences.usesPinnedClipboardItems)
+    private var usesPinnedClipboardItems = false
+
+    @AppStorage(StickyyPreferences.showsTextCount)
+    private var showsTextCount = false
+
+    @AppStorage(StickyyPreferences.textCountMode)
+    private var textCountMode = TextCountMode.words.rawValue
+
     @AppStorage(StickyyPreferences.usesFloatingPanelShortcut)
     private var usesFloatingPanelShortcut = true
 
@@ -38,6 +47,7 @@ private struct StickyySettingsView: View {
     @State private var launchesAtLogin = SMAppService.mainApp.status == .enabled
     @State private var loginItemMessage: String?
     @State private var showsUserGuide = false
+    @State private var pinnedClipboardItems: [ClipboardHistoryItem] = []
 
     var body: some View {
         Form {
@@ -88,6 +98,22 @@ private struct StickyySettingsView: View {
                 .foregroundStyle(.secondary)
             }
 
+            Section("Editor") {
+                Toggle("Show Word or Character Count", isOn: $showsTextCount)
+                    .accessibilityIdentifier("textCountToggle")
+                Picker("Count", selection: $textCountMode) {
+                    ForEach(TextCountMode.allCases) { mode in
+                        Text(mode.title).tag(mode.rawValue)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .disabled(!showsTextCount)
+                .accessibilityIdentifier("textCountModePicker")
+                Text("Bold, italic, and underline controls are available at the bottom of every note.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
             Section("Clipboard Pills") {
                 Toggle("Clipboard History", isOn: $usesClipboardHistory)
                     .accessibilityIdentifier("clipboardHistoryToggle")
@@ -97,6 +123,31 @@ private struct StickyySettingsView: View {
                 }
                 .pickerStyle(.segmented)
                 .accessibilityIdentifier("clipboardHistoryLimitPicker")
+
+                Toggle("Allow Pinned Pills", isOn: $usesPinnedClipboardItems)
+                    .disabled(!usesClipboardHistory)
+                    .accessibilityIdentifier("pinnedClipboardToggle")
+
+                if usesPinnedClipboardItems && !pinnedClipboardItems.isEmpty {
+                    ForEach(pinnedClipboardItems) { item in
+                        HStack {
+                            Label(
+                                pinnedClipboardTitle(for: item),
+                                systemImage: "pin.fill"
+                            )
+                            .lineLimit(1)
+                            Spacer()
+                            Button("Remove") {
+                                PinnedClipboardStore.remove(id: item.id)
+                            }
+                            .buttonStyle(.borderless)
+                        }
+                    }
+
+                    Button("Remove All Pinned Pills", role: .destructive) {
+                        PinnedClipboardStore.removeAll()
+                    }
+                }
                 Text(
                     usesClipboardHistory
                         ? String(
@@ -167,6 +218,7 @@ private struct StickyySettingsView: View {
         .frame(width: 470, height: 700)
         .navigationTitle("Stickyy Settings")
         .onAppear { refreshLoginItemState() }
+        .onAppear { reloadPinnedClipboardItems() }
         .onChange(of: usesClipboardHistory) {
             NotificationCenter.default.post(
                 name: .clipboardHistoryPreferenceDidChange,
@@ -178,6 +230,20 @@ private struct StickyySettingsView: View {
                 name: .clipboardHistoryPreferenceDidChange,
                 object: nil
             )
+        }
+        .onChange(of: usesPinnedClipboardItems) {
+            NotificationCenter.default.post(
+                name: .clipboardHistoryPreferenceDidChange,
+                object: nil
+            )
+            reloadPinnedClipboardItems()
+        }
+        .onReceive(
+            NotificationCenter.default.publisher(
+                for: .pinnedClipboardItemsDidChange
+            )
+        ) { _ in
+            reloadPinnedClipboardItems()
         }
         .onAppear {
             UpdateController.shared.setAutomaticChecks(
@@ -231,6 +297,30 @@ private struct StickyySettingsView: View {
         @unknown default:
             launchesAtLogin = false
             loginItemMessage = nil
+        }
+    }
+
+    private func reloadPinnedClipboardItems() {
+        pinnedClipboardItems = PinnedClipboardStore.load()
+    }
+
+    private func pinnedClipboardTitle(
+        for item: ClipboardHistoryItem
+    ) -> String {
+        switch item.content {
+        case .text(let text):
+            return String(
+                text
+                    .split(whereSeparator: \.isNewline)
+                    .joined(separator: " ")
+                    .prefix(44)
+            )
+        case .image(_, _, let name):
+            return name
+        case .files(let urls):
+            return urls.count == 1
+                ? urls[0].lastPathComponent
+                : "\(urls.count) files"
         }
     }
 }

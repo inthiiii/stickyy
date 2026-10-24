@@ -7,6 +7,7 @@ final class ScratchpadRecord {
 
     @Attribute(.unique) var key: String
     var text: String
+    var richTextData: Data?
     var updatedAt: Date
     var title: String?
     var createdAt: Date?
@@ -17,6 +18,7 @@ final class ScratchpadRecord {
         key: String = ScratchpadRecord.primaryKey,
         title: String? = nil,
         text: String = "",
+        richTextData: Data? = nil,
         isPinned: Bool? = nil,
         attachmentsData: Data? = nil,
         createdAt: Date? = nil,
@@ -25,6 +27,7 @@ final class ScratchpadRecord {
         self.key = key
         self.title = title
         self.text = text
+        self.richTextData = richTextData
         self.isPinned = isPinned
         self.attachmentsData = attachmentsData
         self.createdAt = createdAt

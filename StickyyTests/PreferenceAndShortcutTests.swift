@@ -126,4 +126,33 @@ struct PreferenceAndShortcutTests {
         defaults.set(true, forKey: StickyyPreferences.hasCompletedOnboarding)
         #expect(!StickyyPreferences.shouldShowOnboarding(in: defaults))
     }
+
+    @Test("Text count is off with word mode selected by default")
+    func textCountDefaults() throws {
+        let suiteName = "StickyyTests.\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        #expect(!StickyyPreferences.textCountEnabled(in: defaults))
+        #expect(
+            StickyyPreferences.selectedTextCountMode(in: defaults) == .words
+        )
+        defaults.set(true, forKey: StickyyPreferences.showsTextCount)
+        defaults.set(
+            TextCountMode.characters.rawValue,
+            forKey: StickyyPreferences.textCountMode
+        )
+        #expect(StickyyPreferences.textCountEnabled(in: defaults))
+        #expect(
+            StickyyPreferences.selectedTextCountMode(in: defaults)
+                == .characters
+        )
+    }
+
+    @Test("Word and character counts handle whitespace and composed characters")
+    func textCounts() {
+        let text = "  One two\nthree 👨‍👩‍👧‍👦"
+        #expect(TextCount.value(for: text, mode: .words) == 3)
+        #expect(TextCount.value(for: text, mode: .characters) == 17)
+    }
 }

@@ -43,8 +43,16 @@ struct ClipboardHistoryView: View {
                     Circle().strokeBorder(Color.primary.opacity(0.1))
                 }
                 .shadow(color: .black.opacity(0.14), radius: 5, y: 2)
-                .help("Clear Clipboard History")
-                .accessibilityLabel("Clear Clipboard History")
+                .help(
+                    history.pinningEnabled
+                        ? "Clear unpinned Clipboard Pills"
+                        : "Clear Clipboard History"
+                )
+                .accessibilityLabel(
+                    history.pinningEnabled
+                        ? "Clear unpinned Clipboard Pills"
+                        : "Clear Clipboard History"
+                )
                 .accessibilityIdentifier("clearClipboardHistory")
             }
         }
@@ -107,6 +115,21 @@ struct ClipboardHistoryView: View {
                 history.restore(item)
             }
             .accessibilityIdentifier("clipboardHistoryItem_\(item.id)")
+
+            if history.pinningEnabled {
+                Button {
+                    history.togglePin(item)
+                } label: {
+                    Image(systemName: item.isPinned ? "pin.fill" : "pin")
+                        .font(.system(size: 9, weight: .semibold))
+                        .frame(width: 16, height: 18)
+                }
+                .buttonStyle(.plain)
+                .help(item.isPinned ? "Unpin this pill" : "Pin this pill")
+                .accessibilityLabel(
+                    item.isPinned ? "Unpin Clipboard Pill" : "Pin Clipboard Pill"
+                )
+            }
 
             if case .text(let text) = item.content {
                 Button("Paste") {
