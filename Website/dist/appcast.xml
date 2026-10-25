@@ -3,27 +3,33 @@
     <channel>
         <title>Stickyy</title>
         <item>
-            <title>1.2.6</title>
-            <pubDate>Sat, 24 Oct 2026 11:59:44 +0530</pubDate>
+            <title>1.2.7</title>
+            <pubDate>Sun, 25 Oct 2026 08:26:55 +0530</pubDate>
             <link>https://stickyyformac.vercel.app</link>
             <sparkle:informationalUpdate>
                 <sparkle:belowVersion>6</sparkle:belowVersion>
             </sparkle:informationalUpdate>
-            <sparkle:version>7</sparkle:version>
-            <sparkle:shortVersionString>1.2.6</sparkle:shortVersionString>
+            <sparkle:version>8</sparkle:version>
+            <sparkle:shortVersionString>1.2.7</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-            <description sparkle:format="markdown"><![CDATA[# Stickyy 1.2.6
+            <description sparkle:format="markdown"><![CDATA[# Stickyy 1.2.7
 
-## A new scratchpad in one keystroke
+## More control without losing the minimal feel
 
-- Press **Command-N** while the menu-bar scratchpad is open.
-- Stickyy creates a new blank scratchpad and switches to it immediately.
-- Your previous note stays safely stored in the scratchpad library.
+- Turn on a live word or character count for either note window.
+- Use the compact **B**, *I*, and underline controls in the menu-bar scratchpad
+  and floating note. Formatting is saved with the note.
+- Optionally pin important Clipboard Pills. Pinned items stay in place while
+  the remaining pill slots continue to update, and clearing the shelf leaves
+  pinned items untouched.
+- The floating note now shows one compact clipboard icon and accepts copied
+  text only.
+- Long notes remain correctly aligned and scroll smoothly while you type.
 
-This small release is also the first end-to-end test of the repaired in-app
-updater introduced in Stickyy 1.2.5.
+These options are available in Stickyy Settings and default to the familiar,
+minimal behavior until you enable them.
 ]]></description>
-            <enclosure url="https://stickyyformac.vercel.app/downloads/Stickyy-1.2.6.dmg" length="5337828" type="application/octet-stream" sparkle:edSignature="wMg6Q7spzoZ6om3nEgljgwXaTEOkEtMconMnKBZw+vJWYmyJ1LcoHXUbXiJh/bVxuUD2rF3Wn1C89vqIQqB4Dg=="/>
+            <enclosure url="https://stickyyformac.vercel.app/downloads/Stickyy-1.2.7.dmg" length="5495308" type="application/octet-stream" sparkle:edSignature="HawRc/kGmSGKHXPwjWZLdMpz8nk1X+ac3O6uUfOJeG/WFMSvyV9oSyj7//fItkXonyP6FG4cFtu614itgJW/DQ=="/>
         </item>
     </channel>
 </rss>
