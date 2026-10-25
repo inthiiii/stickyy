@@ -37,6 +37,13 @@ struct ScratchpadEditor: NSViewRepresentable {
         scrollView.hasVerticalScroller = true
         scrollView.hasHorizontalScroller = false
         scrollView.autohidesScrollers = true
+        scrollView.automaticallyAdjustsContentInsets = false
+        scrollView.contentInsets = NSEdgeInsets(
+            top: 0,
+            left: 0,
+            bottom: 50,
+            right: 0
+        )
         scrollView.setAccessibilityLabel(
             String(localized: "Scratchpad editor")
         )
@@ -87,7 +94,7 @@ struct ScratchpadEditor: NSViewRepresentable {
         textView.onQuickPaste = onQuickPaste
         textView.onPasteAttachment = onPasteAttachment
         textView.onCreateScratchpad = onCreateScratchpad
-        textView.typingBottomClearance = 50
+        textView.placeholder = String(localized: "Start typing…")
         textView.setAccessibilityLabel(String(localized: "Scratchpad"))
         textView.setAccessibilityIdentifier(accessibilityIdentifier)
 
@@ -112,10 +119,6 @@ struct ScratchpadEditor: NSViewRepresentable {
         textView.onQuickPaste = onQuickPaste
         textView.onPasteAttachment = onPasteAttachment
         textView.onCreateScratchpad = onCreateScratchpad
-        context.coordinator.ensureVisibleEditorHeight(
-            textView,
-            in: scrollView
-        )
 
         if context.coordinator.shouldApplyModelContent(
             text: text,
@@ -185,13 +188,6 @@ struct ScratchpadEditor: NSViewRepresentable {
             guard let textView, !isApplyingModelContent else { return }
             parent.text = textView.string
             scheduleRichTextSync(from: textView)
-            textView.refreshDocumentHeight()
-            textView.keepSelectionAboveTypingControls()
-        }
-
-        func textViewDidChangeSelection(_ notification: Notification) {
-            guard let textView, !isApplyingModelContent else { return }
-            textView.keepSelectionAboveTypingControls()
         }
 
         func shouldApplyModelContent(
@@ -232,38 +228,6 @@ struct ScratchpadEditor: NSViewRepresentable {
                 lastPushedRichTextData = nil
             }
             textView.textStorage?.setAttributedString(attributedText)
-            textView.refreshDocumentHeight()
-        }
-
-        fileprivate func ensureVisibleEditorHeight(
-            _ textView: EscapeHandlingTextView,
-            in scrollView: NSScrollView
-        ) {
-            let visibleSize = scrollView.contentSize
-            let sizeChanged = abs(
-                textView.minimumDocumentHeight - visibleSize.height
-            ) > 0.5 || abs(textView.frame.width - visibleSize.width) > 0.5
-            guard sizeChanged else { return }
-
-            textView.minimumDocumentHeight = visibleSize.height
-            textView.minSize = NSSize(width: 0, height: visibleSize.height)
-            if let textContainer = textView.textContainer,
-               abs(textContainer.containerSize.width - visibleSize.width) > 0.5 {
-                textContainer.containerSize = NSSize(
-                    width: visibleSize.width,
-                    height: CGFloat.greatestFiniteMagnitude
-                )
-            }
-            if abs(textView.frame.width - visibleSize.width) > 0.5
-                || textView.frame.height < visibleSize.height {
-                textView.setFrameSize(
-                    NSSize(
-                        width: visibleSize.width,
-                        height: max(textView.frame.height, visibleSize.height)
-                    )
-                )
-            }
-            textView.refreshDocumentHeight()
         }
 
         func applyFormatting(
@@ -392,88 +356,29 @@ fileprivate final class EscapeHandlingTextView: NSTextView {
     var onQuickPaste: (Int) -> Void = { _ in }
     var onPasteAttachment: (ClipboardHistoryContent) -> Void = { _ in }
     var onCreateScratchpad: (() -> Void)?
-    var typingBottomClearance: CGFloat = 0
-    var minimumDocumentHeight: CGFloat = 0
-    private var caretVisibilityUpdateIsScheduled = false
+    var placeholder = ""
 
-    func refreshDocumentHeight() {
-        guard let layoutManager, let textContainer else { return }
-        layoutManager.ensureLayout(for: textContainer)
-        let usedHeight = ceil(
-            layoutManager.usedRect(for: textContainer).height
+    override func draw(_ dirtyRect: NSRect) {
+        super.draw(dirtyRect)
+        guard string.isEmpty, !placeholder.isEmpty else { return }
+
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineBreakMode = .byTruncatingTail
+        let attributedPlaceholder = NSAttributedString(
+            string: placeholder,
+            attributes: [
+                .font: font ?? NSFont.preferredFont(forTextStyle: .body),
+                .foregroundColor: NSColor.tertiaryLabelColor,
+                .paragraphStyle: paragraphStyle,
+            ]
         )
-        let requiredHeight = usedHeight
-            + (textContainerInset.height * 2)
-            + typingBottomClearance
-        let targetHeight = max(minimumDocumentHeight, requiredHeight)
-        guard abs(frame.height - targetHeight) > 0.5 else { return }
-        setFrameSize(NSSize(width: frame.width, height: targetHeight))
-    }
-
-    func keepSelectionAboveTypingControls() {
-        guard typingBottomClearance > 0,
-              window?.firstResponder === self,
-              !caretVisibilityUpdateIsScheduled else { return }
-        caretVisibilityUpdateIsScheduled = true
-        DispatchQueue.main.async { [weak self] in
-            guard let self else { return }
-            caretVisibilityUpdateIsScheduled = false
-            guard window?.firstResponder === self,
-                  let scrollView = enclosingScrollView,
-                  let layoutManager,
-                  let textContainer else { return }
-            layoutManager.ensureLayout(for: textContainer)
-
-            let textLength = textStorage?.length ?? 0
-            let selectionEnd = min(
-                NSMaxRange(selectedRange()),
-                textLength
+        let linePadding = textContainer?.lineFragmentPadding ?? 0
+        attributedPlaceholder.draw(
+            at: NSPoint(
+                x: textContainerOrigin.x + linePadding,
+                y: textContainerOrigin.y
             )
-            let caretRect: NSRect
-            if selectionEnd == textLength,
-               layoutManager.extraLineFragmentTextContainer != nil {
-                caretRect = layoutManager.extraLineFragmentRect
-            } else if layoutManager.numberOfGlyphs > 0 {
-                let characterIndex = min(
-                    selectionEnd,
-                    max(textLength - 1, 0)
-                )
-                let glyphIndex = min(
-                    layoutManager.glyphIndexForCharacter(
-                        at: characterIndex
-                    ),
-                    layoutManager.numberOfGlyphs - 1
-                )
-                caretRect = layoutManager.lineFragmentUsedRect(
-                    forGlyphAt: glyphIndex,
-                    effectiveRange: nil
-                )
-            } else {
-                caretRect = NSRect(
-                    x: 0,
-                    y: 0,
-                    width: 1,
-                    height: font?.pointSize ?? 14
-                )
-            }
-
-            let caretBottom = caretRect.maxY + textContainerInset.height
-            let safeBottom = visibleRect.maxY - typingBottomClearance
-            guard caretBottom > safeBottom else { return }
-
-            let clipView = scrollView.contentView
-            var origin = clipView.bounds.origin
-            let maximumOriginY = max(
-                0,
-                frame.height - clipView.bounds.height
-            )
-            origin.y = min(
-                maximumOriginY,
-                origin.y + caretBottom - safeBottom
-            )
-            clipView.scroll(to: origin)
-            scrollView.reflectScrolledClipView(clipView)
-        }
+        )
     }
 
     override func cancelOperation(_ sender: Any?) {

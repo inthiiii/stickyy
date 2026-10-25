@@ -50,15 +50,6 @@ struct FloatingScratchpadView: View {
                 .accessibilityLabel("Floating scratchpad")
                 .accessibilityIdentifier("floatingScratchpadEditor")
 
-                if session.text.isEmpty {
-                    Text("Start typing…")
-                        .foregroundStyle(.tertiary)
-                        .padding(.horizontal, StickyyMetrics.editorInset + 4)
-                        .padding(.vertical, StickyyMetrics.editorInset + 2)
-                        .allowsHitTesting(false)
-                        .accessibilityHidden(true)
-                }
-
                 HStack(alignment: .bottom, spacing: 8) {
                     ScratchpadFormattingControls { action in
                         formattingRequest = ScratchpadFormattingRequest(

@@ -142,20 +142,6 @@ struct ScratchpadView: View {
             .accessibilityLabel("Scratchpad")
             .accessibilityIdentifier("scratchpadEditor")
 
-            if session.text.isEmpty {
-                Text("Start typing…")
-                    .foregroundStyle(.tertiary)
-                    .padding(.horizontal, StickyyMetrics.editorInset + 4)
-                    .padding(.vertical, StickyyMetrics.editorInset + 2)
-                    .frame(
-                        maxWidth: .infinity,
-                        maxHeight: .infinity,
-                        alignment: .topLeading
-                    )
-                    .allowsHitTesting(false)
-                    .accessibilityHidden(true)
-            }
-
             HStack(alignment: .bottom, spacing: 8) {
                 ScratchpadFormattingControls { action in
                     formattingRequest = ScratchpadFormattingRequest(
