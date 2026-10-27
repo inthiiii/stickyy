@@ -24,3 +24,5 @@ Package.resolved
 # Local configuration and secrets
 Local.xcconfig
 *.env
+.vercel
+.env*

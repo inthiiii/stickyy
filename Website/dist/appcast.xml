@@ -3,33 +3,34 @@
     <channel>
         <title>Stickyy</title>
         <item>
-            <title>1.2.7</title>
-            <pubDate>Sun, 25 Oct 2026 08:26:55 +0530</pubDate>
+            <title>1.2.8</title>
+            <pubDate>Tue, 27 Oct 2026 14:55:53 +0530</pubDate>
             <link>https://stickyyformac.vercel.app</link>
             <sparkle:informationalUpdate>
                 <sparkle:belowVersion>6</sparkle:belowVersion>
             </sparkle:informationalUpdate>
-            <sparkle:version>8</sparkle:version>
-            <sparkle:shortVersionString>1.2.7</sparkle:shortVersionString>
+            <sparkle:version>9</sparkle:version>
+            <sparkle:shortVersionString>1.2.8</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-            <description sparkle:format="markdown"><![CDATA[# Stickyy 1.2.7
+            <description sparkle:format="markdown"><![CDATA[# Stickyy 1.2.8
 
-## More control without losing the minimal feel
+## Faster structure, more accurate paste
 
-- Turn on a live word or character count for either note window.
-- Use the compact **B**, *I*, and underline controls in the menu-bar scratchpad
-  and floating note. Formatting is saved with the note.
-- Optionally pin important Clipboard Pills. Pinned items stay in place while
-  the remaining pill slots continue to update, and clearing the shelf leaves
-  pinned items untouched.
-- The floating note now shows one compact clipboard icon and accepts copied
-  text only.
-- Long notes remain correctly aligned and scroll smoothly while you type.
-
-These options are available in Stickyy Settings and default to the familiar,
-minimal behavior until you enable them.
+- The floating-note paste action now inserts the most recently copied text,
+  even when older Clipboard Pills are pinned above it.
+- Type `- ` at the beginning of a line for a solid bullet. Press Return to
+  continue the list, or Return on an empty bullet to finish it.
+- Type `->` to insert a right arrow.
+- Type `---` to create a section divider. A compact dot navigator appears on
+  the right edge so you can jump between sections in either note style.
+- Liquid Glass keeps its background blur when section navigation appears.
+- The dot navigator stays compact and scrollable with long notes, and can be
+  turned off under Editor in Settings.
+- Right-clicking the menu-bar icon now opens Settings reliably.
+- A small, non-intrusive ready card appears for three seconds when Stickyy
+  starts or launches at login.
 ]]></description>
-            <enclosure url="https://stickyyformac.vercel.app/downloads/Stickyy-1.2.7.dmg" length="5495308" type="application/octet-stream" sparkle:edSignature="HawRc/kGmSGKHXPwjWZLdMpz8nk1X+ac3O6uUfOJeG/WFMSvyV9oSyj7//fItkXonyP6FG4cFtu614itgJW/DQ=="/>
+            <enclosure url="https://stickyyformac.vercel.app/downloads/Stickyy-1.2.8.dmg" length="5573377" type="application/octet-stream" sparkle:edSignature="zP5Jpb/GXjT783PXIk+3vsayWBeScXEifA9oTuu2mb6IIipSH1Zp7cqovYX2+gkjgNWNaFj4AJxw+4VHSgYRCw=="/>
         </item>
     </channel>
 </rss>
