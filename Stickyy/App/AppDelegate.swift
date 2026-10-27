@@ -12,6 +12,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var clipboardHistoryController: ClipboardHistoryController?
     private var onboardingController: OnboardingController?
     private var floatingPanelController: FloatingPanelController?
+    private var startupStatusController: StartupStatusController?
     private var onboardingObserver: NSObjectProtocol?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -73,6 +74,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 forKey: StickyyPreferences.textCountMode
             )
             UserDefaults.standard.removeObject(
+                forKey: StickyyPreferences.showsSectionNavigator
+            )
+            UserDefaults.standard.removeObject(
                 forKey: StickyyPreferences.hasCompletedOnboarding
             )
             UserDefaults.standard.removeObject(
@@ -97,6 +101,29 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             UserDefaults.standard.set(
                 FloatingNoteMode.newEveryTime.rawValue,
                 forKey: StickyyPreferences.floatingNoteMode
+            )
+        }
+        if CommandLine.arguments.contains("--ui-testing-safe-shortcut") {
+            UserDefaults.standard.set(
+                GlobalShortcut(
+                    keyCode: UInt32(kVK_ANSI_K),
+                    modifiers: UInt32(controlKey | optionKey | shiftKey | cmdKey)
+                ).storageValue,
+                forKey: StickyyPreferences.globalShortcut
+            )
+        }
+        if CommandLine.arguments.contains(
+            "--ui-testing-hide-section-navigator"
+        ) {
+            UserDefaults.standard.set(
+                false,
+                forKey: StickyyPreferences.showsSectionNavigator
+            )
+        }
+        if CommandLine.arguments.contains("--ui-testing-use-liquid-glass") {
+            UserDefaults.standard.set(
+                true,
+                forKey: StickyyPreferences.usesLiquidGlass
             )
         }
         #endif
@@ -236,6 +263,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let isUITesting = CommandLine.arguments.contains {
             $0.hasPrefix("--ui-testing")
         }
+        let shouldShowStartupStatus = hasCompletedOnboarding
+            && (!isUITesting
+                || CommandLine.arguments.contains(
+                    "--ui-testing-show-startup-status"
+                ))
+        if shouldShowStartupStatus {
+            let startupStatusController = StartupStatusController()
+            self.startupStatusController = startupStatusController
+            startupStatusController.show()
+        }
         if !isUITesting,
            StickyyPreferences.shouldShowOnboarding() {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
@@ -260,6 +297,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             Task { @MainActor [weak floatingPanelController] in
                 try? await Task.sleep(for: .milliseconds(150))
                 floatingPanelController?.show()
+            }
+        }
+
+        if CommandLine.arguments.contains(
+            "--ui-testing-open-settings-from-status-menu"
+        ) {
+            Task { @MainActor [weak statusItemController] in
+                try? await Task.sleep(for: .milliseconds(150))
+                statusItemController?.showSettings()
             }
         }
 

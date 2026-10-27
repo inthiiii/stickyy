@@ -7,7 +7,7 @@ enum AppEnvironment {
     static var version: String {
         Bundle.main.object(
             forInfoDictionaryKey: "CFBundleShortVersionString"
-        ) as? String ?? "1.2.7"
+        ) as? String ?? "1.2.8"
     }
 
     static var latestUpdateTitle: String {
@@ -18,11 +18,13 @@ enum AppEnvironment {
         """
         Stickyy \(version) is ready ✨
 
-        • Optional word or character counts now appear in the bottom-right corner of both note styles.
-        • Bold, italic, and underline controls are available in the scratchpad and floating note.
-        • Clipboard Pills can be pinned so important items remain while newer copies rotate through the remaining slots.
-        • The floating note’s clipboard action is now a single compact icon and accepts text only.
-        • Long notes remain anchored correctly while typing and scrolling.
+        • The floating-note paste action now uses the newest copied text even when older Clipboard Pills are pinned above it.
+        • Type “- ” at the beginning of a line to create a solid bullet and continue the list with Return.
+        • Type “->” to create a clean right arrow.
+        • Type “---” to divide a note into sections, then use the new dot navigator on the right edge to jump between them.
+        • Liquid Glass now keeps a consistent blur while section navigation is visible.
+        • The section navigator stays compact, can scroll through long notes, and can be hidden in Settings.
+        • Stickyy now shows a brief ready indicator when it starts, and Settings opens correctly from the menu-bar icon.
 
         Thank you for testing Stickyy.
         """

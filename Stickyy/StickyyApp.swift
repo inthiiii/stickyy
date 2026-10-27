@@ -13,7 +13,7 @@ struct StickyyApp: App {
     }
 }
 
-private struct StickyySettingsView: View {
+struct StickyySettingsView: View {
     @AppStorage(StickyyPreferences.usesLiquidGlass)
     private var usesLiquidGlass = false
 
@@ -34,6 +34,9 @@ private struct StickyySettingsView: View {
 
     @AppStorage(StickyyPreferences.textCountMode)
     private var textCountMode = TextCountMode.words.rawValue
+
+    @AppStorage(StickyyPreferences.showsSectionNavigator)
+    private var showsSectionNavigator = true
 
     @AppStorage(StickyyPreferences.usesFloatingPanelShortcut)
     private var usesFloatingPanelShortcut = true
@@ -109,6 +112,11 @@ private struct StickyySettingsView: View {
                 .pickerStyle(.segmented)
                 .disabled(!showsTextCount)
                 .accessibilityIdentifier("textCountModePicker")
+                Toggle(
+                    "Show Section Dot Navigator",
+                    isOn: $showsSectionNavigator
+                )
+                .accessibilityIdentifier("sectionNavigatorToggle")
                 Text("Bold, italic, and underline controls are available at the bottom of every note.")
                     .font(.caption)
                     .foregroundStyle(.secondary)

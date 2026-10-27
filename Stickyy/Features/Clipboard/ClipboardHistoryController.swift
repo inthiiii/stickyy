@@ -366,10 +366,12 @@ final class ClipboardHistoryController {
     }
 
     var latestTextItem: ClipboardHistoryItem? {
-        items.first {
-            if case .text = $0.content { return true }
-            return false
-        }
+        items
+            .filter {
+                if case .text = $0.content { return true }
+                return false
+            }
+            .max { $0.capturedAt < $1.capturedAt }
     }
 
     #if DEBUG

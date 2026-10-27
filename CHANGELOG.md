@@ -2,6 +2,23 @@
 
 All notable Stickyy changes are documented here.
 
+## 1.2.8 — Faster structure and accurate recent paste
+
+- Fixed the floating-note paste action so it inserts the most recently copied
+  text instead of the first pinned Clipboard Pill.
+- Added automatic solid bullets when `- ` is typed at the beginning of a line,
+  including Return-to-continue and an empty-bullet exit.
+- Added `->` expansion into a right arrow.
+- Turned `---` dividers into navigable note sections with a compact dot
+  navigator in both the menu-bar scratchpad and floating panel.
+- Kept Liquid Glass blur stable when the section navigator appears.
+- Bounded long section navigators to a compact scrollable control and added an
+  Editor setting for hiding the navigator.
+- Repaired Settings access from the menu-bar icon's contextual menu.
+- Added a three-second ready card when Stickyy launches or starts at login.
+- Added an isolated UI-test command that uses a separate bundle identifier and
+  storage container, protecting data in an installed Stickyy app during tests.
+
 ## 1.2.7 — Richer notes and pinned Clipboard Pills
 
 - Added optional live word or character counts to the menu-bar scratchpad and

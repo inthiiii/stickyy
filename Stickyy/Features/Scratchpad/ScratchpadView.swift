@@ -10,9 +10,14 @@ struct ScratchpadView: View {
     @State private var showsActiveTitle = false
     @State private var titleResetTask: Task<Void, Never>?
     @State private var formattingRequest: ScratchpadFormattingRequest?
+    @State private var sectionNavigationRequest:
+        ScratchpadSectionNavigationRequest?
 
     @AppStorage(StickyyPreferences.showsTextCount)
     private var showsTextCount = false
+
+    @AppStorage(StickyyPreferences.showsSectionNavigator)
+    private var showsSectionNavigator = true
 
     @AppStorage(StickyyPreferences.textCountMode)
     private var textCountMode = TextCountMode.words.rawValue
@@ -132,6 +137,7 @@ struct ScratchpadView: View {
                 focusRequest: session.editorFocusRequest,
                 insertionRequest: session.pendingTextInsertion,
                 formattingRequest: formattingRequest,
+                sectionNavigationRequest: sectionNavigationRequest,
                 onQuickPaste: quickPaste,
                 onPasteAttachment: session.addAttachments,
                 onEscape: onDismiss,
@@ -141,6 +147,21 @@ struct ScratchpadView: View {
             )
             .accessibilityLabel("Scratchpad")
             .accessibilityIdentifier("scratchpadEditor")
+
+            if showsSectionNavigator {
+                ScratchpadSectionNavigator(
+                    text: session.text,
+                    accessibilityPrefix: "scratchpad"
+                ) { location in
+                    sectionNavigationRequest =
+                        ScratchpadSectionNavigationRequest(location: location)
+                }
+                .frame(
+                    maxWidth: .infinity,
+                    maxHeight: .infinity,
+                    alignment: .trailing
+                )
+            }
 
             HStack(alignment: .bottom, spacing: 8) {
                 ScratchpadFormattingControls { action in

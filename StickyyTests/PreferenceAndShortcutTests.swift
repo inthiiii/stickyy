@@ -149,6 +149,20 @@ struct PreferenceAndShortcutTests {
         )
     }
 
+    @Test("Section navigation is visible by default and can be disabled")
+    func sectionNavigatorDefaults() throws {
+        let suiteName = "StickyyTests.\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        #expect(StickyyPreferences.sectionNavigatorEnabled(in: defaults))
+        defaults.set(
+            false,
+            forKey: StickyyPreferences.showsSectionNavigator
+        )
+        #expect(!StickyyPreferences.sectionNavigatorEnabled(in: defaults))
+    }
+
     @Test("Word and character counts handle whitespace and composed characters")
     func textCounts() {
         let text = "  One two\nthree 👨‍👩‍👧‍👦"

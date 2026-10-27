@@ -14,7 +14,15 @@ private struct StickyySurfaceModifier: ViewModifier {
                 .background(Color(nsColor: .windowBackgroundColor))
         } else if usesLiquidGlass {
             if #available(macOS 26.0, *) {
-                content.glassEffect(.regular, in: Rectangle())
+                content
+                    // Keep a real material layer beneath Liquid Glass. Dynamic
+                    // overlays (such as the section navigator) can cause the
+                    // glass compositor to rebuild; this prevents that rebuild
+                    // from briefly exposing a clear window.
+                    .background {
+                        Rectangle().fill(.regularMaterial)
+                    }
+                    .glassEffect(.regular, in: Rectangle())
             } else {
                 content.background {
                     Rectangle().fill(.regularMaterial)
@@ -50,7 +58,9 @@ private struct StickyyPillSurfaceModifier<S: Shape>: ViewModifier {
             content.background(Color(nsColor: .windowBackgroundColor), in: shape)
         } else if usesLiquidGlass {
             if #available(macOS 26.0, *) {
-                content.glassEffect(.regular, in: shape)
+                content
+                    .background(.regularMaterial, in: shape)
+                    .glassEffect(.regular, in: shape)
             } else {
                 content.background(.regularMaterial, in: shape)
             }

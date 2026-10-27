@@ -6,6 +6,8 @@ final class StatusItemController: NSObject {
     private let popoverController: PopoverController
     private let floatingPanelController: FloatingPanelController
     private lazy var contextMenu = makeContextMenu()
+    private lazy var settingsWindowController =
+        StickyySettingsWindowController()
 
     init(
         popoverController: PopoverController,
@@ -62,7 +64,7 @@ final class StatusItemController: NSObject {
     private func makeContextMenu() -> NSMenu {
         let menu = NSMenu()
         let phaseLabel = NSMenuItem(
-            title: String(localized: "Stickyy — 1.1"),
+            title: "Stickyy — \(AppEnvironment.version)",
             action: nil,
             keyEquivalent: ""
         )
@@ -90,10 +92,14 @@ final class StatusItemController: NSObject {
     }
 
     @objc
-    private func showSettings() {
+    func showSettings() {
         popoverController.close()
         floatingPanelController.close()
-        NSApp.activate()
-        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+        // A status-item menu is still tracking while its action runs. Opening
+        // Settings on the next main-loop pass lets the menu finish closing
+        // before the settings window becomes key.
+        DispatchQueue.main.async {
+            self.settingsWindowController.show()
+        }
     }
 }

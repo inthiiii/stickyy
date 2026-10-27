@@ -44,6 +44,7 @@ enum StickyyPreferences {
     static let automaticallyChecksForUpdates = "automaticallyChecksForUpdates"
     static let showsTextCount = "showsTextCount"
     static let textCountMode = "textCountMode"
+    static let showsSectionNavigator = "showsSectionNavigator"
     static let lastPresentedReleaseNotesVersion =
         "lastPresentedReleaseNotesVersion"
 
@@ -81,6 +82,14 @@ enum StickyyPreferences {
             return .words
         }
         return mode
+    }
+
+    static func sectionNavigatorEnabled(
+        in defaults: UserDefaults = .standard
+    ) -> Bool {
+        defaults.object(forKey: showsSectionNavigator) == nil
+            ? true
+            : defaults.bool(forKey: showsSectionNavigator)
     }
 
     static func floatingPanelEnabled(

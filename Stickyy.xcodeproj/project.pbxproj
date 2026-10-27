@@ -38,8 +38,16 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
+				ScratchpadSessionTests.swift,
 			);
 			target = F4961967307A882F00647263 /* Stickyy */;
+		};
+		F493C19B308C031E00BC86C3 /* Exceptions for "Stickyy" folder in "StickyyTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				ScratchpadSessionTests.swift,
+			);
+			target = F4961974307A883000647263 /* StickyyTests */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -48,6 +56,7 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				A11000000000000000000004 /* Exceptions for "Stickyy" folder in "Stickyy" target */,
+				F493C19B308C031E00BC86C3 /* Exceptions for "Stickyy" folder in "StickyyTests" target */,
 			);
 			path = Stickyy;
 			sourceTree = "<group>";
@@ -202,11 +211,11 @@
 			);
 			mainGroup = F496195F307A882F00647263;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
-			productRefGroup = F4961969307A882F00647263 /* Products */;
 			packageReferences = (
 				A11000000000000000000002 /* XCRemoteSwiftPackageReference "Sparkle" */,
 			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = F4961969307A882F00647263 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -395,7 +404,7 @@
 				CODE_SIGN_ENTITLEMENTS = Stickyy/Stickyy.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = W646PJF57Y;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -407,7 +416,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.2.7;
+				MARKETING_VERSION = 1.2.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.inthiiii.Stickyy;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = NO;
@@ -429,7 +438,7 @@
 				CODE_SIGN_ENTITLEMENTS = Stickyy/Stickyy.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = W646PJF57Y;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -441,7 +450,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.2.7;
+				MARKETING_VERSION = 1.2.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.inthiiii.Stickyy;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = NO;

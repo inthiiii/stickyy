@@ -286,6 +286,32 @@ struct ClipboardHistoryTests {
         #expect(restored.isPinned)
     }
 
+    @Test("Latest copied text ignores the shelf position of pinned pills")
+    func latestTextUsesCaptureTimeInsteadOfShelfOrder() throws {
+        let suiteName = "StickyyTests.\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let pasteboard = makePasteboard()
+        let history = ClipboardHistoryController(
+            pasteboard: pasteboard,
+            monitoringEnabled: false,
+            initiallyPinningEnabled: true,
+            defaults: defaults
+        )
+
+        pasteboard.clearContents()
+        #expect(pasteboard.setString("Pinned earlier", forType: .string))
+        history.captureIfChanged()
+        history.togglePin(try #require(history.items.first))
+
+        pasteboard.clearContents()
+        #expect(pasteboard.setString("Copied most recently", forType: .string))
+        history.captureIfChanged()
+
+        #expect(text(from: history.items.first!) == "Pinned earlier")
+        #expect(text(from: history.latestTextItem!) == "Copied most recently")
+    }
+
     private func makePasteboard() -> NSPasteboard {
         NSPasteboard(name: .init("StickyyTests.\(UUID().uuidString)"))
     }

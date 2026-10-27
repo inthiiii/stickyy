@@ -18,6 +18,7 @@ struct ScratchpadEditor: NSViewRepresentable {
     let focusRequest: Int
     let insertionRequest: ScratchpadTextInsertion?
     let formattingRequest: ScratchpadFormattingRequest?
+    let sectionNavigationRequest: ScratchpadSectionNavigationRequest?
     let onQuickPaste: (Int) -> Void
     let onPasteAttachment: (ClipboardHistoryContent) -> Void
     let onEscape: () -> Void
@@ -105,6 +106,7 @@ struct ScratchpadEditor: NSViewRepresentable {
         context.coordinator.lastFocusRequest = focusRequest
         context.coordinator.lastInsertionID = insertionRequest?.id
         context.coordinator.lastFormattingID = formattingRequest?.id
+        context.coordinator.lastSectionNavigationID = sectionNavigationRequest?.id
         scrollView.documentView = textView
         return scrollView
     }
@@ -167,6 +169,17 @@ struct ScratchpadEditor: NSViewRepresentable {
                 onFormattingApplied(formattingID)
             }
         }
+
+        if let sectionNavigationRequest,
+           context.coordinator.lastSectionNavigationID
+               != sectionNavigationRequest.id {
+            context.coordinator.lastSectionNavigationID =
+                sectionNavigationRequest.id
+            context.coordinator.navigate(
+                to: sectionNavigationRequest.location,
+                in: textView
+            )
+        }
     }
 
     @MainActor
@@ -176,6 +189,7 @@ struct ScratchpadEditor: NSViewRepresentable {
         var lastFocusRequest = 0
         var lastInsertionID: UUID?
         var lastFormattingID: UUID?
+        var lastSectionNavigationID: UUID?
         var lastPushedRichTextData: Data?
         var isApplyingModelContent = false
         private var richTextSyncTask: Task<Void, Never>?
@@ -243,6 +257,13 @@ struct ScratchpadEditor: NSViewRepresentable {
                 toggleUnderline(in: textView)
             }
             textDidChange(Notification(name: NSText.didChangeNotification))
+        }
+
+        func navigate(to location: Int, in textView: NSTextView) {
+            let safeLocation = min(max(location, 0), textView.string.utf16.count)
+            textView.scrollRangeToVisible(
+                NSRange(location: safeLocation, length: 0)
+            )
         }
 
         private func toggleFontTrait(
@@ -407,18 +428,74 @@ fileprivate final class EscapeHandlingTextView: NSTextView {
     }
 
     override func insertText(_ insertString: Any, replacementRange: NSRange) {
-        if let string = insertString as? String,
-           string == "-",
-           selectedRange().length == 0,
-           selectedRange().location >= 2 {
-            let source = self.string as NSString
-            let previousRange = NSRange(location: selectedRange().location - 2, length: 2)
+        guard let insertedText = insertString as? String,
+              selectedRange().length == 0 else {
+            super.insertText(insertString, replacementRange: replacementRange)
+            return
+        }
+
+        let cursor = selectedRange().location
+        let source = string as NSString
+
+        if insertedText == "-", cursor >= 2 {
+            let previousRange = NSRange(location: cursor - 2, length: 2)
             if source.substring(with: previousRange) == "--" {
-                super.insertText("\n────────────\n", replacementRange: previousRange)
+                let hasTextBeforeDivider = previousRange.location > 0
+                    && source.character(at: previousRange.location - 1) != 10
+                    && source.character(at: previousRange.location - 1) != 13
+                let prefix = hasTextBeforeDivider ? "\n" : ""
+                super.insertText(
+                    "\(prefix)\(ScratchpadSections.divider)\n",
+                    replacementRange: previousRange
+                )
                 return
             }
         }
+
+        if insertedText == ">", cursor >= 1 {
+            let previousRange = NSRange(location: cursor - 1, length: 1)
+            if source.substring(with: previousRange) == "-" {
+                super.insertText("→", replacementRange: previousRange)
+                return
+            }
+        }
+
+        if insertedText == " ", cursor >= 1 {
+            let hyphenRange = NSRange(location: cursor - 1, length: 1)
+            let startsLine = hyphenRange.location == 0
+                || source.character(at: hyphenRange.location - 1) == 10
+                || source.character(at: hyphenRange.location - 1) == 13
+            if startsLine, source.substring(with: hyphenRange) == "-" {
+                super.insertText("• ", replacementRange: hyphenRange)
+                return
+            }
+        }
+
         super.insertText(insertString, replacementRange: replacementRange)
+    }
+
+    override func insertNewline(_ sender: Any?) {
+        let source = string as NSString
+        let cursor = selectedRange().location
+        let lineRange = source.lineRange(
+            for: NSRange(location: min(cursor, source.length), length: 0)
+        )
+        let contentEnd = min(cursor, NSMaxRange(lineRange))
+        let contentRange = NSRange(
+            location: lineRange.location,
+            length: max(0, contentEnd - lineRange.location)
+        )
+        let currentLine = source.substring(with: contentRange)
+
+        if currentLine == "• " {
+            super.insertText("\n", replacementRange: contentRange)
+            return
+        }
+        if currentLine.hasPrefix("• ") {
+            super.insertText("\n• ", replacementRange: selectedRange())
+            return
+        }
+        super.insertNewline(sender)
     }
 
     override func paste(_ sender: Any?) {

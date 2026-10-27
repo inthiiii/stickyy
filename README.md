@@ -6,7 +6,7 @@ Stickyy is a fast, local-first macOS menu-bar scratchpad built with SwiftUI, App
 
 ## Current status
 
-Stickyy 1.2.7 is a stable local-first scratchpad with automated quality, recovery, accessibility, and performance coverage while preserving its original minimal design. Its editors now support rich-text emphasis and optional live counts, while pinned Clipboard Pills keep important copied items available.
+Stickyy 1.2.8 is a stable local-first scratchpad with automated quality, recovery, accessibility, and performance coverage while preserving its original minimal design. Its editors support rich-text emphasis, optional live counts, lightweight list transformations, and section navigation, while pinned Clipboard Pills keep important copied items available.
 
 - Xcode 27 project
 - Swift 6 language mode and complete concurrency checking

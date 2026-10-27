@@ -6,9 +6,14 @@ struct FloatingScratchpadView: View {
     let onDismiss: () -> Void
 
     @State private var formattingRequest: ScratchpadFormattingRequest?
+    @State private var sectionNavigationRequest:
+        ScratchpadSectionNavigationRequest?
 
     @AppStorage(StickyyPreferences.showsTextCount)
     private var showsTextCount = false
+
+    @AppStorage(StickyyPreferences.showsSectionNavigator)
+    private var showsSectionNavigator = true
 
     @AppStorage(StickyyPreferences.textCountMode)
     private var textCountMode = TextCountMode.words.rawValue
@@ -40,6 +45,7 @@ struct FloatingScratchpadView: View {
                     focusRequest: session.editorFocusRequest,
                     insertionRequest: session.pendingTextInsertion,
                     formattingRequest: formattingRequest,
+                    sectionNavigationRequest: sectionNavigationRequest,
                     onQuickPaste: quickPaste,
                     onPasteAttachment: session.addAttachments,
                     onEscape: onDismiss,
@@ -49,6 +55,23 @@ struct FloatingScratchpadView: View {
                 )
                 .accessibilityLabel("Floating scratchpad")
                 .accessibilityIdentifier("floatingScratchpadEditor")
+
+                if showsSectionNavigator {
+                    ScratchpadSectionNavigator(
+                        text: session.text,
+                        accessibilityPrefix: "floatingScratchpad"
+                    ) { location in
+                        sectionNavigationRequest =
+                            ScratchpadSectionNavigationRequest(
+                                location: location
+                            )
+                    }
+                    .frame(
+                        maxWidth: .infinity,
+                        maxHeight: .infinity,
+                        alignment: .trailing
+                    )
+                }
 
                 HStack(alignment: .bottom, spacing: 8) {
                     ScratchpadFormattingControls { action in

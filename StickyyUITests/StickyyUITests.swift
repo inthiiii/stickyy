@@ -118,6 +118,78 @@ final class StickyyUITests: XCTestCase {
         let value = editor.value as? String
         XCTAssertTrue(value?.contains("────────────") == true)
         XCTAssertFalse(value?.contains("---") == true)
+        XCTAssertTrue(
+            app.descendants(matching: .any)["scratchpadSectionNavigator"]
+                .waitForExistence(timeout: 2)
+        )
+        XCTAssertTrue(app.buttons["scratchpadSection_1"].exists)
+        XCTAssertTrue(app.buttons["scratchpadSection_2"].exists)
+        app.buttons["scratchpadSection_1"].click()
+        app.buttons["scratchpadSection_2"].click()
+    }
+
+    @MainActor
+    func testSectionNavigatorStaysCompactWithManySections() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-reset-persistence",
+            "--ui-testing-open-scratchpad",
+            "--ui-testing-use-liquid-glass",
+        ]
+        app.launch()
+
+        let editor = app.textViews["scratchpadEditor"]
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+        editor.typeText(Array(repeating: "---", count: 16).joined())
+
+        let navigator = app.descendants(matching: .any)[
+            "scratchpadSectionNavigator"
+        ]
+        XCTAssertTrue(navigator.waitForExistence(timeout: 2))
+        XCTAssertLessThanOrEqual(navigator.frame.height, 166)
+    }
+
+    @MainActor
+    func testSectionNavigatorCanBeHidden() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-reset-persistence",
+            "--ui-testing-hide-section-navigator",
+            "--ui-testing-open-scratchpad",
+        ]
+        app.launch()
+
+        let editor = app.textViews["scratchpadEditor"]
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+        editor.typeText("---")
+        XCTAssertFalse(
+            app.descendants(matching: .any)["scratchpadSectionNavigator"]
+                .exists
+        )
+    }
+
+    @MainActor
+    func testHyphenPatternsCreateBulletsAndArrows() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-reset-persistence",
+            "--ui-testing-open-scratchpad",
+        ]
+        app.launch()
+
+        let editor = app.textViews["scratchpadEditor"]
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+        editor.typeText("- First item")
+        editor.typeKey(.return, modifierFlags: [])
+        editor.typeText("Second item")
+        editor.typeKey(.return, modifierFlags: [])
+        editor.typeKey(.return, modifierFlags: [])
+        editor.typeText("-> Next")
+
+        XCTAssertEqual(
+            editor.value as? String,
+            "• First item\n• Second item\n\n→ Next"
+        )
     }
 
     @MainActor
@@ -483,7 +555,42 @@ final class StickyyUITests: XCTestCase {
         XCTAssertTrue(
             app.descendants(matching: .any)["automaticUpdateChecksToggle"].exists
         )
+        XCTAssertTrue(
+            app.descendants(matching: .any)["sectionNavigatorToggle"].exists
+        )
         XCTAssertTrue(app.buttons["checkForUpdates"].exists)
+    }
+
+    @MainActor
+    func testStatusMenuSettingsActionOpensSettings() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-reset-persistence",
+            "--ui-testing-open-settings-from-status-menu",
+        ]
+        app.launch()
+
+        XCTAssertTrue(
+            app.descendants(matching: .any)["launchAtLoginToggle"]
+                .waitForExistence(timeout: 5)
+        )
+    }
+
+    @MainActor
+    func testStartupStatusAppearsAndDismissesAutomatically() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-reset-persistence",
+            "--ui-testing-existing-version",
+            "1.2.8",
+            "--ui-testing-show-startup-status",
+        ]
+        app.launch()
+
+        let status = app.descendants(matching: .any)["startupStatusPanel"]
+        XCTAssertTrue(status.waitForExistence(timeout: 2))
+        XCTAssertGreaterThanOrEqual(status.frame.minY, 12)
+        XCTAssertTrue(status.waitForNonExistence(timeout: 5))
     }
 
     @MainActor
@@ -547,25 +654,28 @@ final class StickyyUITests: XCTestCase {
         let recorder = app.buttons["globalShortcutRecorder"]
         XCTAssertTrue(recorder.waitForExistence(timeout: 5))
         recorder.click()
-        app.typeKey("k", modifierFlags: [.control, .option])
+        app.typeKey("k", modifierFlags: [.control, .option, .shift, .command])
 
-        XCTAssertEqual(recorder.value as? String, "⌃⌥K")
+        XCTAssertEqual(recorder.value as? String, "⌃⌥⇧⌘K")
     }
 
     @MainActor
-    func testDefaultGlobalShortcutOpensScratchpad() async {
+    func testConfiguredGlobalShortcutOpensScratchpad() async {
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-testing-reset-persistence"]
+        app.launchArguments = [
+            "--ui-testing-reset-persistence",
+            "--ui-testing-safe-shortcut",
+        ]
         app.launch()
 
         // Carbon can briefly retain the previous UI-test process's hot-key
         // registration while repeated app launches are settling.
         try? await Task.sleep(for: .milliseconds(500))
-        app.typeKey(.space, modifierFlags: [.control, .option])
+        app.typeKey("k", modifierFlags: [.control, .option, .shift, .command])
 
         let editor = app.textViews["floatingScratchpadEditor"]
         if !editor.waitForExistence(timeout: 2) {
-            app.typeKey(.space, modifierFlags: [.control, .option])
+            app.typeKey("k", modifierFlags: [.control, .option, .shift, .command])
         }
         XCTAssertTrue(editor.waitForExistence(timeout: 5))
         XCTAssertFalse(app.buttons["exportToAppleNotes"].exists)
@@ -580,15 +690,16 @@ final class StickyyUITests: XCTestCase {
         app.launchArguments = [
             "--ui-testing-reset-persistence",
             "--ui-testing-disable-floating-panel",
+            "--ui-testing-safe-shortcut",
         ]
         app.launch()
 
         try? await Task.sleep(for: .milliseconds(500))
-        app.typeKey(.space, modifierFlags: [.control, .option])
+        app.typeKey("k", modifierFlags: [.control, .option, .shift, .command])
 
         let editor = app.textViews["scratchpadEditor"]
         if !editor.waitForExistence(timeout: 2) {
-            app.typeKey(.space, modifierFlags: [.control, .option])
+            app.typeKey("k", modifierFlags: [.control, .option, .shift, .command])
         }
         XCTAssertTrue(editor.waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["exportToAppleNotes"].exists)
@@ -601,6 +712,7 @@ final class StickyyUITests: XCTestCase {
             "--ui-testing-reset-persistence",
             "--ui-testing-floating-mode-new",
             "--ui-testing-open-floating-panel",
+            "--ui-testing-safe-shortcut",
         ]
         app.launch()
 
@@ -611,7 +723,7 @@ final class StickyyUITests: XCTestCase {
         XCTAssertTrue(editor.waitForNonExistence(timeout: 2))
 
         try? await Task.sleep(for: .milliseconds(300))
-        app.typeKey(.space, modifierFlags: [.control, .option])
+        app.typeKey("k", modifierFlags: [.control, .option, .shift, .command])
         XCTAssertTrue(editor.waitForExistence(timeout: 5))
         XCTAssertEqual(editor.value as? String, "")
     }
@@ -657,6 +769,29 @@ final class StickyyUITests: XCTestCase {
     }
 
     @MainActor
+    func testFloatingPanelShowsSectionNavigatorForDividers() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-reset-persistence",
+            "--ui-testing-open-floating-panel",
+        ]
+        app.launch()
+
+        let editor = app.textViews["floatingScratchpadEditor"]
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+        editor.typeText("First section\n---Second section")
+
+        XCTAssertTrue(
+            app.descendants(matching: .any)[
+                "floatingScratchpadSectionNavigator"
+            ].waitForExistence(timeout: 2)
+        )
+        XCTAssertTrue(app.buttons["floatingScratchpadSection_1"].exists)
+        XCTAssertTrue(app.buttons["floatingScratchpadSection_2"].exists)
+        app.buttons["floatingScratchpadSection_2"].click()
+    }
+
+    @MainActor
     func testExistingInstallReceivesTheLatestUpdateNote() {
         let app = XCUIApplication()
         app.launchArguments = [
@@ -669,13 +804,13 @@ final class StickyyUITests: XCTestCase {
         let editor = app.textViews["scratchpadEditor"]
         XCTAssertTrue(editor.waitForExistence(timeout: 5))
         XCTAssertTrue(
-            (editor.value as? String)?.contains("Stickyy 1.2.7 is ready")
+            (editor.value as? String)?.contains("Stickyy 1.2.8 is ready")
                 == true
         )
         app.buttons["scratchpadHeaderTitle"].click()
         XCTAssertEqual(
             app.buttons["scratchpadHeaderTitle"].label,
-            "Latest update 1.2.7 and the features"
+            "Latest update 1.2.8 and the features"
         )
     }
 
