@@ -3,34 +3,26 @@
     <channel>
         <title>Stickyy</title>
         <item>
-            <title>1.2.8</title>
-            <pubDate>Tue, 27 Oct 2026 14:55:53 +0530</pubDate>
+            <title>1.2.8.1</title>
+            <pubDate>Wed, 28 Oct 2026 09:52:50 +0530</pubDate>
             <link>https://stickyyformac.vercel.app</link>
             <sparkle:informationalUpdate>
                 <sparkle:belowVersion>6</sparkle:belowVersion>
             </sparkle:informationalUpdate>
-            <sparkle:version>9</sparkle:version>
-            <sparkle:shortVersionString>1.2.8</sparkle:shortVersionString>
+            <sparkle:version>10</sparkle:version>
+            <sparkle:shortVersionString>1.2.8.1</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-            <description sparkle:format="markdown"><![CDATA[# Stickyy 1.2.8
+            <description sparkle:format="markdown"><![CDATA[# Stickyy 1.2.8.1
 
-## Faster structure, more accurate paste
+## Liquid Glass restored
 
-- The floating-note paste action now inserts the most recently copied text,
-  even when older Clipboard Pills are pinned above it.
-- Type `- ` at the beginning of a line for a solid bullet. Press Return to
-  continue the list, or Return on an empty bullet to finish it.
-- Type `->` to insert a right arrow.
-- Type `---` to create a section divider. A compact dot navigator appears on
-  the right edge so you can jump between sections in either note style.
-- Liquid Glass keeps its background blur when section navigation appears.
-- The dot navigator stays compact and scrollable with long notes, and can be
-  turned off under Editor in Settings.
-- Right-clicking the menu-bar icon now opens Settings reliably.
-- A small, non-intrusive ready card appears for three seconds when Stickyy
-  starts or launches at login.
+- Restored the native Liquid Glass appearance in the menu-bar scratchpad,
+  floating note, and compact controls.
+- Kept the glass surface stable while section navigation and other editor
+  overlays appear or change.
+- Preserved the original minimal material when Liquid Glass is turned off.
 ]]></description>
-            <enclosure url="https://stickyyformac.vercel.app/downloads/Stickyy-1.2.8.dmg" length="5573377" type="application/octet-stream" sparkle:edSignature="zP5Jpb/GXjT783PXIk+3vsayWBeScXEifA9oTuu2mb6IIipSH1Zp7cqovYX2+gkjgNWNaFj4AJxw+4VHSgYRCw=="/>
+            <enclosure url="https://github.com/inthiiii/stickyy/releases/download/v1.2.8.1/Stickyy-1.2.8.1.dmg" length="5575773" type="application/octet-stream" sparkle:edSignature="wMs6TpZVJ4/JfzYghy8VQVo47Vuz2Jn8gchTkINIKyKq6Y/468CCZb3/JnHs92Zvn3IL7OndlKWOUqwqE+I+AQ=="/>
         </item>
     </channel>
 </rss>
