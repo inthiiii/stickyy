@@ -582,7 +582,7 @@ final class StickyyUITests: XCTestCase {
         app.launchArguments = [
             "--ui-testing-reset-persistence",
             "--ui-testing-existing-version",
-            "1.2.8",
+            "1.2.8.1",
             "--ui-testing-show-startup-status",
         ]
         app.launch()
@@ -774,6 +774,7 @@ final class StickyyUITests: XCTestCase {
         app.launchArguments = [
             "--ui-testing-reset-persistence",
             "--ui-testing-open-floating-panel",
+            "--ui-testing-use-liquid-glass",
         ]
         app.launch()
 
@@ -804,13 +805,13 @@ final class StickyyUITests: XCTestCase {
         let editor = app.textViews["scratchpadEditor"]
         XCTAssertTrue(editor.waitForExistence(timeout: 5))
         XCTAssertTrue(
-            (editor.value as? String)?.contains("Stickyy 1.2.8 is ready")
+            (editor.value as? String)?.contains("Stickyy 1.2.8.1 is ready")
                 == true
         )
         app.buttons["scratchpadHeaderTitle"].click()
         XCTAssertEqual(
             app.buttons["scratchpadHeaderTitle"].label,
-            "Latest update 1.2.8 and the features"
+            "Latest update 1.2.8.1 and the features"
         )
     }
 

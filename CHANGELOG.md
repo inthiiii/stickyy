@@ -2,6 +2,14 @@
 
 All notable Stickyy changes are documented here.
 
+## 1.2.8.1 — Liquid Glass hotfix
+
+- Restored the native Liquid Glass appearance in the menu-bar scratchpad,
+  floating note, and compact controls.
+- Isolated the glass backdrop from dynamic editor overlays so section
+  navigation no longer changes or invalidates the window surface.
+- Preserved the original minimal material path when Liquid Glass is disabled.
+
 ## 1.2.8 — Faster structure and accurate recent paste
 
 - Fixed the floating-note paste action so it inserts the most recently copied
