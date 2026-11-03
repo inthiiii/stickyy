@@ -21,7 +21,6 @@ final class FloatingPanelController: NSObject, NSWindowDelegate {
             ),
             styleMask: [
                 .borderless,
-                .nonactivatingPanel,
                 .resizable,
                 .fullSizeContentView,
             ],
@@ -39,6 +38,8 @@ final class FloatingPanelController: NSObject, NSWindowDelegate {
         ]
         panel.isReleasedWhenClosed = false
         panel.hidesOnDeactivate = false
+        panel.becomesKeyOnlyIfNeeded = false
+        panel.acceptsMouseMovedEvents = true
         panel.isOpaque = false
         panel.backgroundColor = .clear
         panel.hasShadow = true
@@ -74,6 +75,7 @@ final class FloatingPanelController: NSObject, NSWindowDelegate {
 
     func show() {
         guard !panel.isVisible else {
+            NSApp.activate(ignoringOtherApps: true)
             panel.makeKeyAndOrderFront(nil)
             session.requestEditorFocus()
             return
@@ -92,8 +94,8 @@ final class FloatingPanelController: NSObject, NSWindowDelegate {
         }
 
         panel.orderFrontRegardless()
-        panel.makeKey()
-        NSApp.activate()
+        NSApp.activate(ignoringOtherApps: true)
+        panel.makeKeyAndOrderFront(nil)
         session.requestEditorFocus()
     }
 

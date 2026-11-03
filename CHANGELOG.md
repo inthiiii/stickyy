@@ -2,6 +2,15 @@
 
 All notable Stickyy changes are documented here.
 
+## 1.2.9 — Interactive floating notes and clean paste
+
+- Fixed floating-note interaction so clicking, typing, and scrolling target the
+  note instead of the window behind it.
+- Made normal text paste strip rich formatting from websites and documents.
+- Added an explicit Paste as Plain Text command with the
+  Command–Option–Shift–V shortcut.
+- Preserved file and image attachment pasting in the scratchpad.
+
 ## 1.2.8.1 — Liquid Glass hotfix
 
 - Restored the native Liquid Glass appearance in the menu-bar scratchpad,

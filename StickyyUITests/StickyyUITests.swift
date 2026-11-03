@@ -582,7 +582,7 @@ final class StickyyUITests: XCTestCase {
         app.launchArguments = [
             "--ui-testing-reset-persistence",
             "--ui-testing-existing-version",
-            "1.2.8.1",
+            "1.2.9",
             "--ui-testing-show-startup-status",
         ]
         app.launch()
@@ -750,6 +750,77 @@ final class StickyyUITests: XCTestCase {
     }
 
     @MainActor
+    func testFloatingPanelReclaimsClicksAndScrollingFromAnotherApp() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-reset-persistence",
+            "--ui-testing-seed-long-note",
+            "--ui-testing-open-floating-panel",
+        ]
+        app.launch()
+
+        let editor = app.textViews["floatingScratchpadEditor"]
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+
+        let finder = XCUIApplication(bundleIdentifier: "com.apple.finder")
+        finder.activate()
+        finder.coordinate(
+            withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)
+        ).click()
+
+        editor.click()
+        XCTAssertEqual(app.state, .runningForeground)
+
+        editor.scroll(byDeltaX: 0, deltaY: -8)
+
+        editor.typeKey(.downArrow, modifierFlags: .command)
+        let addition = "\nFloating panel owns this interaction."
+        editor.typeText(addition)
+        XCTAssertTrue((editor.value as? String)?.hasSuffix(addition) == true)
+    }
+
+    @MainActor
+    func testPastingRichClipboardContentUsesPlainText() throws {
+        let pasteboard = NSPasteboard.general
+        pasteboard.declareTypes([.string, .rtf], owner: nil)
+        let plainText = "Pasted without formatting"
+        XCTAssertTrue(pasteboard.setString(plainText, forType: .string))
+        let attributed = NSAttributedString(
+            string: plainText,
+            attributes: [
+                .font: NSFont.boldSystemFont(ofSize: 22),
+                .foregroundColor: NSColor.systemRed,
+            ]
+        )
+        let rtf = try XCTUnwrap(
+            attributed.rtf(
+                from: NSRange(location: 0, length: attributed.length),
+                documentAttributes: [
+                    .documentType: NSAttributedString.DocumentType.rtf
+                ]
+            )
+        )
+        XCTAssertTrue(pasteboard.setData(rtf, forType: .rtf))
+
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-reset-persistence",
+            "--ui-testing-open-scratchpad",
+        ]
+        app.launch()
+
+        let editor = app.textViews["scratchpadEditor"]
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+        editor.click()
+        editor.typeKey("v", modifierFlags: .command)
+        XCTAssertEqual(editor.value as? String, plainText)
+
+        editor.rightClick()
+        XCTAssertTrue(app.menuItems["Paste as Plain Text"].exists)
+        app.typeKey(.escape, modifierFlags: [])
+    }
+
+    @MainActor
     func testFloatingPanelCanInsertTheLatestClipboardItem() {
         let app = XCUIApplication()
         app.launchArguments = [
@@ -805,13 +876,13 @@ final class StickyyUITests: XCTestCase {
         let editor = app.textViews["scratchpadEditor"]
         XCTAssertTrue(editor.waitForExistence(timeout: 5))
         XCTAssertTrue(
-            (editor.value as? String)?.contains("Stickyy 1.2.8.1 is ready")
+            (editor.value as? String)?.contains("Stickyy 1.2.9 is ready")
                 == true
         )
         app.buttons["scratchpadHeaderTitle"].click()
         XCTAssertEqual(
             app.buttons["scratchpadHeaderTitle"].label,
-            "Latest update 1.2.8.1 and the features"
+            "Latest update 1.2.9 and the features"
         )
     }
 

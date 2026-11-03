@@ -7,7 +7,7 @@ enum AppEnvironment {
     static var version: String {
         Bundle.main.object(
             forInfoDictionaryKey: "CFBundleShortVersionString"
-        ) as? String ?? "1.2.8.1"
+        ) as? String ?? "1.2.9"
     }
 
     static var latestUpdateTitle: String {
@@ -18,9 +18,9 @@ enum AppEnvironment {
         """
         Stickyy \(version) is ready ✨
 
-        • Restored the native Liquid Glass appearance in the menu-bar scratchpad, floating note, and compact controls.
-        • Liquid Glass now stays stable while section navigation and other editor overlays appear or change.
-        • The original minimal material remains unchanged when Liquid Glass is turned off.
+        • The floating note now captures clicks, typing, and scrolling even after you have been working in another app.
+        • Pasted text automatically drops website and document formatting so it matches your note.
+        • Paste as Plain Text is also available from the editor menu or with Command–Option–Shift–V.
 
         Thank you for testing Stickyy.
         """

@@ -12,6 +12,32 @@ struct ScratchpadFormattingRequest: Equatable, Sendable {
     let action: ScratchpadFormattingAction
 }
 
+enum ScratchpadPasteboardContent {
+    static func plainText(from pasteboard: NSPasteboard) -> String? {
+        if let plainText = pasteboard.string(forType: .string) {
+            return plainText
+        }
+
+        if let rtfData = pasteboard.data(forType: .rtf),
+           let attributedText = NSAttributedString(
+               rtf: rtfData,
+               documentAttributes: nil
+           ) {
+            return attributedText.string
+        }
+
+        if let rtfdData = pasteboard.data(forType: .rtfd),
+           let attributedText = NSAttributedString(
+               rtfd: rtfdData,
+               documentAttributes: nil
+           ) {
+            return attributedText.string
+        }
+
+        return nil
+    }
+}
+
 struct ScratchpadEditor: NSViewRepresentable {
     @Binding var text: String
     @Binding var richTextData: Data?
@@ -424,7 +450,41 @@ fileprivate final class EscapeHandlingTextView: NSTextView {
             onQuickPaste(number - 1)
             return true
         }
+        if modifiers == [.command, .option, .shift],
+           event.charactersIgnoringModifiers?.lowercased() == "v" {
+            pasteAsPlainText(nil)
+            return true
+        }
         return super.performKeyEquivalent(with: event)
+    }
+
+    override func menu(for event: NSEvent) -> NSMenu? {
+        guard let menu = super.menu(for: event) else { return nil }
+        let action = #selector(pasteAsPlainText(_:))
+        if let existingItem = menu.items.first(where: { $0.action == action }) {
+            existingItem.title = String(localized: "Paste as Plain Text")
+            existingItem.keyEquivalent = "v"
+            existingItem.keyEquivalentModifierMask = [.command, .option, .shift]
+            existingItem.target = self
+            return menu
+        }
+
+        let item = NSMenuItem(
+            title: String(localized: "Paste as Plain Text"),
+            action: action,
+            keyEquivalent: "v"
+        )
+        item.keyEquivalentModifierMask = [.command, .option, .shift]
+        item.target = self
+
+        let pasteIndex = menu.items.firstIndex {
+            $0.action == #selector(paste(_:))
+        }
+        menu.insertItem(
+            item,
+            at: min((pasteIndex ?? menu.items.count - 1) + 1, menu.items.count)
+        )
+        return menu
     }
 
     override func insertText(_ insertString: Any, replacementRange: NSRange) {
@@ -516,6 +576,26 @@ fileprivate final class EscapeHandlingTextView: NSTextView {
             onPasteAttachment(.image(data: data, pasteboardType: NSPasteboard.PasteboardType.tiff.rawValue, name: String(localized: "Pasted Image")))
             return
         }
+        if insertPlainText(from: pasteboard) {
+            return
+        }
         super.paste(sender)
+    }
+
+    override func pasteAsPlainText(_ sender: Any?) {
+        if !insertPlainText(from: .general) {
+            super.pasteAsPlainText(sender)
+        }
+    }
+
+    @discardableResult
+    private func insertPlainText(from pasteboard: NSPasteboard) -> Bool {
+        guard let plainText = ScratchpadPasteboardContent.plainText(
+            from: pasteboard
+        ) else {
+            return false
+        }
+        insertText(plainText, replacementRange: selectedRange())
+        return true
     }
 }
