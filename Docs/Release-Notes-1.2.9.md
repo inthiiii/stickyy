@@ -14,5 +14,9 @@
   Command–Option–Shift–V.
 - Image and file attachment pasting continues to work as before.
 
-This build is a local test candidate. It must not be uploaded to the website or
-published through the updater until it receives release approval.
+## Updating
+
+- Existing Stickyy users can install this release from **Check for Updates**.
+- The direct-download DMG remains a free Apple Development-signed test build
+  and is not Apple-notarized. First-time users may need to approve Stickyy in
+  **System Settings → Privacy & Security** after attempting to open it.

@@ -3,26 +3,39 @@
     <channel>
         <title>Stickyy</title>
         <item>
-            <title>1.2.8.1</title>
-            <pubDate>Wed, 28 Oct 2026 09:52:50 +0530</pubDate>
+            <title>1.2.9</title>
+            <pubDate>Tue, 03 Nov 2026 12:18:13 +0530</pubDate>
             <link>https://stickyyformac.vercel.app</link>
             <sparkle:informationalUpdate>
                 <sparkle:belowVersion>6</sparkle:belowVersion>
             </sparkle:informationalUpdate>
-            <sparkle:version>10</sparkle:version>
-            <sparkle:shortVersionString>1.2.8.1</sparkle:shortVersionString>
+            <sparkle:version>11</sparkle:version>
+            <sparkle:shortVersionString>1.2.9</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-            <description sparkle:format="markdown"><![CDATA[# Stickyy 1.2.8.1
+            <description sparkle:format="markdown"><![CDATA[# Stickyy 1.2.9
 
-## Liquid Glass restored
+## Floating note interaction
 
-- Restored the native Liquid Glass appearance in the menu-bar scratchpad,
-  floating note, and compact controls.
-- Kept the glass surface stable while section navigation and other editor
-  overlays appear or change.
-- Preserved the original minimal material when Liquid Glass is turned off.
+- The floating note now receives clicks and scrolling after switching from
+  another app.
+- Typing and scrolling no longer affect the window behind Stickyy.
+
+## Clean paste
+
+- Text pasted from websites and documents is inserted as plain text and adopts
+  the note's current style.
+- Paste as Plain Text is available from the editor context menu and with
+  Command–Option–Shift–V.
+- Image and file attachment pasting continues to work as before.
+
+## Updating
+
+- Existing Stickyy users can install this release from **Check for Updates**.
+- The direct-download DMG remains a free Apple Development-signed test build
+  and is not Apple-notarized. First-time users may need to approve Stickyy in
+  **System Settings → Privacy & Security** after attempting to open it.
 ]]></description>
-            <enclosure url="https://github.com/inthiiii/stickyy/releases/download/v1.2.8.1/Stickyy-1.2.8.1.dmg" length="5575773" type="application/octet-stream" sparkle:edSignature="wMs6TpZVJ4/JfzYghy8VQVo47Vuz2Jn8gchTkINIKyKq6Y/468CCZb3/JnHs92Zvn3IL7OndlKWOUqwqE+I+AQ=="/>
+            <enclosure url="https://github.com/inthiiii/stickyy/releases/download/v1.2.9/Stickyy-1.2.9.dmg" length="5584693" type="application/octet-stream" sparkle:edSignature="X//QD84QdBtOfP8+U0vsOVZDu/MJULGz8RSNcRD4Q1eFjbDlWocWIRbaBF1pAdSvODqInt6U8QMkRBiYZG55Cw=="/>
         </item>
     </channel>
 </rss>
