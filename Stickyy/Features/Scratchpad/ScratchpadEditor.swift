@@ -50,6 +50,7 @@ struct ScratchpadEditor: NSViewRepresentable {
     let onEscape: () -> Void
     var onCreateScratchpad: (() -> Void)? = nil
     var accessibilityIdentifier = "scratchpadEditor"
+    var activatesAppOnInteraction = false
     var onInsertionApplied: (UUID) -> Void = { _ in }
     var onFormattingApplied: (UUID) -> Void = { _ in }
 
@@ -58,7 +59,8 @@ struct ScratchpadEditor: NSViewRepresentable {
     }
 
     func makeNSView(context: Context) -> NSScrollView {
-        let scrollView = NSScrollView()
+        let scrollView = InteractiveScratchpadScrollView()
+        scrollView.activatesAppOnInteraction = activatesAppOnInteraction
         scrollView.borderType = .noBorder
         scrollView.drawsBackground = false
         scrollView.hasVerticalScroller = true
@@ -77,6 +79,7 @@ struct ScratchpadEditor: NSViewRepresentable {
         scrollView.setAccessibilityIdentifier("\(accessibilityIdentifier)ScrollView")
 
         let textView = EscapeHandlingTextView()
+        textView.activatesAppOnInteraction = activatesAppOnInteraction
         textView.delegate = context.coordinator
         textView.isRichText = true
         textView.importsGraphics = false
@@ -147,6 +150,12 @@ struct ScratchpadEditor: NSViewRepresentable {
         textView.onQuickPaste = onQuickPaste
         textView.onPasteAttachment = onPasteAttachment
         textView.onCreateScratchpad = onCreateScratchpad
+        textView.activatesAppOnInteraction = activatesAppOnInteraction
+        if let interactiveScrollView = scrollView
+            as? InteractiveScratchpadScrollView {
+            interactiveScrollView.activatesAppOnInteraction =
+                activatesAppOnInteraction
+        }
 
         if context.coordinator.shouldApplyModelContent(
             text: text,
@@ -398,12 +407,71 @@ struct ScratchpadEditor: NSViewRepresentable {
 }
 
 @MainActor
+private final class InteractiveScratchpadScrollView: NSScrollView {
+    var activatesAppOnInteraction = false
+
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool {
+        activatesAppOnInteraction || super.acceptsFirstMouse(for: event)
+    }
+
+    override func mouseDown(with event: NSEvent) {
+        activateOwningWindowIfNeeded()
+        super.mouseDown(with: event)
+    }
+
+    override func scrollWheel(with event: NSEvent) {
+        activateOwningWindowIfNeeded()
+        super.scrollWheel(with: event)
+    }
+
+    private func activateOwningWindowIfNeeded() {
+        guard activatesAppOnInteraction, let window else { return }
+        if !NSApp.isActive {
+            NSApp.activate(ignoringOtherApps: true)
+        }
+        if !window.isKeyWindow {
+            window.makeKey()
+        }
+    }
+}
+
+@MainActor
 fileprivate final class EscapeHandlingTextView: NSTextView {
     var onEscape: () -> Void = {}
     var onQuickPaste: (Int) -> Void = { _ in }
     var onPasteAttachment: (ClipboardHistoryContent) -> Void = { _ in }
     var onCreateScratchpad: (() -> Void)?
     var placeholder = ""
+    var activatesAppOnInteraction = false
+
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool {
+        activatesAppOnInteraction || super.acceptsFirstMouse(for: event)
+    }
+
+    override func mouseDown(with event: NSEvent) {
+        activateOwningWindowIfNeeded()
+        super.mouseDown(with: event)
+    }
+
+    override func rightMouseDown(with event: NSEvent) {
+        activateOwningWindowIfNeeded()
+        super.rightMouseDown(with: event)
+    }
+
+    override func scrollWheel(with event: NSEvent) {
+        activateOwningWindowIfNeeded()
+        super.scrollWheel(with: event)
+    }
+
+    private func activateOwningWindowIfNeeded() {
+        guard activatesAppOnInteraction, let window else { return }
+        if !NSApp.isActive {
+            NSApp.activate(ignoringOtherApps: true)
+        }
+        if !window.isKeyWindow {
+            window.makeKey()
+        }
+    }
 
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)

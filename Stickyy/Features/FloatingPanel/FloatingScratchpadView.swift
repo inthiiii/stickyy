@@ -50,6 +50,7 @@ struct FloatingScratchpadView: View {
                     onPasteAttachment: session.addAttachments,
                     onEscape: onDismiss,
                     accessibilityIdentifier: "floatingScratchpadEditor",
+                    activatesAppOnInteraction: true,
                     onInsertionApplied: session.didApplyTextInsertion,
                     onFormattingApplied: didApplyFormatting
                 )

@@ -769,7 +769,11 @@ final class StickyyUITests: XCTestCase {
         ).click()
 
         editor.click()
-        XCTAssertEqual(app.state, .runningForeground)
+        XCTAssertEqual(
+            app.state,
+            .runningForeground,
+            "Clicking the floating note must activate Stickyy."
+        )
 
         editor.scroll(byDeltaX: 0, deltaY: -8)
 

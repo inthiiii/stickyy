@@ -4,14 +4,14 @@ import SwiftUI
 @MainActor
 final class FloatingPanelController: NSObject, NSWindowDelegate {
     private let session: ScratchpadSession
-    private let panel: FloatingNotePanel
+    private let panel: FloatingNoteWindow
 
     init(
         session: ScratchpadSession,
         clipboardHistory: ClipboardHistoryController
     ) {
         self.session = session
-        panel = FloatingNotePanel(
+        panel = FloatingNoteWindow(
             contentRect: NSRect(
                 origin: .zero,
                 size: NSSize(
@@ -20,9 +20,10 @@ final class FloatingPanelController: NSObject, NSWindowDelegate {
                 )
             ),
             styleMask: [
-                .borderless,
+                .titled,
                 .resizable,
                 .fullSizeContentView,
+                .utilityWindow,
             ],
             backing: .buffered,
             defer: false
@@ -38,11 +39,17 @@ final class FloatingPanelController: NSObject, NSWindowDelegate {
         ]
         panel.isReleasedWhenClosed = false
         panel.hidesOnDeactivate = false
-        panel.becomesKeyOnlyIfNeeded = false
+        panel.ignoresMouseEvents = false
         panel.acceptsMouseMovedEvents = true
         panel.isOpaque = false
         panel.backgroundColor = .clear
         panel.hasShadow = true
+        panel.titleVisibility = .hidden
+        panel.titlebarAppearsTransparent = true
+        panel.titlebarSeparatorStyle = .none
+        panel.standardWindowButton(.closeButton)?.isHidden = true
+        panel.standardWindowButton(.miniaturizeButton)?.isHidden = true
+        panel.standardWindowButton(.zoomButton)?.isHidden = true
         panel.animationBehavior = .utilityWindow
         panel.isMovableByWindowBackground = true
         panel.minSize = NSSize(
@@ -131,7 +138,22 @@ final class FloatingPanelController: NSObject, NSWindowDelegate {
 }
 
 @MainActor
-private final class FloatingNotePanel: NSPanel {
+private final class FloatingNoteWindow: NSWindow {
     override var canBecomeKey: Bool { true }
-    override var canBecomeMain: Bool { false }
+    override var canBecomeMain: Bool { true }
+
+    override func sendEvent(_ event: NSEvent) {
+        switch event.type {
+        case .leftMouseDown, .rightMouseDown, .otherMouseDown, .scrollWheel:
+            if !NSApp.isActive {
+                NSApp.activate(ignoringOtherApps: true)
+            }
+            if !isKeyWindow {
+                makeKey()
+            }
+        default:
+            break
+        }
+        super.sendEvent(event)
+    }
 }
