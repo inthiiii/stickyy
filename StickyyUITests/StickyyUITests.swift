@@ -193,6 +193,106 @@ final class StickyyUITests: XCTestCase {
     }
 
     @MainActor
+    func testNumberedListsContinueAndFinishOnAnEmptyItem() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-reset-persistence",
+            "--ui-testing-open-scratchpad",
+        ]
+        app.launch()
+
+        let editor = app.textViews["scratchpadEditor"]
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+        editor.typeText("1. First item")
+        editor.typeKey(.return, modifierFlags: [])
+        editor.typeText("Second item")
+        editor.typeKey(.return, modifierFlags: [])
+        editor.typeKey(.return, modifierFlags: [])
+
+        XCTAssertEqual(
+            editor.value as? String,
+            "1. First item\n2. Second item\n\n"
+        )
+    }
+
+    @MainActor
+    func testStickyyTimerStartsFromTheScratchpadHeader() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-reset-persistence",
+            "--ui-testing-open-scratchpad",
+        ]
+        app.launch()
+
+        XCTAssertTrue(
+            app.textViews["scratchpadEditor"].waitForExistence(timeout: 5)
+        )
+        let timer = app.buttons["stickyyTimerControl"]
+        XCTAssertTrue(timer.exists)
+        timer.click()
+        app.buttons["stickyyTimerPreset_60"].click()
+        app.buttons["startStickyyTimer"].click()
+
+        XCTAssertTrue(timer.waitForExistence(timeout: 2))
+        XCTAssertTrue((timer.value as? String)?.hasPrefix("59:") == true
+            || (timer.value as? String) == "60:00")
+    }
+
+    @MainActor
+    func testFloatingNoteIncludesTheSharedStickyyTimer() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-reset-persistence",
+            "--ui-testing-open-floating-panel",
+        ]
+        app.launch()
+
+        XCTAssertTrue(
+            app.textViews["floatingScratchpadEditor"]
+                .waitForExistence(timeout: 5)
+        )
+        XCTAssertTrue(app.buttons["stickyyTimerControl"].exists)
+    }
+
+    @MainActor
+    func testClipboardPillsScrollHorizontallyToTheLastItem() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-reset-persistence",
+            "--ui-testing-clipboard-item-count",
+            "7",
+            "--ui-testing-open-scratchpad",
+        ]
+        app.launch()
+
+        XCTAssertTrue(
+            app.textViews["scratchpadEditor"].waitForExistence(timeout: 5)
+        )
+        let shelf = app.descendants(matching: .any)["clipboardShelf"]
+        XCTAssertTrue(shelf.waitForExistence(timeout: 2))
+        let lastPasteButton = app.buttons["pasteClipboardText_7"]
+        XCTAssertTrue(lastPasteButton.exists)
+        XCTAssertGreaterThan(
+            lastPasteButton.frame.minX,
+            shelf.frame.maxX
+        )
+        // The shelf lives in a separate nonactivating child panel. Allow its
+        // accessibility geometry to settle before synthesizing the gesture.
+        Thread.sleep(forTimeInterval: 0.5)
+
+        shelf.swipeLeft()
+
+        let becameHittable = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "isHittable == true"),
+            object: lastPasteButton
+        )
+        XCTAssertEqual(
+            XCTWaiter.wait(for: [becameHittable], timeout: 2),
+            .completed
+        )
+    }
+
+    @MainActor
     func testHeaderTemporarilyShowsTheActiveNoteTitle() {
         let app = XCUIApplication()
         app.launchArguments = [
@@ -558,6 +658,9 @@ final class StickyyUITests: XCTestCase {
         XCTAssertTrue(
             app.descendants(matching: .any)["sectionNavigatorToggle"].exists
         )
+        XCTAssertTrue(
+            app.descendants(matching: .any)["stickyyTimerToggle"].exists
+        )
         XCTAssertTrue(app.buttons["checkForUpdates"].exists)
     }
 
@@ -589,6 +692,10 @@ final class StickyyUITests: XCTestCase {
 
         let status = app.descendants(matching: .any)["startupStatusPanel"]
         XCTAssertTrue(status.waitForExistence(timeout: 2))
+        XCTAssertTrue(
+            (status.label.contains("Back in your menu bar"))
+        )
+        XCTAssertFalse(status.label.contains("⌃⌥Space"))
         XCTAssertGreaterThanOrEqual(status.frame.minY, 12)
         XCTAssertTrue(status.waitForNonExistence(timeout: 5))
     }
@@ -632,6 +739,20 @@ final class StickyyUITests: XCTestCase {
         )
         XCTAssertTrue(continueButton.waitForExistence(timeout: 2))
         continueButton.click()
+
+        XCTAssertTrue(
+            app.descendants(matching: .any)["onboardingTimerPreview"]
+                .waitForExistence(timeout: 2)
+        )
+        XCTAssertTrue(continueButton.waitForExistence(timeout: 2))
+        continueButton.click()
+        XCTAssertTrue(continueButton.waitForExistence(timeout: 2))
+        continueButton.click()
+
+        XCTAssertTrue(
+            app.descendants(matching: .any)["onboardingFeatureGrid"]
+                .waitForExistence(timeout: 2)
+        )
 
         let startButton = app.buttons["Start catching thoughts"]
         XCTAssertTrue(startButton.waitForExistence(timeout: 2))

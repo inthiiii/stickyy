@@ -45,6 +45,7 @@ enum StickyyPreferences {
     static let showsTextCount = "showsTextCount"
     static let textCountMode = "textCountMode"
     static let showsSectionNavigator = "showsSectionNavigator"
+    static let usesStickyyTimer = "usesStickyyTimer"
     static let lastPresentedReleaseNotesVersion =
         "lastPresentedReleaseNotesVersion"
 
@@ -90,6 +91,14 @@ enum StickyyPreferences {
         defaults.object(forKey: showsSectionNavigator) == nil
             ? true
             : defaults.bool(forKey: showsSectionNavigator)
+    }
+
+    static func timerEnabled(
+        in defaults: UserDefaults = .standard
+    ) -> Bool {
+        defaults.object(forKey: usesStickyyTimer) == nil
+            ? true
+            : defaults.bool(forKey: usesStickyyTimer)
     }
 
     static func floatingPanelEnabled(
@@ -140,6 +149,15 @@ extension Notification.Name {
     )
     static let pinnedClipboardItemsDidChange = Notification.Name(
         "Stickyy.pinnedClipboardItemsDidChange"
+    )
+    static let stickyyTimerPreferenceDidChange = Notification.Name(
+        "Stickyy.stickyyTimerPreferenceDidChange"
+    )
+    static let stickyyTimerDidChange = Notification.Name(
+        "Stickyy.stickyyTimerDidChange"
+    )
+    static let stickyyNoteVisibilityDidChange = Notification.Name(
+        "Stickyy.stickyyNoteVisibilityDidChange"
     )
     static let onboardingDidFinish = Notification.Name(
         "Stickyy.onboardingDidFinish"

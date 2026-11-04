@@ -4,6 +4,7 @@ import SwiftUI
 struct ScratchpadView: View {
     @Bindable var session: ScratchpadSession
     @Bindable var clipboardHistory: ClipboardHistoryController
+    @Bindable var timer: StickyyTimerController
     let onDismiss: () -> Void
 
     @State private var showsLibrary = false
@@ -21,6 +22,9 @@ struct ScratchpadView: View {
 
     @AppStorage(StickyyPreferences.textCountMode)
     private var textCountMode = TextCountMode.words.rawValue
+
+    @AppStorage(StickyyPreferences.usesStickyyTimer)
+    private var usesStickyyTimer = true
 
     var body: some View {
         VStack(spacing: 0) {
@@ -104,6 +108,10 @@ struct ScratchpadView: View {
             .accessibilityIdentifier("scratchpadHeaderTitle")
 
             Spacer()
+
+            if usesStickyyTimer {
+                StickyyTimerControl(timer: timer)
+            }
 
             NativeShareButton(text: notesExportText, isEnabled: !session.text.isEmpty)
                 .frame(width: 24, height: 24)

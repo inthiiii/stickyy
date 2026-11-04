@@ -14,7 +14,8 @@ final class PopoverController: NSObject, NSPopoverDelegate {
 
     init(
         session: ScratchpadSession,
-        clipboardHistory: ClipboardHistoryController
+        clipboardHistory: ClipboardHistoryController,
+        timer: StickyyTimerController
     ) {
         self.session = session
         clipboardShelfController = ClipboardShelfController(
@@ -35,6 +36,7 @@ final class PopoverController: NSObject, NSPopoverDelegate {
             rootView: ScratchpadView(
                 session: session,
                 clipboardHistory: clipboardHistory,
+                timer: timer,
                 onDismiss: { [weak self] in
                     self?.close()
                 }
@@ -92,6 +94,7 @@ final class PopoverController: NSObject, NSPopoverDelegate {
             of: button,
             preferredEdge: .minY
         )
+        notifyVisibilityChanged()
         if let popoverWindow = popover.contentViewController?.view.window {
             clipboardShelfController.show(relativeTo: popoverWindow)
         }
@@ -104,12 +107,14 @@ final class PopoverController: NSObject, NSPopoverDelegate {
         stopDismissalMonitoring()
         clipboardShelfController.hide()
         popover.close()
+        notifyVisibilityChanged()
     }
 
     func popoverDidClose(_ notification: Notification) {
         stopDismissalMonitoring()
         clipboardShelfController.hide()
         session.flush()
+        notifyVisibilityChanged()
     }
 
     private func startDismissalMonitoring() {
@@ -146,6 +151,13 @@ final class PopoverController: NSObject, NSPopoverDelegate {
             self.globalMouseMonitor = nil
         }
         anchorWindow = nil
+    }
+
+    private func notifyVisibilityChanged() {
+        NotificationCenter.default.post(
+            name: .stickyyNoteVisibilityDidChange,
+            object: self
+        )
     }
 
     private func dismissIfNeeded(for event: NSEvent) {

@@ -13,11 +13,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var onboardingController: OnboardingController?
     private var floatingPanelController: FloatingPanelController?
     private var startupStatusController: StartupStatusController?
+    private var timerController: StickyyTimerController?
     private var onboardingObserver: NSObjectProtocol?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
         _ = UpdateController.shared
+        StickyyTimerNotificationController.shared.prepare()
 
         let store: any ScratchpadStoring
 
@@ -75,6 +77,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             )
             UserDefaults.standard.removeObject(
                 forKey: StickyyPreferences.showsSectionNavigator
+            )
+            UserDefaults.standard.removeObject(
+                forKey: StickyyPreferences.usesStickyyTimer
             )
             UserDefaults.standard.removeObject(
                 forKey: StickyyPreferences.hasCompletedOnboarding
@@ -173,17 +178,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         #else
         let clipboardHistoryController = ClipboardHistoryController()
         #endif
+        let timerController = StickyyTimerController()
         let popoverController = PopoverController(
             session: session,
-            clipboardHistory: clipboardHistoryController
+            clipboardHistory: clipboardHistoryController,
+            timer: timerController
         )
         let floatingPanelController = FloatingPanelController(
             session: session,
-            clipboardHistory: clipboardHistoryController
+            clipboardHistory: clipboardHistoryController,
+            timer: timerController
         )
         let statusItemController = StatusItemController(
             popoverController: popoverController,
-            floatingPanelController: floatingPanelController
+            floatingPanelController: floatingPanelController,
+            timer: timerController
         )
 
         scratchpadSession = session
@@ -191,6 +200,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         self.statusItemController = statusItemController
         self.floatingPanelController = floatingPanelController
         self.clipboardHistoryController = clipboardHistoryController
+        self.timerController = timerController
 
         #if DEBUG
         if let versionArgumentIndex = CommandLine.arguments.firstIndex(

@@ -9,7 +9,7 @@ struct ClipboardHistoryView: View {
     var body: some View {
         HStack(spacing: 5) {
             ScrollView(.horizontal) {
-                LazyHStack(spacing: 5) {
+                HStack(spacing: 5) {
                     if history.items.isEmpty {
                         emptyPill
                     } else {

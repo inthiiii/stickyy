@@ -3,39 +3,59 @@
     <channel>
         <title>Stickyy</title>
         <item>
-            <title>1.2.9</title>
-            <pubDate>Tue, 03 Nov 2026 12:18:13 +0530</pubDate>
+            <title>1.2.10</title>
+            <pubDate>Thu, 05 Nov 2026 00:18:10 +0530</pubDate>
             <link>https://stickyyformac.vercel.app</link>
             <sparkle:informationalUpdate>
                 <sparkle:belowVersion>6</sparkle:belowVersion>
             </sparkle:informationalUpdate>
-            <sparkle:version>11</sparkle:version>
-            <sparkle:shortVersionString>1.2.9</sparkle:shortVersionString>
+            <sparkle:version>12</sparkle:version>
+            <sparkle:shortVersionString>1.2.10</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-            <description sparkle:format="markdown"><![CDATA[# Stickyy 1.2.9
+            <description sparkle:format="markdown"><![CDATA[# Stickyy 1.2.10
 
-## Floating note interaction
+## Stickyy Timer
 
-- The floating note now receives clicks and scrolling after switching from
-  another app.
-- Typing and scrolling no longer affect the window behind Stickyy.
+- Set a timer for up to 60 minutes from the menu-bar scratchpad or floating
+  note.
+- The compact timer icon smoothly expands into a live countdown pill.
+- A sound and macOS attention request let you know when time is up.
+- Stickyy sends a local notification when the timer finishes, including while
+  another app is in front.
+- When both note windows are closed, the regular menu-bar icon smoothly turns
+  into a live Liquid Timer pill. Opening either note restores the regular icon.
+- The menu-bar pill now returns to the normal icon before the scratchpad opens,
+  keeping its popover arrow perfectly aligned.
+- A completed timer turns green in the note header; click it once to reset it
+  to the compact timer icon.
+- Hide Stickyy Timer completely from Settings whenever you prefer a more
+  minimal workspace.
 
-## Clean paste
+## Smoother Clipboard Pills
 
-- Text pasted from websites and documents is inserted as plain text and adopts
-  the note's current style.
-- Paste as Plain Text is available from the editor context menu and with
-  Command–Option–Shift–V.
-- Image and file attachment pasting continues to work as before.
+- Clipboard Pills now respond freely to horizontal trackpad gestures.
+- Vertical mouse-wheel movement over the shelf is translated into horizontal
+  scrolling, making every pill easier to reach.
 
-## Updating
+## Numbered lists
 
-- Existing Stickyy users can install this release from **Check for Updates**.
-- The direct-download DMG remains a free Apple Development-signed test build
-  and is not Apple-notarized. First-time users may need to approve Stickyy in
-  **System Settings → Privacy & Security** after attempting to open it.
+- Begin a line with `1. ` and press Return to continue with `2.`, `3.`, and
+  onward.
+- Press Return on an empty numbered item to finish the list.
+
+## A more complete welcome
+
+- Onboarding now introduces the Liquid Timer.
+- A final feature grid highlights Multiple Notes, pinned notes, text formatting,
+  and chapter sections.
+- The startup card now simply says that Stickyy is back in the menu bar.
+
+Existing Stickyy users can install this release from **Check for Updates**.
+The direct-download DMG remains a free Apple Development-signed test build and
+is not Apple-notarized. First-time users may need to approve Stickyy in
+**System Settings → Privacy & Security** before opening it.
 ]]></description>
-            <enclosure url="https://github.com/inthiiii/stickyy/releases/download/v1.2.9/Stickyy-1.2.9.dmg" length="5584693" type="application/octet-stream" sparkle:edSignature="X//QD84QdBtOfP8+U0vsOVZDu/MJULGz8RSNcRD4Q1eFjbDlWocWIRbaBF1pAdSvODqInt6U8QMkRBiYZG55Cw=="/>
+            <enclosure url="https://github.com/inthiiii/stickyy/releases/download/v1.2.10/Stickyy-1.2.10.dmg" length="5760529" type="application/octet-stream" sparkle:edSignature="6lLl4qmFRhNpJuDuQRDNRPdOGlDFEq2xNdGPiyFrUUZLWWGpxX+OxwkGH+p0zaQ8pKfi7nnOrFDzbh9RaW9ZDQ=="/>
         </item>
     </channel>
 </rss>

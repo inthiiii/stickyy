@@ -623,7 +623,38 @@ fileprivate final class EscapeHandlingTextView: NSTextView {
             super.insertText("\n• ", replacementRange: selectedRange())
             return
         }
+        if let numberedItem = numberedListItem(in: currentLine) {
+            if numberedItem.content.isEmpty {
+                super.insertText("\n", replacementRange: contentRange)
+                return
+            }
+            super.insertText(
+                "\n\(numberedItem.number + 1). ",
+                replacementRange: selectedRange()
+            )
+            return
+        }
         super.insertNewline(sender)
+    }
+
+    private func numberedListItem(
+        in line: String
+    ) -> (number: Int, content: String)? {
+        let expression = try? NSRegularExpression(
+            pattern: #"^([0-9]+)\. (.*)$"#
+        )
+        let range = NSRange(line.startIndex..<line.endIndex, in: line)
+        guard let match = expression?.firstMatch(
+            in: line,
+            range: range
+        ),
+        let numberRange = Range(match.range(at: 1), in: line),
+        let contentRange = Range(match.range(at: 2), in: line),
+        let number = Int(line[numberRange]),
+        number < Int.max else {
+            return nil
+        }
+        return (number, String(line[contentRange]))
     }
 
     override func paste(_ sender: Any?) {

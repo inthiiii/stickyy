@@ -7,7 +7,7 @@ enum AppEnvironment {
     static var version: String {
         Bundle.main.object(
             forInfoDictionaryKey: "CFBundleShortVersionString"
-        ) as? String ?? "1.2.9"
+        ) as? String ?? "1.2.10"
     }
 
     static var latestUpdateTitle: String {
@@ -18,9 +18,9 @@ enum AppEnvironment {
         """
         Stickyy \(version) is ready ✨
 
-        • The floating note now captures clicks, typing, and scrolling even after you have been working in another app.
-        • Pasted text automatically drops website and document formatting so it matches your note.
-        • Paste as Plain Text is also available from the editor menu or with Command–Option–Shift–V.
+        • Clipboard Pills now scroll freely from side to side.
+        • Stickyy Timer adds a smooth countdown for up to 60 minutes, a menu-bar timer pill, and a notification when time is up.
+        • Numbered lists continue automatically when you press Return.
 
         Thank you for testing Stickyy.
         """

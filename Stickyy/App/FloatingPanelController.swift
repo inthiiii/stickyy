@@ -8,7 +8,8 @@ final class FloatingPanelController: NSObject, NSWindowDelegate {
 
     init(
         session: ScratchpadSession,
-        clipboardHistory: ClipboardHistoryController
+        clipboardHistory: ClipboardHistoryController,
+        timer: StickyyTimerController
     ) {
         self.session = session
         panel = FloatingNoteWindow(
@@ -60,6 +61,7 @@ final class FloatingPanelController: NSObject, NSWindowDelegate {
             rootView: FloatingScratchpadView(
                 session: session,
                 clipboardHistory: clipboardHistory,
+                timer: timer,
                 onDismiss: { [weak self] in
                     self?.close()
                 }
@@ -104,12 +106,14 @@ final class FloatingPanelController: NSObject, NSWindowDelegate {
         NSApp.activate(ignoringOtherApps: true)
         panel.makeKeyAndOrderFront(nil)
         session.requestEditorFocus()
+        notifyVisibilityChanged()
     }
 
     func close() {
         guard panel.isVisible else { return }
         session.flush()
         panel.orderOut(nil)
+        notifyVisibilityChanged()
     }
 
     func windowDidResignKey(_ notification: Notification) {
@@ -120,6 +124,14 @@ final class FloatingPanelController: NSObject, NSWindowDelegate {
 
     func windowWillClose(_ notification: Notification) {
         session.flush()
+        notifyVisibilityChanged()
+    }
+
+    private func notifyVisibilityChanged() {
+        NotificationCenter.default.post(
+            name: .stickyyNoteVisibilityDidChange,
+            object: self
+        )
     }
 
     private func centerOnActiveScreen() {

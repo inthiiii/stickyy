@@ -38,6 +38,9 @@ struct StickyySettingsView: View {
     @AppStorage(StickyyPreferences.showsSectionNavigator)
     private var showsSectionNavigator = true
 
+    @AppStorage(StickyyPreferences.usesStickyyTimer)
+    private var usesStickyyTimer = true
+
     @AppStorage(StickyyPreferences.usesFloatingPanelShortcut)
     private var usesFloatingPanelShortcut = true
 
@@ -118,6 +121,14 @@ struct StickyySettingsView: View {
                 )
                 .accessibilityIdentifier("sectionNavigatorToggle")
                 Text("Bold, italic, and underline controls are available at the bottom of every note.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section("Stickyy Timer") {
+                Toggle("Show Stickyy Timer", isOn: $usesStickyyTimer)
+                    .accessibilityIdentifier("stickyyTimerToggle")
+                Text("Set up to 60 minutes from either note. When both notes are closed, the countdown moves to your menu bar and notifies you when time is up.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -246,6 +257,12 @@ struct StickyySettingsView: View {
             )
             reloadPinnedClipboardItems()
         }
+        .onChange(of: usesStickyyTimer) {
+            NotificationCenter.default.post(
+                name: .stickyyTimerPreferenceDidChange,
+                object: nil
+            )
+        }
         .onReceive(
             NotificationCenter.default.publisher(
                 for: .pinnedClipboardItemsDidChange
@@ -359,7 +376,17 @@ private struct StickyyUserGuideView: View {
             guideRow(
                 icon: "clipboard",
                 title: "Reuse clipboard items",
-                detail: "Double-click a pill to copy it again. Press ⌘1 through ⌘7 to paste a numbered pill directly into Stickyy."
+                detail: "Scroll the pills freely from side to side, double-click one to copy it again, or press ⌘1 through ⌘7 to paste it directly into Stickyy."
+            )
+            guideRow(
+                icon: "timer",
+                title: "Stay focused with a timer",
+                detail: "Choose up to 60 minutes from either note. Close the notes to keep its Liquid Timer in your menu bar, and Stickyy will notify you when time is up."
+            )
+            guideRow(
+                icon: "list.number",
+                title: "Continue numbered lists",
+                detail: "Begin a line with 1. and a space. Press Return to continue the sequence, or press Return on an empty item to finish the list."
             )
             guideRow(
                 icon: "doc.on.doc",

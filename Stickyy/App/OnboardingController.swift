@@ -9,7 +9,7 @@ final class OnboardingController {
         if let panel = Self.activePanel { panel.makeKeyAndOrderFront(nil); return }
 
         let panel = NSPanel(
-            contentRect: NSRect(x: 0, y: 0, width: 560, height: 420),
+            contentRect: NSRect(x: 0, y: 0, width: 560, height: 480),
             styleMask: [.titled, .fullSizeContentView],
             backing: .buffered,
             defer: false
@@ -40,7 +40,17 @@ final class OnboardingController {
     }
 }
 
+private enum OnboardingPageKind {
+    case welcome
+    case clipboard
+    case floatingNote
+    case timer
+    case privacy
+    case featureGrid
+}
+
 private struct OnboardingPage {
+    let kind: OnboardingPageKind
     let icon: String
     let eyebrow: String
     let title: String
@@ -55,28 +65,46 @@ private struct OnboardingView: View {
 
     private let pages = [
         OnboardingPage(
+            kind: .welcome,
             icon: "sparkles", eyebrow: "WELCOME TO STICKYY",
             title: "Catch it before it fades.",
             detail: "A calm scratchpad that lives in your menu bar. Open it from anywhere with ⌃⌥Space.",
             accent: .orange
         ),
         OnboardingPage(
+            kind: .clipboard,
             icon: "rectangle.stack.fill", eyebrow: "CLIPBOARD PILLS",
             title: "Your recent copies, close by.",
             detail: "Keep five or seven text, link, image, and file pills below the note. Double-click any pill to copy it again.",
             accent: .blue
         ),
         OnboardingPage(
+            kind: .floatingNote,
             icon: "macwindow.on.rectangle", eyebrow: "FLOATING NOTE",
             title: "Stay with the thought you are in.",
             detail: "Press ⌃⌥Space for a focused, movable note above every app—even while you are working in full screen.",
             accent: .mint
         ),
         OnboardingPage(
+            kind: .timer,
+            icon: "timer", eyebrow: "STICKYY TIMER",
+            title: "Focus without leaving the thought.",
+            detail: "Set up to 60 minutes from either note. When the note closes, its Liquid Timer continues counting down right in your menu bar.",
+            accent: .cyan
+        ),
+        OnboardingPage(
+            kind: .privacy,
             icon: "hand.raised.fill", eyebrow: "YOURS, LOCALLY",
             title: "Simple by design. Private by default.",
             detail: "Your scratchpads stay on this Mac. Choose the original minimal surface or Liquid Glass anytime.",
             accent: .purple
+        ),
+        OnboardingPage(
+            kind: .featureGrid,
+            icon: "square.grid.2x2.fill", eyebrow: "MORE IN EVERY THOUGHT",
+            title: "Small tools. A complete scratchpad.",
+            detail: "Organize, format, and move through longer thoughts without turning Stickyy into a heavy notes app.",
+            accent: .indigo
         )
     ]
 
@@ -111,20 +139,26 @@ private struct OnboardingView: View {
                     .multilineTextAlignment(.center).lineSpacing(3)
                     .frame(maxWidth: 420).padding(.top, 10)
 
-                if page == 3 {
+                if pages[page].kind == .privacy {
                     if #available(macOS 26.0, *) {
                         Toggle("Use Liquid Glass", isOn: $usesLiquidGlass)
                             .toggleStyle(.switch).controlSize(.small).padding(.top, 14)
                     }
-                } else if page == 1 {
+                } else if pages[page].kind == .clipboard {
                     HStack(spacing: 7) {
                         demoPill("link", "A useful link")
                         demoPill("photo", "Design.png")
                         demoPill("text.quote", "A thought")
                     }
                     .padding(.top, 14)
-                } else if page == 2 {
+                } else if pages[page].kind == .floatingNote {
                     floatingPanelPreview
+                        .padding(.top, 12)
+                } else if pages[page].kind == .timer {
+                    liquidTimerPreview
+                        .padding(.top, 14)
+                } else if pages[page].kind == .featureGrid {
+                    featureGridPreview
                         .padding(.top, 12)
                 }
 
@@ -153,7 +187,7 @@ private struct OnboardingView: View {
                 .padding(24)
             }
         }
-        .frame(width: 560, height: 420)
+        .frame(width: 560, height: 480)
         .background(.ultraThinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         .animation(.easeInOut(duration: 0.3), value: page)
@@ -189,5 +223,62 @@ private struct OnboardingView: View {
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Floating note preview")
         .accessibilityIdentifier("onboardingFloatingPreview")
+    }
+
+    private var liquidTimerPreview: some View {
+        HStack(spacing: 7) {
+            Image(systemName: "timer")
+            Text("25:00")
+                .monospacedDigit()
+        }
+        .font(.system(size: 14, weight: .semibold, design: .rounded))
+        .padding(.horizontal, 15)
+        .frame(height: 38)
+        .background(.regularMaterial, in: Capsule())
+        .overlay {
+            Capsule().strokeBorder(.white.opacity(0.2))
+        }
+        .shadow(color: pages[page].accent.opacity(0.3), radius: 12, y: 5)
+        .symbolEffect(.pulse, options: .repeating)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Liquid Timer preview, 25 minutes")
+        .accessibilityIdentifier("onboardingTimerPreview")
+    }
+
+    private var featureGridPreview: some View {
+        LazyVGrid(
+            columns: [
+                GridItem(.fixed(162), spacing: 8),
+                GridItem(.fixed(162), spacing: 8),
+            ],
+            spacing: 8
+        ) {
+            featureCard("note.text.badge.plus", "Multiple Notes")
+            featureCard("pin.fill", "Pin Notes")
+            featureCard("bold.italic.underline", "Text Formatting")
+            featureCard("circle.grid.3x3.fill", "Chapter Sections")
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("More Stickyy features")
+        .accessibilityIdentifier("onboardingFeatureGrid")
+    }
+
+    private func featureCard(_ icon: String, _ title: String) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .foregroundStyle(pages[page].accent)
+                .frame(width: 22)
+            Text(title)
+                .font(.caption.weight(.semibold))
+                .lineLimit(1)
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 10)
+        .frame(height: 40)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 11))
+        .overlay {
+            RoundedRectangle(cornerRadius: 11)
+                .strokeBorder(.white.opacity(0.14))
+        }
     }
 }

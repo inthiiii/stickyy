@@ -8,6 +8,7 @@ final class ClipboardShelfController {
     private let history: ClipboardHistoryController
     private weak var parentWindow: NSWindow?
     private var historyStateObserver: NSObjectProtocol?
+    private var scrollWheelMonitor: Any?
 
     init(
         history: ClipboardHistoryController,
@@ -64,6 +65,7 @@ final class ClipboardShelfController {
 
     func updateVisibility() {
         guard history.isEnabled else {
+            stopScrollMonitoring()
             panel.parent?.removeChildWindow(panel)
             panel.orderOut(nil)
             return
@@ -98,10 +100,12 @@ final class ClipboardShelfController {
         }
         panel.setFrame(targetFrame, display: true)
         panel.orderFront(nil)
+        startScrollMonitoring()
         if isNewlyShown { animateOpening() }
     }
 
     func hide() {
+        stopScrollMonitoring()
         panel.contentView?.layer?.removeAllAnimations()
         panel.alphaValue = 1
         panel.parent?.removeChildWindow(panel)
@@ -136,5 +140,73 @@ final class ClipboardShelfController {
 
         layer.add(spring, forKey: "stickyy.open.spring")
         layer.add(fade, forKey: "stickyy.open.fade")
+    }
+
+    private func startScrollMonitoring() {
+        guard scrollWheelMonitor == nil else { return }
+        scrollWheelMonitor = NSEvent.addLocalMonitorForEvents(
+            matching: .scrollWheel
+        ) { [weak self] event in
+            guard let self, event.window === panel else { return event }
+            return scrollClipboardShelf(with: event) ? nil : event
+        }
+    }
+
+    private func stopScrollMonitoring() {
+        guard let scrollWheelMonitor else { return }
+        NSEvent.removeMonitor(scrollWheelMonitor)
+        self.scrollWheelMonitor = nil
+    }
+
+    private func scrollClipboardShelf(with event: NSEvent) -> Bool {
+        guard let scrollView = horizontalScrollView(in: panel.contentView),
+              let documentView = scrollView.documentView else {
+            return false
+        }
+
+        scrollView.usesPredominantAxisScrolling = false
+        scrollView.horizontalScrollElasticity = .allowed
+        scrollView.verticalScrollElasticity = .none
+
+        let horizontal = event.scrollingDeltaX
+        let vertical = event.scrollingDeltaY
+        let usesHorizontalGesture = abs(horizontal) > abs(vertical)
+        if usesHorizontalGesture {
+            scrollView.scrollWheel(with: event)
+            return true
+        }
+        guard abs(vertical) > 0.01 else { return false }
+
+        let multiplier: CGFloat = event.hasPreciseScrollingDeltas ? 1 : 12
+        let clipView = scrollView.contentView
+        let maximumX = max(
+            0,
+            documentView.bounds.width - clipView.bounds.width
+        )
+        guard maximumX > 0 else { return false }
+
+        let proposedX = clipView.bounds.origin.x
+            - vertical * multiplier
+        let targetX = min(max(proposedX, 0), maximumX)
+        clipView.scroll(
+            to: NSPoint(x: targetX, y: clipView.bounds.origin.y)
+        )
+        scrollView.reflectScrolledClipView(clipView)
+        return true
+    }
+
+    private func horizontalScrollView(in view: NSView?) -> NSScrollView? {
+        guard let view else { return nil }
+        if let scrollView = view as? NSScrollView,
+           let documentView = scrollView.documentView,
+           documentView.bounds.width > scrollView.contentView.bounds.width + 1 {
+            return scrollView
+        }
+        for subview in view.subviews {
+            if let match = horizontalScrollView(in: subview) {
+                return match
+            }
+        }
+        return nil
     }
 }

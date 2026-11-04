@@ -3,6 +3,7 @@ import SwiftUI
 struct FloatingScratchpadView: View {
     @Bindable var session: ScratchpadSession
     @Bindable var clipboardHistory: ClipboardHistoryController
+    @Bindable var timer: StickyyTimerController
     let onDismiss: () -> Void
 
     @State private var formattingRequest: ScratchpadFormattingRequest?
@@ -17,6 +18,9 @@ struct FloatingScratchpadView: View {
 
     @AppStorage(StickyyPreferences.textCountMode)
     private var textCountMode = TextCountMode.words.rawValue
+
+    @AppStorage(StickyyPreferences.usesStickyyTimer)
+    private var usesStickyyTimer = true
 
     var body: some View {
         VStack(spacing: 0) {
@@ -88,6 +92,10 @@ struct FloatingScratchpadView: View {
                             text: session.text,
                             mode: selectedTextCountMode
                         )
+                    }
+
+                    if usesStickyyTimer {
+                        StickyyTimerControl(timer: timer)
                     }
 
                     if clipboardHistory.isEnabled,

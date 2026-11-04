@@ -163,6 +163,17 @@ struct PreferenceAndShortcutTests {
         #expect(!StickyyPreferences.sectionNavigatorEnabled(in: defaults))
     }
 
+    @Test("Stickyy Timer is visible by default and can be disabled")
+    func timerDefaults() throws {
+        let suiteName = "StickyyTests.\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        #expect(StickyyPreferences.timerEnabled(in: defaults))
+        defaults.set(false, forKey: StickyyPreferences.usesStickyyTimer)
+        #expect(!StickyyPreferences.timerEnabled(in: defaults))
+    }
+
     @Test("Word and character counts handle whitespace and composed characters")
     func textCounts() {
         let text = "  One two\nthree 👨‍👩‍👧‍👦"

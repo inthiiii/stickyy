@@ -119,7 +119,7 @@ private struct StartupStatusView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Stickyy is ready")
                     .font(.system(size: 15, weight: .semibold))
-                Text("Back in your menu bar · \(shortcutTitle)")
+                Text("Back in your menu bar")
                     .font(.system(size: 12))
                     .foregroundStyle(.secondary)
             }
@@ -148,14 +148,5 @@ private struct StartupStatusView: View {
             "Stickyy is ready. Back in your menu bar."
         )
         .accessibilityIdentifier("startupStatusPanel")
-    }
-
-    private var shortcutTitle: String {
-        guard let storedValue = UserDefaults.standard.string(
-            forKey: StickyyPreferences.globalShortcut
-        ), let shortcut = GlobalShortcut(storageValue: storedValue) else {
-            return GlobalShortcut.defaultShortcut.title
-        }
-        return shortcut.title
     }
 }
